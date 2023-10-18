@@ -1,5 +1,6 @@
+import { createTheme } from '@mui/material/styles'
+
 import { type IScrollbarParameters, generateScrollbarStyles } from '@/utils/generateScrollbarStyles'
-import { createTheme } from '@mui/material'
 
 const scrollbarParameters: IScrollbarParameters = {
 	borderRadius: '5px',
@@ -12,6 +13,16 @@ const scrollbarParameters: IScrollbarParameters = {
 }
 
 export const theme = createTheme({
+	palette: {
+		primary: {
+			main: '#05287f',
+			light: '#eaeefc',
+		},
+		background: {
+			default: '#fafafa',
+			paper: '#FFF',
+		},
+	},
 	components: {
 		MuiCssBaseline: {
 			// styleOverrides: defaultStyles.concat(
@@ -30,6 +41,51 @@ export const theme = createTheme({
 			},
 			defaultProps: {
 				elevation: 0,
+			},
+		},
+		MuiTooltip: {
+			styleOverrides: {
+				tooltip: {
+					fontSize: '0.9rem',
+					backgroundColor: '#000000de',
+				},
+				arrow: {
+					color: '#000000de',
+				},
+			},
+		},
+		MuiPaper: {
+			styleOverrides: {
+				root: {
+					borderRadius: 8,
+				},
+			},
+		},
+		MuiSelect: {
+			defaultProps: {
+				size: 'small',
+			},
+			styleOverrides: {
+				root: {
+					borderRadius: 12,
+				},
+			},
+		},
+		MuiTextField: {
+			defaultProps: {
+				size: 'small',
+			},
+			styleOverrides: {
+				root: {
+					borderRadius: 12,
+				},
+			},
+		},
+		MuiOutlinedInput: {
+			styleOverrides: {
+				root: {
+					borderRadius: 12,
+				},
 			},
 		},
 	},

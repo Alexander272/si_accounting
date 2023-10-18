@@ -6,11 +6,15 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit'
 
 // import { authPath, authReducer } from '@/features/auth/authSlice'
 // import { userPath, userReducer } from '@/features/user/userSlice'
+import { dataTablePath, dataTableReducer } from '@/features/dataTable/dataTableSlice'
+import { modalPath, modalReducer } from '@/features/modal/modalSlice'
 
 const rootReducer = combineReducers({
 	// [apiSlice.reducerPath]: apiSlice.reducer,
 	// [authPath]: authReducer,
 	// [userPath]: userReducer,
+	[dataTablePath]: dataTableReducer,
+	[modalPath]: modalReducer,
 })
 
 export const store = configureStore({

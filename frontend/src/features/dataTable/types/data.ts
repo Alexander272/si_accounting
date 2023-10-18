@@ -6,6 +6,7 @@ export interface IDataItem {
 	measurementLimits: string
 	manufacturer: string
 	accuracy: string
+	stateRegister: string
 	yearOfIssue: string
 	verificationDate: string
 	interVerificationInterval: string

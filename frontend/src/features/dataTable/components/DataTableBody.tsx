@@ -1,6 +1,6 @@
 import { TableBody, TableCell, TableRow } from '@mui/material'
 import { IDataItem } from '../types/data'
-import { HeadCells } from './DataTableHead'
+import { HeadCells } from './DataTableHead/DataTableHead'
 
 const data: IDataItem[] = [
 	{
@@ -11,6 +11,7 @@ const data: IDataItem[] = [
 		measurementLimits: '',
 		manufacturer: '',
 		accuracy: '',
+		stateRegister: '',
 		yearOfIssue: '',
 		verificationDate: '',
 		interVerificationInterval: '12',

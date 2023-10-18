@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux'
-import { CssBaseline, ThemeProvider } from '@mui/material'
+import { ThemeProvider, CssBaseline } from '@mui/material'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import 'dayjs/locale/ru'
