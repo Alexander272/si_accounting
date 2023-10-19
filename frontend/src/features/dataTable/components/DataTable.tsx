@@ -1,10 +1,16 @@
 import { Box, Button, Stack, SvgIcon, Table, TableContainer, Typography, useTheme } from '@mui/material'
 
+import { useModal } from '@/features/modal/hooks/useModal'
 import { DataTableHead } from './DataTableHead/DataTableHead'
 import { DataTableBody } from './DataTableBody'
 
 export const DataTable = () => {
 	const { palette } = useTheme()
+	const { openModal } = useModal()
+
+	const openHandler = () => {
+		openModal('CreateDataItem')
+	}
 
 	return (
 		<Box
@@ -14,13 +20,16 @@ export const DataTable = () => {
 			border={'1px solid rgba(0, 0, 0, 0.12)'}
 			sx={{ backgroundColor: '#fff', userSelect: 'none' }}
 		>
-			{/* //TODO header */}
 			<Stack direction={'row'} spacing={2} paddingX={3} paddingY={2}>
 				<Typography color={'primary'} variant='h5'>
 					Средства измерения
 				</Typography>
 
-				<Button variant='outlined' sx={{ borderRadius: 3, minWidth: 54 }}>
+				<Button
+					onClick={openHandler}
+					variant='outlined'
+					sx={{ borderWidth: 2, borderRadius: 3, minWidth: 54, ':hover': { borderWidth: 2 } }}
+				>
 					<SvgIcon sx={{ fontSize: 14, fill: palette.primary.main }}>
 						<svg
 							x='0px'

@@ -38,9 +38,9 @@ const dataTableSlice = createSlice({
 	},
 })
 
+export const getTableSort = (state: RootState) => state.dataTable.sort
+
 export const dataTablePath = dataTableSlice.name
 export const dataTableReducer = dataTableSlice.reducer
-
-export const getTableSort = (state: RootState) => state.dataTable.sort
 
 export const { setSort, resetDataTableState } = dataTableSlice.actions

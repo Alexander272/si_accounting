@@ -1,8 +1,11 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { RootState } from '@/app/store'
+import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+
+export type ModalSelectors = 'CreateDataItem' | 'EditDataItem'
 
 interface IModalState {
 	open: boolean
-	selector: 'CreateDataItem' | 'EditDataItem'
+	selector: ModalSelectors
 }
 
 const initialState: IModalState = {
@@ -14,11 +17,20 @@ const modalSlice = createSlice({
 	name: 'modal',
 	initialState,
 	reducers: {
+		setModalSelector: (state, action: PayloadAction<ModalSelectors>) => {
+			state.selector = action.payload
+		},
+		changeModalIsOpen: (state, action: PayloadAction<boolean>) => {
+			state.open = action.payload
+		},
 		resetModalState: () => initialState,
 	},
 })
 
+export const getModalSelector = (state: RootState) => state.modal.selector
+export const getIsOpenModal = (state: RootState) => state.modal.open
+
 export const modalPath = modalSlice.name
 export const modalReducer = modalSlice.reducer
 
-export const { resetModalState } = modalSlice.actions
+export const { setModalSelector, changeModalIsOpen, resetModalState } = modalSlice.actions
