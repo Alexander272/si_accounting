@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	"github.com/Alexander272/data_center/backend/pkg/logger"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/Nerzal/gocloak/v13"
 )
 

@@ -3,11 +3,11 @@ module github.com/Alexander272/si_accounting/backend
 go 1.20
 
 require (
-	github.com/Alexander272/data_center/backend v0.0.0-20230928100446-b6daad5aa458
 	github.com/Nerzal/gocloak/v13 v13.8.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/google/uuid v1.3.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/sirupsen/logrus v1.9.3
