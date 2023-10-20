@@ -1,10 +1,12 @@
-import { ColumnNames } from '@/constants/columns'
 import { RegisterOptions } from 'react-hook-form'
+
+import { ColumnNames } from '@/constants/columns'
+import { Dayjs } from 'dayjs'
 
 export interface IField<T> {
 	key: T
 	label: string
-	type?: 'string' | 'date' | 'year' | 'number' | 'file' | 'link'
+	type?: 'string' | 'date' | 'year' | 'number' | 'file' | 'link' | 'list'
 	rules?: RegisterOptions
 }
 
@@ -22,7 +24,7 @@ export type KeysOfInstrument =
 
 export type InstrumentFormType = {
 	[item in KeysOfInstrument]: string
-}
+} & { id?: string }
 
 export const InstrumentFields: IField<KeysOfInstrument>[] = [
 	{ key: 'name', label: ColumnNames.NAME, rules: { required: true } },
@@ -50,13 +52,27 @@ export type KeysOfVerification =
 	| 'verificationStatus'
 
 export type VerificationFormType = {
-	[item in KeysOfVerification]: string
-}
+	[item in KeysOfVerification]: string | Dayjs
+} & { id?: string }
 
 export const VerificationFields: IField<KeysOfVerification>[] = [
-	{ key: 'verificationDate', label: ColumnNames.VERIFICATION_DATE, type: 'date' },
+	{ key: 'verificationDate', label: ColumnNames.VERIFICATION_DATE, type: 'date', rules: { required: true } },
 	{ key: 'nextVerificationDate', label: ColumnNames.NEXT_VERIFICATION_DATE, type: 'date' },
 	{ key: 'verificationFile', label: 'Файл', type: 'file' },
 	{ key: 'verificationLink', label: 'Ссылка о поверке', type: 'link' },
-	{ key: 'verificationStatus', label: 'Результат поверки' },
+	{ key: 'verificationStatus', label: 'Результат поверки', rules: { required: true } },
+]
+
+export type KeysOfLocation = 'department' | 'person' | 'receiptDate'
+
+export type LocationFormType = {
+	department: string
+	person: string
+	receiptDate: Dayjs
+} & { id?: string }
+
+export const LocationFields: IField<KeysOfLocation>[] = [
+	{ key: 'department', label: 'Подразделение', type: 'list', rules: { required: true } },
+	{ key: 'person', label: 'Лицо держащее СИ', type: 'list', rules: { required: true } },
+	{ key: 'receiptDate', label: 'дата выдачи', type: 'date', rules: { required: true } },
 ]

@@ -1,9 +1,9 @@
+import { FC, PropsWithChildren } from 'react'
 import { Stack, TextField } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import dayjs from 'dayjs'
 
 import { type InstrumentFormType, InstrumentFields } from '../fields'
-import { FC, PropsWithChildren } from 'react'
 
 const defaultValues: InstrumentFormType = {
 	name: '',
@@ -26,17 +26,15 @@ export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmi
 	const methods = useForm<InstrumentFormType>({ defaultValues })
 
 	const submitHandler = methods.handleSubmit(data => {
-		console.log('submit', data)
+		if (!data.id) {
+			console.log('submit', data)
+		}
 		onSubmit()
 	})
 
 	const renderFields = () => {
 		return InstrumentFields.map(f => {
 			switch (f.type) {
-				// case 'date':
-				// 	break
-				// case 'year':
-				// 	break
 				case 'number':
 					return (
 						<Controller
@@ -44,8 +42,8 @@ export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmi
 							control={methods.control}
 							name={f.key}
 							rules={f.rules}
-							render={({ field, formState: { errors } }) => (
-								<TextField label={f.label} type='number' error={Boolean(errors[f.key])} {...field} />
+							render={({ field, fieldState: { error } }) => (
+								<TextField label={f.label} type='number' error={Boolean(error)} {...field} />
 							)}
 						/>
 					)
@@ -56,8 +54,8 @@ export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmi
 							control={methods.control}
 							name={f.key}
 							rules={f.rules}
-							render={({ field, formState: { errors } }) => (
-								<TextField label={f.label} error={Boolean(errors[f.key])} {...field} />
+							render={({ field, fieldState: { error } }) => (
+								<TextField label={f.label} error={Boolean(error)} {...field} />
 							)}
 						/>
 					)

@@ -33,28 +33,8 @@ export const HeadCells: readonly IHeadCell[] = [
 		width: initWidth,
 	},
 	{
-		id: 'measurementLimits',
-		label: ColumnNames.MEASUREMENT_LIMITS,
-		width: initWidth,
-	},
-	{
-		id: 'accuracy',
-		label: ColumnNames.ACCURACY,
-		width: initWidth,
-	},
-	{
 		id: 'stateRegister',
 		label: ColumnNames.STATE_REGISTER,
-		width: initWidth,
-	},
-	{
-		id: 'manufacturer',
-		label: ColumnNames.MANUFACTURER,
-		width: initWidth,
-	},
-	{
-		id: 'yearOfIssue',
-		label: ColumnNames.YEAR_OF_ISSUE,
 		width: initWidth,
 	},
 	{
@@ -75,6 +55,26 @@ export const HeadCells: readonly IHeadCell[] = [
 	{
 		id: 'place',
 		label: ColumnNames.PLACE,
+		width: initWidth,
+	},
+	{
+		id: 'measurementLimits',
+		label: ColumnNames.MEASUREMENT_LIMITS,
+		width: initWidth,
+	},
+	{
+		id: 'accuracy',
+		label: ColumnNames.ACCURACY,
+		width: initWidth,
+	},
+	{
+		id: 'manufacturer',
+		label: ColumnNames.MANUFACTURER,
+		width: initWidth,
+	},
+	{
+		id: 'yearOfIssue',
+		label: ColumnNames.YEAR_OF_ISSUE,
 		width: initWidth,
 	},
 	{

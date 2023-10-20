@@ -1,12 +1,13 @@
 import { FC, PropsWithChildren } from 'react'
 import { Stack, TextField } from '@mui/material'
+import { DatePicker } from '@mui/x-date-pickers'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import dayjs from 'dayjs'
 
-import { VerificationFields, VerificationFormType } from '../fields'
+import { VerificationFields, type VerificationFormType } from '../fields'
 
 const defaultValues: VerificationFormType = {
-	verificationDate: dayjs().format('DD.MM.YYYY'),
+	verificationDate: dayjs(),
 	//TODO надо как-то получать интервал поверок, чтобы считать эту дату
 	nextVerificationDate: '',
 	verificationFile: '',
@@ -22,7 +23,9 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 	const methods = useForm<VerificationFormType>({ defaultValues })
 
 	const submitHandler = methods.handleSubmit(data => {
-		console.log('submit', data)
+		if (!data.id) {
+			console.log('submit', data)
+		}
 		onSubmit()
 	})
 
@@ -30,11 +33,31 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 		return VerificationFields.map(f => {
 			switch (f.type) {
 				case 'date':
-					break
+					return (
+						<Controller
+							key={f.key}
+							control={methods.control}
+							name={f.key}
+							rules={f.rules}
+							render={({ field, fieldState: { error } }) => (
+								<DatePicker
+									{...field}
+									label={f.label}
+									showDaysOutsideCurrentMonth
+									fixedWeekNumber={6}
+									slotProps={{
+										textField: {
+											error: Boolean(error),
+											// helperText: error?.message ?? ' ',
+										},
+									}}
+								/>
+							)}
+						/>
+					)
 				case 'file':
 					break
 				case 'link':
-					break
 				default:
 					return (
 						<Controller
@@ -42,8 +65,8 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 							control={methods.control}
 							name={f.key}
 							rules={f.rules}
-							render={({ field, formState: { errors } }) => (
-								<TextField label={f.label} error={Boolean(errors[f.key])} {...field} />
+							render={({ field, fieldState: { error } }) => (
+								<TextField label={f.label} error={Boolean(error)} {...field} />
 							)}
 						/>
 					)

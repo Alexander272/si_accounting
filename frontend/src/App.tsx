@@ -1,5 +1,7 @@
 import { Provider } from 'react-redux'
 import { ThemeProvider, CssBaseline } from '@mui/material'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { LocalizationProvider } from '@mui/x-date-pickers'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import 'dayjs/locale/ru'
@@ -16,7 +18,9 @@ function App() {
 		<Provider store={store}>
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
-				<AppRouter />
+				<LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ru'>
+					<AppRouter />
+				</LocalizationProvider>
 			</ThemeProvider>
 		</Provider>
 	)
