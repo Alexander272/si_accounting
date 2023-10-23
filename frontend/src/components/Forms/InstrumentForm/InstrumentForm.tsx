@@ -1,9 +1,14 @@
-import { FC, PropsWithChildren } from 'react'
-import { Stack, TextField } from '@mui/material'
+import { FC, PropsWithChildren, useEffect } from 'react'
+import { LinearProgress, Stack, TextField } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import dayjs from 'dayjs'
 
 import { type InstrumentFormType, InstrumentFields } from '../fields'
+import {
+	useCreateInstrumentMutation,
+	useGetInstrumentByIdQuery,
+	useUpdateInstrumentMutation,
+} from './instrumentApiSlice'
 
 const defaultValues: InstrumentFormType = {
 	name: '',
@@ -25,11 +30,28 @@ type Props = {
 export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit }) => {
 	const methods = useForm<InstrumentFormType>({ defaultValues })
 
-	const submitHandler = methods.handleSubmit(data => {
-		if (!data.id) {
-			console.log('submit', data)
+	const { data, isFetching } = useGetInstrumentByIdQuery('draft')
+
+	const [create] = useCreateInstrumentMutation()
+	const [update] = useUpdateInstrumentMutation()
+
+	useEffect(() => {
+		if (data) methods.reset(data.data)
+	}, [data, methods])
+
+	const submitHandler = methods.handleSubmit(async data => {
+		try {
+			if (!data.id) {
+				await create(data).unwrap()
+				console.log('submit', data)
+			} else if (Object.keys(methods.formState.dirtyFields).length) {
+				await update(data).unwrap()
+				console.log('dirty value')
+			}
+			onSubmit()
+		} catch {
+			console.log('error send data')
 		}
-		onSubmit()
 	})
 
 	const renderFields = () => {
@@ -65,6 +87,8 @@ export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmi
 
 	return (
 		<Stack component={'form'} onSubmit={submitHandler} paddingX={2} mt={4}>
+			{isFetching && <LinearProgress />}
+
 			<FormProvider {...methods}>
 				<Stack spacing={2}>{renderFields()}</Stack>
 				<Stack direction={'row'} spacing={3} mt={4}>

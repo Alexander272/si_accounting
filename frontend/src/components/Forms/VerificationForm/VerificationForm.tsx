@@ -1,18 +1,23 @@
-import { FC, PropsWithChildren } from 'react'
-import { Stack, TextField } from '@mui/material'
+import { FC, PropsWithChildren, useEffect } from 'react'
+import { MenuItem, Select, Stack, TextField } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 
 import { VerificationFields, type VerificationFormType } from '../fields'
+import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
+import {
+	useCreateVerificationMutation,
+	useGetLastVerificationQuery,
+	useUpdateVerificationMutation,
+} from './verificationApiSlice'
 
 const defaultValues: VerificationFormType = {
 	verificationDate: dayjs(),
-	//TODO надо как-то получать интервал поверок, чтобы считать эту дату
-	nextVerificationDate: '',
+	nextVerificationDate: dayjs(),
 	verificationFile: '',
 	verificationLink: '',
-	verificationStatus: '',
+	verificationStatus: 'work',
 }
 
 type Props = {
@@ -22,12 +27,66 @@ type Props = {
 export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit }) => {
 	const methods = useForm<VerificationFormType>({ defaultValues })
 
-	const submitHandler = methods.handleSubmit(data => {
-		if (!data.id) {
-			console.log('submit', data)
+	const { data: instrument } = useGetInstrumentByIdQuery('draft')
+
+	const { data } = useGetLastVerificationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
+
+	const [create] = useCreateVerificationMutation()
+	const [update] = useUpdateVerificationMutation()
+
+	useEffect(() => {
+		if (data)
+			methods.reset({
+				id: data.data.id,
+				verificationDate: dayjs(data.data.date, 'DD.MM.YYYY'),
+				nextVerificationDate: dayjs(data.data.nextDate, 'DD.MM.YYYY'),
+				verificationFile: data.data.fileLink,
+				verificationLink: data.data.registerLink,
+				verificationStatus: data.data.status,
+			})
+		else if (instrument) {
+			methods.setValue(
+				'nextVerificationDate',
+				dayjs().add(+instrument.data.interVerificationInterval, 'M').subtract(1, 'd')
+			)
 		}
-		onSubmit()
+	}, [data, methods, instrument])
+
+	const submitHandler = methods.handleSubmit(async data => {
+		const verification = {
+			id: data.id,
+			instrumentId: instrument?.data.id || '',
+			date: data.verificationDate.format('DD.MM.YYYY'),
+			nextDate: data.nextVerificationDate.format('DD.MM.YYYY'),
+			fileLink: data.verificationFile,
+			registerLink: data.verificationLink,
+			status: data.verificationStatus,
+		}
+
+		try {
+			if (!data.id) {
+				console.log('submit', data)
+				await create(verification).unwrap()
+			} else if (Object.keys(methods.formState.dirtyFields).length) {
+				console.log('dirty values')
+				await update(verification).unwrap()
+			}
+			onSubmit()
+		} catch (error) {
+			console.log(error)
+		}
 	})
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const changeVerificationDataHandler = (onChange: (...event: any[]) => void) => (value: string | Dayjs | null) => {
+		onChange(value)
+		if (!value || typeof value === 'string') return
+
+		methods.setValue(
+			'nextVerificationDate',
+			value.add(+(instrument?.data.interVerificationInterval || 0), 'M').subtract(1, 'd')
+		)
+	}
 
 	const renderFields = () => {
 		return VerificationFields.map(f => {
@@ -42,6 +101,11 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 							render={({ field, fieldState: { error } }) => (
 								<DatePicker
 									{...field}
+									onChange={
+										f.key == 'verificationDate'
+											? changeVerificationDataHandler(field.onChange)
+											: field.onChange
+									}
 									label={f.label}
 									showDaysOutsideCurrentMonth
 									fixedWeekNumber={6}
@@ -55,9 +119,37 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 							)}
 						/>
 					)
+				case 'list':
+					return (
+						<Controller
+							key={f.key}
+							control={methods.control}
+							name={f.key}
+							rules={f.rules}
+							render={({ field, fieldState: { error } }) => (
+								<Select label={f.label} error={Boolean(error)} {...field}>
+									<MenuItem value='work'>Пригоден</MenuItem>
+									<MenuItem value='repair'>Пригоден</MenuItem>
+									<MenuItem value='decommissioning'>Не пригоден</MenuItem>
+								</Select>
+							)}
+						/>
+					)
 				case 'file':
 					break
 				case 'link':
+					return (
+						<Controller
+							key={f.key}
+							control={methods.control}
+							name={f.key}
+							rules={f.rules}
+							render={({ field, fieldState: { error } }) => (
+								<TextField type='link' label={f.label} error={Boolean(error)} {...field} />
+							)}
+						/>
+					)
+
 				default:
 					return (
 						<Controller

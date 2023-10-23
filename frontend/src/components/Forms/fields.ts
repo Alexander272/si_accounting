@@ -51,16 +51,24 @@ export type KeysOfVerification =
 	| 'verificationLink'
 	| 'verificationStatus'
 
+// export type VerificationFormType = {
+// 	[item in KeysOfVerification]: string | Dayjs
+// } & { id?: string }
+
 export type VerificationFormType = {
-	[item in KeysOfVerification]: string | Dayjs
+	verificationDate: Dayjs
+	nextVerificationDate: Dayjs
+	verificationFile: string
+	verificationLink: string
+	verificationStatus: string
 } & { id?: string }
 
 export const VerificationFields: IField<KeysOfVerification>[] = [
 	{ key: 'verificationDate', label: ColumnNames.VERIFICATION_DATE, type: 'date', rules: { required: true } },
 	{ key: 'nextVerificationDate', label: ColumnNames.NEXT_VERIFICATION_DATE, type: 'date' },
+	{ key: 'verificationStatus', label: 'Результат поверки', type: 'list', rules: { required: true } },
+	{ key: 'verificationLink', label: 'Ссылка на поверку', type: 'link' },
 	{ key: 'verificationFile', label: 'Файл', type: 'file' },
-	{ key: 'verificationLink', label: 'Ссылка о поверке', type: 'link' },
-	{ key: 'verificationStatus', label: 'Результат поверки', rules: { required: true } },
 ]
 
 export type KeysOfLocation = 'department' | 'person' | 'receiptDate'
