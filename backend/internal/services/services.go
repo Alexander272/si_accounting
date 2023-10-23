@@ -8,6 +8,8 @@ import (
 )
 
 type Services struct {
+	Instrument
+	Verification
 }
 
 type Deps struct {
@@ -17,6 +19,9 @@ type Deps struct {
 	RefreshTokenTTL time.Duration
 }
 
-func NewServices() *Services {
-	return &Services{}
+func NewServices(deps Deps) *Services {
+	return &Services{
+		Instrument:   NewInstrumentService(deps.Repos.Instrument),
+		Verification: NewVerificationService(deps.Repos.Verification),
+	}
 }

@@ -6,22 +6,21 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	httpV1 "github.com/Alexander272/si_accounting/backend/internal/transport/http/v1"
-	"github.com/Alexander272/si_accounting/backend/pkg/auth"
 	"github.com/Alexander272/si_accounting/backend/pkg/limiter"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
 	// permissions casbin.Casbin
-	keycloak *auth.KeycloakClient
+	// keycloak *auth.KeycloakClient
 	services *services.Services
 }
 
-func NewHandler(services *services.Services, keycloak *auth.KeycloakClient) *Handler {
+func NewHandler(services *services.Services) *Handler {
 	return &Handler{
 		services: services,
 		// permissions: permissions,
-		keycloak: keycloak,
+		// keycloak: keycloak,
 	}
 }
 

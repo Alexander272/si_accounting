@@ -31,13 +31,14 @@ type Instrument interface {
 
 // func (r *InstrumentRepo) GetAll(ctx context.Context, )
 
-func (r *InstrumentRepo) GetById(ctx context.Context, id string) (instrument *models.Instrument, err error) {
+func (r *InstrumentRepo) GetById(ctx context.Context, id string) (*models.Instrument, error) {
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer,
-		year_of_issue, inter_verification_interval, notes FROM %s WHERE CASE WHEN $1='' THEN status=$2 ELSE id=$1 END LIMIT 1`,
+		year_of_issue, inter_verification_interval, notes FROM %s WHERE CASE WHEN $1='' OR $1='draft' THEN status=$2 ELSE id::text=$1 END LIMIT 1`,
 		InstrumentTable,
 	)
+	instrument := &models.Instrument{}
 
-	if err := r.db.Get(&instrument, query, id, constants.InstrumentDraft); err != nil {
+	if err := r.db.Get(instrument, query, id, constants.InstrumentDraft); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRows
 		}

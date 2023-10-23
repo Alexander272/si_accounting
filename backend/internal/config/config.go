@@ -21,7 +21,7 @@ type (
 
 	HttpConfig struct {
 		Host               string        `yaml:"host" env:"HOST" env-default:"localhost"`
-		Port               string        `yaml:"port" env:"PORT" env-default:"9000"`
+		Port               string        `yaml:"port" env:"PORT" env-default:"8080"`
 		ReadTimeout        time.Duration `yaml:"read_timeout" env:"READ_TIMEOUT" env-default:"10s"`
 		WriteTimeout       time.Duration `yaml:"write_timeout" env:"WRITE_TIMEOUT" env-default:"10s"`
 		MaxHeaderMegabytes int           `yaml:"max_header_bytes" env-default:"1"`
@@ -44,11 +44,11 @@ type (
 	}
 
 	AuthConfig struct {
-		AccessTokenTTL  time.Duration `yaml:"access_token_ttl"`
-		RefreshTokenTTL time.Duration `yaml:"refresh_token_ttl"`
-		LimitAuthTTL    time.Duration `yaml:"limit_auth_ttl"`
-		CountAttempt    int32         `yaml:"count_attempt"`
-		Secure          bool          `yaml:"secure"`
+		AccessTokenTTL  time.Duration `yaml:"access_token_ttl" env-default:"10m"`
+		RefreshTokenTTL time.Duration `yaml:"refresh_token_ttl" env-default:"12h"`
+		LimitAuthTTL    time.Duration `yaml:"limit_auth_ttl" env-default:"30m"`
+		CountAttempt    int32         `yaml:"count_attempt" env-default:"5"`
+		Secure          bool          `yaml:"secure" env-default:"false"`
 		Domain          string        `yaml:"domain"`
 		Key             string        `env:"JWT"`
 	}
