@@ -11,6 +11,7 @@ type Services struct {
 	Instrument
 	Verification
 	Location
+	SI
 }
 
 type Deps struct {
@@ -21,9 +22,16 @@ type Deps struct {
 }
 
 func NewServices(deps Deps) *Services {
+	instrument := NewInstrumentService(deps.Repos.Instrument)
+	verification := NewVerificationService(deps.Repos.Verification)
+	location := NewLocationService(deps.Repos.Location)
+
+	si := NewSIService(deps.Repos.SI, instrument, verification, location)
+
 	return &Services{
-		Instrument:   NewInstrumentService(deps.Repos.Instrument),
-		Verification: NewVerificationService(deps.Repos.Verification),
-		Location:     NewLocationService(deps.Repos.Location),
+		Instrument:   instrument,
+		Verification: verification,
+		Location:     location,
+		SI:           si,
 	}
 }

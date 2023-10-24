@@ -5,6 +5,7 @@ import (
 
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/instrument"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/location"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/verification"
@@ -45,6 +46,7 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	// auth.Register(v1, h.services.Session, h.auth, botApi, h.cookieName)
 
 	siGroup := v1.Group("/si")
+	si.Register(siGroup, h.services.SI)
 	instrument.Register(siGroup, h.services.Instrument)
 	verification.Register(siGroup, h.services.Verification)
 	location.Register(siGroup, h.services.Location)

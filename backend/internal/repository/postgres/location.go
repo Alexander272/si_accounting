@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -51,7 +52,12 @@ func (r *LocationRepo) Create(ctx context.Context, l models.CreateLocationDTO) e
 	)
 	id := uuid.New()
 
-	_, err := r.db.Exec(query, id, l.InstrumentId, l.ReceiptDate, l.DeliveryDate, l.Status, l.Person, l.Department)
+	status := l.Status
+	if status == "" {
+		status = constants.LocationStatusUsed
+	}
+
+	_, err := r.db.Exec(query, id, l.InstrumentId, l.ReceiptDate, l.DeliveryDate, status, l.Person, l.Department)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
