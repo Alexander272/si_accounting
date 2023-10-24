@@ -12,15 +12,20 @@ type Instrument interface {
 type Verification interface {
 	postgres.Verification
 }
+type Location interface {
+	postgres.Location
+}
 
 type Repository struct {
 	Instrument
 	Verification
+	Location
 }
 
 func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
 	return &Repository{
 		Instrument:   postgres.NewInstrumentRepo(db),
 		Verification: postgres.NewVerificationRepo(db),
+		Location:     postgres.NewLocationRepo(db),
 	}
 }

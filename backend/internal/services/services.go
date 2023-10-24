@@ -10,6 +10,7 @@ import (
 type Services struct {
 	Instrument
 	Verification
+	Location
 }
 
 type Deps struct {
@@ -23,5 +24,6 @@ func NewServices(deps Deps) *Services {
 	return &Services{
 		Instrument:   NewInstrumentService(deps.Repos.Instrument),
 		Verification: NewVerificationService(deps.Repos.Verification),
+		Location:     NewLocationService(deps.Repos.Location),
 	}
 }
