@@ -71,9 +71,15 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiInputLabel: {
+			defaultProps: {
+				size: 'small',
+			},
+		},
 		MuiTextField: {
 			defaultProps: {
 				size: 'small',
+				autoComplete: 'off',
 			},
 			styleOverrides: {
 				root: {

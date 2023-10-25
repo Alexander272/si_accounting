@@ -1,10 +1,12 @@
 import { FC, PropsWithChildren } from 'react'
-import { Autocomplete, Stack, TextField } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-
-import { LocationFields, type LocationFormType } from '../fields'
+import { Autocomplete, Stack, TextField } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs from 'dayjs'
+
+import { LocationFields, type LocationFormType } from '../fields'
+import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
+import { useCreateLocationMutation } from './locationApiSlice'
 
 const defaultValues: LocationFormType = {
 	department: '',
@@ -19,19 +21,46 @@ type Props = {
 export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit }) => {
 	const methods = useForm<LocationFormType>({ defaultValues })
 
+	const { data: instrument } = useGetInstrumentByIdQuery('draft')
+
+	// const { data } = useGetLastLocationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
+
 	const departments = [{ id: '1', name: 'test', leader: 'lead' }]
 	const users = [{ id: '1', name: 'user', departmentId: '1' }]
+
+	const [create] = useCreateLocationMutation()
+
+	// useEffect(() => {
+	// 	if (data) {
+	// 		methods.reset({ ...data.data, receiptDate: dayjs(data.data.receiptDate, 'DD.MM.YYYY') })
+	// 	}
+	// }, [data, methods])
 
 	const options = {
 		department: departments,
 		person: users,
 	}
 
-	const submitHandler = methods.handleSubmit(data => {
-		if (!data.id) {
-			console.log('submit', data)
+	const submitHandler = methods.handleSubmit(async data => {
+		const location = {
+			id: '',
+			instrumentId: instrument?.data.id || '',
+			department: data.department,
+			person: data.person,
+			receiptDate: data.receiptDate.format('DD.MM.YYYY'),
+			deliveryDate: '',
+			status: '',
 		}
-		onSubmit()
+
+		try {
+			if (!data.id) {
+				console.log('submit', data)
+				await create(location).unwrap()
+			}
+			onSubmit()
+		} catch (error) {
+			console.log(error)
+		}
 	})
 
 	const renderFields = () => {
@@ -69,9 +98,9 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 							rules={f.rules}
 							render={({ field, fieldState: { error } }) => (
 								<Autocomplete
-									value={field.value as string}
+									value={departments.find(d => d.name == field.value) || ''}
 									onChange={(_event, value) => {
-										field.onChange(value)
+										field.onChange(typeof value == 'string' ? value : value.name)
 									}}
 									options={options[f.key as 'department']}
 									getOptionLabel={option => (typeof option === 'string' ? option : option.name)}

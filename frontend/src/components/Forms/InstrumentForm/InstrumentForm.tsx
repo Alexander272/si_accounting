@@ -30,7 +30,7 @@ type Props = {
 export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit }) => {
 	const methods = useForm<InstrumentFormType>({ defaultValues })
 
-	const { data, isFetching } = useGetInstrumentByIdQuery('draft')
+	const { data, isFetching, isError } = useGetInstrumentByIdQuery('draft')
 
 	const [create] = useCreateInstrumentMutation()
 	const [update] = useUpdateInstrumentMutation()
@@ -38,6 +38,9 @@ export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmi
 	useEffect(() => {
 		if (data) methods.reset(data.data)
 	}, [data, methods])
+	useEffect(() => {
+		if (isError) methods.reset(defaultValues)
+	}, [isError, methods])
 
 	const submitHandler = methods.handleSubmit(async data => {
 		try {

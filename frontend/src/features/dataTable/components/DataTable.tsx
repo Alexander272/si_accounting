@@ -48,7 +48,7 @@ export const DataTable = () => {
 				</Button>
 			</Stack>
 
-			<TableContainer>
+			<TableContainer sx={{ maxHeight: 600 }}>
 				<Table stickyHeader size='small'>
 					<DataTableHead />
 					<DataTableBody />

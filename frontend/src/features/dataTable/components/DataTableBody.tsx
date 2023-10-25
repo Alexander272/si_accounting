@@ -1,50 +1,40 @@
-import { TableBody, TableCell, TableRow } from '@mui/material'
-import { IDataItem } from '../types/data'
-import { HeadCells } from './DataTableHead/DataTableHead'
+import { TableBody, TableRow } from '@mui/material'
 
-const data: IDataItem[] = [
-	{
-		id: '1',
-		name: 'test',
-		type: '',
-		factoryNumber: '',
-		measurementLimits: '',
-		manufacturer: '',
-		accuracy: '',
-		stateRegister: '',
-		yearOfIssue: '',
-		verificationDate: '',
-		interVerificationInterval: '12',
-		nextVerificationDate: '',
-		place: '',
-		notes: '',
-	},
-]
+import { useAppSelector } from '@/hooks/redux'
+import { HeadCells } from './DataTableHead/DataTableHead'
+import { useGetAllSIQuery } from '../siApiSlice'
+import { DataTableCell } from './DataTableCell'
+import { getTableSort } from '../dataTableSlice'
 
 export const DataTableBody = () => {
+	const sort = useAppSelector(getTableSort)
+
+	const { data } = useGetAllSIQuery({ sort: sort || undefined })
+
 	return (
 		<TableBody>
-			{data.map(d => (
+			{data?.data.map(d => (
 				<TableRow key={d.id}>
 					{HeadCells.map((c, i) => (
-						<TableCell
-							key={d.id + c.id}
-							align='center'
-							sx={{
-								position: 'relative',
-								':before': {
-									content: i ? `""` : null,
-									width: '1px',
-									height: '60%',
-									background: '#e0e0e0',
-									position: 'absolute',
-									top: '20%',
-									left: -0.5,
-								},
-							}}
-						>
-							{d[c.id] || '-'}
-						</TableCell>
+						<DataTableCell key={d.id + c.id} index={i} width={c.width} label={d[c.id] || '-'} />
+						// <TableCell
+						// 	key={d.id + c.id}
+						// 	align='center'
+						// 	sx={{
+						// 		position: 'relative',
+						// 		':before': {
+						// 			content: i ? `""` : null,
+						// 			width: '1px',
+						// 			height: '60%',
+						// 			background: '#e0e0e0',
+						// 			position: 'absolute',
+						// 			top: '20%',
+						// 			left: -0.5,
+						// 		},
+						// 	}}
+						// >
+						// 	{d[c.id] || '-'}
+						// </TableCell>
 					))}
 				</TableRow>
 			))}

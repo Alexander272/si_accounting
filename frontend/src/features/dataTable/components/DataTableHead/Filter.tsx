@@ -1,7 +1,9 @@
 import { FC, useRef, useState } from 'react'
 import {
 	Divider,
+	FormControl,
 	IconButton,
+	InputLabel,
 	Menu,
 	MenuItem,
 	Select,
@@ -102,10 +104,13 @@ export const Filter: FC<Props> = ({ cell }) => {
 				</Stack>
 
 				<Divider sx={{ mb: 2, mt: 1 }} />
+				<FormControl fullWidth sx={{ mb: 2 }}>
+					<InputLabel id='filter-select'>Операторы</InputLabel>
 
-				<Select label='Операторы' fullWidth sx={{ mb: 2 }}>
-					<MenuItem>Содержит</MenuItem>
-				</Select>
+					<Select id='filter-select' label='Операторы'>
+						<MenuItem>Содержит</MenuItem>
+					</Select>
+				</FormControl>
 
 				<TextField fullWidth label='Значение' />
 			</Menu>

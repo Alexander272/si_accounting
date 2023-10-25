@@ -108,7 +108,7 @@ export const DataTableHead = () => {
 							padding: 0,
 							minWidth: c.width,
 							maxWidth: c.width,
-							position: 'relative',
+							// position: 'relative',
 							':before': {
 								content: i ? `""` : null,
 								width: '1px',
@@ -128,10 +128,10 @@ export const DataTableHead = () => {
 									<SvgIcon
 										sx={{
 											fontSize: '16px',
-											fill: tableSort.fieldId === c.id ? 'black' : '#adadad',
+											fill: tableSort?.field === c.id ? 'black' : '#adadad',
 										}}
 									>
-										{tableSort.fieldId !== c.id || tableSort.type == 'DESC' ? (
+										{tableSort?.field !== c.id || tableSort?.type == 'ASC' ? (
 											<svg
 												shapeRendering='geometricPrecision'
 												textRendering='geometricPrecision'
@@ -146,7 +146,7 @@ export const DataTableHead = () => {
 												/>
 											</svg>
 										) : null}
-										{tableSort.fieldId === c.id && tableSort.type == 'ASC' ? (
+										{tableSort?.field === c.id && tableSort?.type == 'DESC' ? (
 											<svg
 												shapeRendering='geometricPrecision'
 												textRendering='geometricPrecision'

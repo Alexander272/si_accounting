@@ -14,3 +14,19 @@ export interface IDataItem {
 	place: string
 	notes: string
 }
+
+export interface ISIParams {
+	sort?: ISISort
+	filter?: ISIFilter
+}
+
+export interface ISISort {
+	field: keyof IDataItem
+	type: 'DESC' | 'ASC'
+}
+
+export interface ISIFilter {
+	field: keyof IDataItem
+	compareType: string
+	value: string
+}

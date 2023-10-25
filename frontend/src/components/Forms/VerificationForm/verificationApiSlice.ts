@@ -16,7 +16,10 @@ const verificationApiSlice = apiSlice.injectEndpoints({
 	endpoints: builder => ({
 		getLastVerification: builder.query<{ data: Verification }, string>({
 			query: instrumentId => `${API.si.verification.base}/${instrumentId}`,
-			providesTags: [{ type: 'Verification', id: 'LAST' }],
+			providesTags: [
+				{ type: 'Verification', id: 'LAST' },
+				{ type: 'SI', id: 'DRAFT' },
+			],
 		}),
 
 		createVerification: builder.mutation<string, Verification>({

@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren, useEffect } from 'react'
-import { MenuItem, Select, Stack, TextField } from '@mui/material'
+import { FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import dayjs, { Dayjs } from 'dayjs'
@@ -127,11 +127,15 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 							name={f.key}
 							rules={f.rules}
 							render={({ field, fieldState: { error } }) => (
-								<Select label={f.label} error={Boolean(error)} {...field}>
-									<MenuItem value='work'>Пригоден</MenuItem>
-									<MenuItem value='repair'>Пригоден</MenuItem>
-									<MenuItem value='decommissioning'>Не пригоден</MenuItem>
-								</Select>
+								<FormControl>
+									<InputLabel id={f.key}>{f.label}</InputLabel>
+
+									<Select labelId={f.key} label={f.label} error={Boolean(error)} {...field}>
+										<MenuItem value='work'>Пригоден</MenuItem>
+										<MenuItem value='repair'>Пригоден</MenuItem>
+										<MenuItem value='decommissioning'>Не пригоден</MenuItem>
+									</Select>
+								</FormControl>
 							)}
 						/>
 					)

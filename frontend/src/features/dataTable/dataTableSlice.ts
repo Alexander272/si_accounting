@@ -1,19 +1,20 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { RootState } from '@/app/store'
-import { IDataItem } from './types/data'
+import { IDataItem, ISISort } from './types/data'
 
 interface IDataTableSlice {
-	sort: {
-		fieldId: keyof IDataItem | null
-		type: 'DESC' | 'ASC'
-	}
+	// sort: {
+	// 	fieldId: keyof IDataItem | null
+	// 	type: 'DESC' | 'ASC'
+	// }
+	sort: ISISort | null
 }
 
 const initialState: IDataTableSlice = {
 	sort: {
-		fieldId: 'nextVerificationDate',
-		type: 'DESC',
+		field: 'nextVerificationDate',
+		type: 'ASC',
 	},
 }
 
@@ -22,14 +23,14 @@ const dataTableSlice = createSlice({
 	initialState,
 	reducers: {
 		setSort: (state, action: PayloadAction<keyof IDataItem>) => {
-			if (state.sort.fieldId == action.payload) {
-				if (state.sort.type == 'DESC') {
-					state.sort.type = 'ASC'
+			if (state.sort && state.sort.field == action.payload) {
+				if (state.sort.type == 'ASC') {
+					state.sort.type = 'DESC'
 				} else {
-					state.sort = { fieldId: null, type: 'DESC' }
+					state.sort = null
 				}
 			} else {
-				state.sort = { fieldId: action.payload, type: 'DESC' }
+				state.sort = { field: action.payload, type: 'ASC' }
 			}
 			// state.sortFieldId = action.payload
 		},

@@ -1,15 +1,15 @@
 import { FC, MouseEvent, useRef, useState } from 'react'
-import { Stack, Tooltip, Typography } from '@mui/material'
+import { TableCell, Tooltip, Typography } from '@mui/material'
 
-import { isOverflown } from '../../utils/overflow'
+import { isOverflown } from '../utils/overflow'
 
 type Props = {
-	// fieldId: string
+	index: number
 	label: string
-	onClick: () => void
+	width: number
 }
 
-export const HeadCell: FC<Props> = ({ label, onClick }) => {
+export const DataTableCell: FC<Props> = ({ index, label, width }) => {
 	const cellContainer = useRef<HTMLDivElement | null>(null)
 	const cellValue = useRef<HTMLParagraphElement | null>(null)
 
@@ -30,22 +30,24 @@ export const HeadCell: FC<Props> = ({ label, onClick }) => {
 
 	return (
 		<Tooltip title={title} arrow>
-			<Stack
+			<TableCell
 				ref={cellContainer}
 				onMouseEnter={mouseEnterHandler}
 				onMouseLeave={mouseLeaveHandler}
-				onClick={onClick}
-				direction={'row'}
-				// spacing={1}
-				justifyContent={'center'}
-				alignItems={'center'}
-				width={'100%'}
-				borderRadius={3}
-				padding={'6px 16px'}
-				pr={'4px'}
+				align='center'
 				sx={{
-					transition: 'all 0.3s ease-in-out',
-					':hover': { backgroundColor: '#0000000a' },
+					minWidth: width,
+					maxWidth: width,
+					position: 'relative',
+					':before': {
+						content: index ? `""` : null,
+						width: '1px',
+						height: '60%',
+						background: '#e0e0e0',
+						position: 'absolute',
+						top: '20%',
+						left: -0.5,
+					},
 				}}
 			>
 				<Typography
@@ -59,7 +61,7 @@ export const HeadCell: FC<Props> = ({ label, onClick }) => {
 				>
 					{label}
 				</Typography>
-			</Stack>
+			</TableCell>
 		</Tooltip>
 	)
 }

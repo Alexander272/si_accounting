@@ -7,7 +7,10 @@ const instrumentApiSlice = apiSlice.injectEndpoints({
 	endpoints: builder => ({
 		getInstrumentById: builder.query<{ data: InstrumentFormType }, string>({
 			query: id => `${API.si.instruments.base}/${id}`,
-			providesTags: [{ type: 'Instrument', id: 'ID' }],
+			providesTags: [
+				{ type: 'Instrument', id: 'ID' },
+				{ type: 'SI', id: 'DRAFT' },
+			],
 		}),
 
 		createInstrument: builder.mutation<string, InstrumentFormType>({
@@ -16,6 +19,7 @@ const instrumentApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: data,
 			}),
+			invalidatesTags: [{ type: 'Instrument', id: 'ID' }],
 		}),
 
 		updateInstrument: builder.mutation<string, InstrumentFormType>({

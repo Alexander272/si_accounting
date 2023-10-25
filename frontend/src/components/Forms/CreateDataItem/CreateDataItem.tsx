@@ -5,6 +5,8 @@ import { Stepper } from '@/components/Stepper/Stepper'
 import { useState } from 'react'
 import { VerificationForm } from '../VerificationForm/VerificationForm'
 import { LocationForm } from '../LocationForm/LocationForm'
+import { useSaveSIMutation } from '@/features/dataTable/siApiSlice'
+import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
 
 const steps = [
 	{ id: 'instrument', label: 'Информация о СИ' },
@@ -15,9 +17,14 @@ const steps = [
 export const CreateDataItem = () => {
 	const [active, setActive] = useState(0)
 
-	const nextHandler = () => {
+	const { data } = useGetInstrumentByIdQuery('draft')
+
+	const [save] = useSaveSIMutation()
+
+	const nextHandler = async () => {
 		if (active + 1 == steps.length) {
 			// TODO отправить запрос на сохранение всех черновиков
+			await save(data?.data.id || '').unwrap()
 		}
 		setActive(prev => (prev + 1) % steps.length)
 	}
