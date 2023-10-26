@@ -1,14 +1,15 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { RootState } from '@/app/store'
-import { IDataItem, ISISort } from './types/data'
+import { IDataItem, ISIFilter, ISISort } from './types/data'
 
 interface IDataTableSlice {
 	// sort: {
 	// 	fieldId: keyof IDataItem | null
 	// 	type: 'DESC' | 'ASC'
 	// }
-	sort: ISISort | null
+	sort?: ISISort
+	filter?: ISIFilter
 }
 
 const initialState: IDataTableSlice = {
@@ -27,12 +28,15 @@ const dataTableSlice = createSlice({
 				if (state.sort.type == 'ASC') {
 					state.sort.type = 'DESC'
 				} else {
-					state.sort = null
+					state.sort = undefined
 				}
 			} else {
 				state.sort = { field: action.payload, type: 'ASC' }
 			}
-			// state.sortFieldId = action.payload
+		},
+
+		setFilters: (state, action: PayloadAction<ISIFilter | undefined>) => {
+			state.filter = action.payload
 		},
 
 		resetDataTableState: () => initialState,
@@ -40,8 +44,9 @@ const dataTableSlice = createSlice({
 })
 
 export const getTableSort = (state: RootState) => state.dataTable.sort
+export const getTableFilter = (state: RootState) => state.dataTable.filter
 
 export const dataTablePath = dataTableSlice.name
 export const dataTableReducer = dataTableSlice.reducer
 
-export const { setSort, resetDataTableState } = dataTableSlice.actions
+export const { setSort, setFilters, resetDataTableState } = dataTableSlice.actions

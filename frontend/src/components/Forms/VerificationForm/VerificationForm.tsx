@@ -109,6 +109,7 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 									label={f.label}
 									showDaysOutsideCurrentMonth
 									fixedWeekNumber={6}
+									disableFuture
 									slotProps={{
 										textField: {
 											error: Boolean(error),

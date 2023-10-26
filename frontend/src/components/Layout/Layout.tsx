@@ -7,7 +7,7 @@ import { LayoutHeader } from './LayoutHeader'
 
 export const Layout = () => {
 	return (
-		<Box minHeight='100vh' height='100vh' display='flex' flexDirection='column'>
+		<Box minHeight='100vh' height='100vh' display='flex' flexDirection='column' pb={8}>
 			<LayoutHeader />
 			<Suspense fallback={<Fallback />}>
 				<Outlet />

@@ -4,40 +4,28 @@ import { useAppSelector } from '@/hooks/redux'
 import { HeadCells } from './DataTableHead/DataTableHead'
 import { useGetAllSIQuery } from '../siApiSlice'
 import { DataTableCell } from './DataTableCell'
-import { getTableSort } from '../dataTableSlice'
+import { getTableFilter, getTableSort } from '../dataTableSlice'
+import dayjs from 'dayjs'
 
 export const DataTableBody = () => {
 	const sort = useAppSelector(getTableSort)
+	const filter = useAppSelector(getTableFilter)
 
-	const { data } = useGetAllSIQuery({ sort: sort || undefined })
+	const { data } = useGetAllSIQuery({ sort: sort, filter })
 
 	return (
 		<TableBody>
-			{data?.data.map(d => (
-				<TableRow key={d.id}>
-					{HeadCells.map((c, i) => (
-						<DataTableCell key={d.id + c.id} index={i} width={c.width} label={d[c.id] || '-'} />
-						// <TableCell
-						// 	key={d.id + c.id}
-						// 	align='center'
-						// 	sx={{
-						// 		position: 'relative',
-						// 		':before': {
-						// 			content: i ? `""` : null,
-						// 			width: '1px',
-						// 			height: '60%',
-						// 			background: '#e0e0e0',
-						// 			position: 'absolute',
-						// 			top: '20%',
-						// 			left: -0.5,
-						// 		},
-						// 	}}
-						// >
-						// 	{d[c.id] || '-'}
-						// </TableCell>
-					))}
-				</TableRow>
-			))}
+			{data?.data.map(d => {
+				const deadline = dayjs().add(15, 'd').isAfter(dayjs(d.nextVerificationDate, 'DD.MM.YYYY'))
+
+				return (
+					<TableRow key={d.id} sx={{ background: deadline ? '#ff9393' : 'transparent' }}>
+						{HeadCells.map((c, i) => (
+							<DataTableCell key={d.id + c.id} index={i} width={c.width} label={d[c.id] || '-'} />
+						))}
+					</TableRow>
+				)
+			})}
 		</TableBody>
 	)
 }

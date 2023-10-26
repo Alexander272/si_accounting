@@ -7,7 +7,7 @@ export const PageBox = styled(Box)<BoxProps>(({ theme }) => ({
 	display: 'flex',
 	flexDirection: 'column',
 	flexGrow: 1,
-	overflow: 'hidden',
+	// overflow: 'hidden',
 	marginTop: theme.spacing(11),
 	padding: '0 18px',
 })) as typeof Box

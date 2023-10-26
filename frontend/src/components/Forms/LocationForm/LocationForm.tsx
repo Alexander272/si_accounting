@@ -79,6 +79,7 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 									label={f.label}
 									showDaysOutsideCurrentMonth
 									fixedWeekNumber={6}
+									disableFuture
 									slotProps={{
 										textField: {
 											error: Boolean(error),

@@ -1,24 +1,14 @@
 import { FC, useRef, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import {
-	Button,
-	Divider,
-	FormControl,
-	IconButton,
-	InputLabel,
-	Menu,
-	MenuItem,
-	Select,
-	Stack,
-	SvgIcon,
-	TextField,
-	Tooltip,
-	Typography,
-} from '@mui/material'
-import { DatePicker } from '@mui/x-date-pickers'
+import { FormProvider, useForm } from 'react-hook-form'
+import { Button, Divider, IconButton, Menu, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
 
 import type { IDataItem, ISIFilter } from '../../types/data'
-import type { IHeadCell } from './DataTableHead'
+import type { IHeadCell } from '../DataTableHead/DataTableHead'
+import { DateFilter } from './DateFilter'
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { getTableFilter, setFilters } from '../../dataTableSlice'
+import { TextFilter } from './TextFilter'
+import { NumberFilter } from './NumberFilter'
 
 // const defaultValue = {}
 
@@ -29,13 +19,21 @@ type Props = {
 }
 
 export const Filter: FC<Props> = ({ cell }) => {
+	const filter = useAppSelector(getTableFilter)
+
+	const dispatch = useAppDispatch()
+
 	const anchor = useRef<HTMLButtonElement>(null)
 	const [open, setOpen] = useState(false)
 
-	const { control, watch } = useForm<ISIFilter>({
-		defaultValues: { field: cell.id, compareType: !cell.type ? 'contains' : 'equals' },
+	const methods = useForm<ISIFilter>({
+		defaultValues: {
+			field: cell.id,
+			compareType: !cell.type ? 'contains' : 'equals',
+			valueStart: '',
+			valueEnd: '',
+		},
 	})
-	console.log(watch('compareType'))
 
 	const toggleHandler = () => setOpen(prev => !prev)
 
@@ -44,69 +42,21 @@ export const Filter: FC<Props> = ({ cell }) => {
 		toggleHandler()
 	}
 
-	const renderFilter = () => {
-		if (cell.type == 'date') {
-			return [
-				<Controller
-					key={'compareType'}
-					control={control}
-					name='compareType'
-					rules={{ required: true }}
-					render={({ field, fieldState: { error } }) => (
-						<FormControl fullWidth sx={{ mb: 2 }}>
-							<InputLabel id='filter-select'>Операторы</InputLabel>
-
-							<Select {...field} error={Boolean(error)} labelId='filter-select' label='Операторы'>
-								<MenuItem value='equals'>Равна</MenuItem>
-								<MenuItem value='more'>Больше чем</MenuItem>
-								<MenuItem value='less'>Меньше чем</MenuItem>
-								<MenuItem value='period'>В диапазоне</MenuItem>
-							</Select>
-						</FormControl>
-					)}
-				/>,
-
-				<Controller
-					key={'value'}
-					control={control}
-					name={'valueStart'}
-					rules={{ required: true }}
-					render={({ field, fieldState: { error } }) => (
-						<DatePicker
-							{...field}
-							label={'Значение'}
-							showDaysOutsideCurrentMonth
-							fixedWeekNumber={6}
-							slotProps={{
-								textField: {
-									error: Boolean(error),
-									fullWidth: true,
-								},
-							}}
-						/>
-					)}
-				/>,
-			]
-		}
-
-		return [
-			<FormControl key={'compareType'} fullWidth sx={{ mb: 2 }}>
-				<InputLabel id='filter-select'>Операторы</InputLabel>
-
-				<Select labelId='filter-select' label='Операторы'>
-					<MenuItem value='contains'>Содержит</MenuItem>
-				</Select>
-			</FormControl>,
-
-			<TextField key={'value'} fullWidth label='Значение' />,
-		]
+	const clearHandler = () => {
+		if (filter) dispatch(setFilters())
+		toggleHandler()
 	}
+
+	const submitHandler = methods.handleSubmit(data => {
+		dispatch(setFilters(data))
+		toggleHandler()
+	})
 
 	return (
 		<>
 			<Tooltip title='Фильтр' arrow>
 				<IconButton ref={anchor} onClick={clickFilterHandler}>
-					<SvgIcon sx={{ fontSize: '16px', fill: '#adadad' }}>
+					<SvgIcon sx={{ fontSize: '16px', fill: filter?.field === cell.id ? 'black' : '#adadad' }}>
 						<svg
 							x='0px'
 							y='0px'
@@ -139,6 +89,8 @@ export const Filter: FC<Props> = ({ cell }) => {
 							mt: 1.5,
 							paddingX: 2,
 							paddingBottom: 2,
+							maxWidth: 400,
+							width: '100%',
 							'&:before': {
 								content: '""',
 								display: 'block',
@@ -174,14 +126,20 @@ export const Filter: FC<Props> = ({ cell }) => {
 
 				<Divider sx={{ mb: 2, mt: 1 }} />
 
-				{renderFilter()}
+				<FormProvider {...methods}>
+					{cell.type == 'date' && <DateFilter />}
+
+					{cell.type == 'number' && <NumberFilter />}
+
+					{!cell.type || cell.type == 'string' ? <TextFilter /> : null}
+				</FormProvider>
 
 				<Stack direction={'row'} mt={3} spacing={2}>
-					<Button fullWidth sx={{ borderRadius: 3 }}>
+					<Button onClick={clearHandler} fullWidth sx={{ borderRadius: 3 }}>
 						Отменить
 					</Button>
 
-					<Button fullWidth variant='outlined' sx={{ borderRadius: 3 }}>
+					<Button onClick={submitHandler} fullWidth variant='outlined' sx={{ borderRadius: 3 }}>
 						Применить
 					</Button>
 				</Stack>

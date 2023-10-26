@@ -2,15 +2,16 @@ import { IconButton, Stack, SvgIcon, TableCell, TableHead, TableRow, Tooltip } f
 
 import { ColumnNames } from '@/constants/columns'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { IDataItem } from '../../types/data'
+import type { IDataItem } from '../../types/data'
 import { getTableSort, setSort } from '../../dataTableSlice'
+import { Filter } from '../Filter/Filter'
 import { HeadCell } from './HeadCell'
-import { Filter } from './Filter'
 
 export interface IHeadCell {
 	id: keyof IDataItem
 	label: string
 	width: number
+	type?: 'string' | 'date' | 'number'
 	// sorting?: 'none' | 'DESC' | 'ASC'
 }
 
@@ -41,16 +42,19 @@ export const HeadCells: readonly IHeadCell[] = [
 		id: 'verificationDate',
 		label: ColumnNames.VERIFICATION_DATE,
 		width: initWidth,
+		type: 'date',
 	},
 	{
 		id: 'interVerificationInterval',
 		label: ColumnNames.INTER_VERIFICATION_INTERVAL,
 		width: initWidth,
+		type: 'number',
 	},
 	{
 		id: 'nextVerificationDate',
 		label: ColumnNames.NEXT_VERIFICATION_DATE,
 		width: initWidth,
+		type: 'date',
 	},
 	{
 		id: 'place',
@@ -76,6 +80,7 @@ export const HeadCells: readonly IHeadCell[] = [
 		id: 'yearOfIssue',
 		label: ColumnNames.YEAR_OF_ISSUE,
 		width: initWidth,
+		type: 'number',
 	},
 	{
 		id: 'notes',
