@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/google/uuid"
@@ -45,6 +47,20 @@ func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*m
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
+	date, err := strconv.ParseInt(verification.Date, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse date. error: %w", err)
+	}
+	verification.Date = time.Unix(date, 0).Format("02.01.2006")
+
+	nextDate, err := strconv.ParseInt(verification.Date, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse date. error: %w", err)
+	}
+	if nextDate > 0 {
+		verification.NextDate = time.Unix(nextDate, 0).Format("02.01.2006")
+	}
+
 	return verification, nil
 }
 
@@ -55,7 +71,19 @@ func (r *VerificationRepo) Create(ctx context.Context, v models.CreateVerificati
 	)
 	id := uuid.New()
 
-	_, err := r.db.Exec(query, id, v.InstrumentId, v.Date, v.NextDate, v.FileLink, v.RegisterLink, v.Status)
+	date, err := time.Parse("02.01.2006", v.Date)
+	if err != nil {
+		return fmt.Errorf("failed to parse date. error: %w", err)
+	}
+	nextDate := time.Unix(0, 0)
+	if v.NextDate != "" {
+		nextDate, err = time.Parse("02.01.2006", v.NextDate)
+		if err != nil {
+			return fmt.Errorf("failed to parse date. error: %w", err)
+		}
+	}
+
+	_, err = r.db.Exec(query, id, v.InstrumentId, date.Unix(), nextDate.Unix(), v.FileLink, v.RegisterLink, v.Status)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
@@ -67,7 +95,19 @@ func (r *VerificationRepo) Update(ctx context.Context, v models.UpdateVerificati
 		VerificationTable,
 	)
 
-	_, err := r.db.Exec(query, v.Date, v.FileLink, v.RegisterLink, v.Status, v.NextDate, v.Id)
+	date, err := time.Parse("02.01.2006", v.Date)
+	if err != nil {
+		return fmt.Errorf("failed to parse date. error: %w", err)
+	}
+	nextDate := time.Unix(0, 0)
+	if v.NextDate != "" {
+		nextDate, err = time.Parse("02.01.2006", v.NextDate)
+		if err != nil {
+			return fmt.Errorf("failed to parse date. error: %w", err)
+		}
+	}
+
+	_, err = r.db.Exec(query, date.Unix(), v.FileLink, v.RegisterLink, v.Status, nextDate.Unix(), v.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

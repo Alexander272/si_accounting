@@ -26,16 +26,16 @@ func NewSIService(repo repository.SI, instrument Instrument, verification Verifi
 }
 
 type SI interface {
-	GetAll(context.Context, models.SIParams) ([]models.SI, error)
+	GetAll(context.Context, models.SIParams) ([]models.SI, int, error)
 	Save(ctx context.Context, id string) error
 }
 
-func (s *SIService) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, error) {
-	si, err := s.repo.GetAll(ctx, req)
+func (s *SIService) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, int, error) {
+	si, total, err := s.repo.GetAll(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get all si. error: %w", err)
+		return nil, 0, fmt.Errorf("failed to get all si. error: %w", err)
 	}
-	return si, err
+	return si, total, err
 }
 
 func (s *SIService) Save(ctx context.Context, id string) error {

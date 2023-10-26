@@ -1,12 +1,25 @@
 package models
 
 type SIParams struct {
-	Sort SiSort `json:"sort"`
+	Page   SIPage
+	Sort   SISort   `json:"sort"`
+	Filter SIFilter `json:"filter"`
 }
 
-type SiSort struct {
+type SIPage struct {
+	Limit  int
+	Offset int
+}
+
+type SISort struct {
 	Field string `json:"field"`
 	Type  string `json:"type"`
+}
+
+type SIFilter struct {
+	Field       string   `json:"field"`
+	CompareType string   `json:"compareType"`
+	Values      []string `json:"values"`
 }
 
 type SI struct {
