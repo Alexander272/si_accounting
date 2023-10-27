@@ -111,6 +111,9 @@ func (h *SIHandlers) Save(c *gin.Context) {
 		return
 	}
 
+	// response.NewErrorResponse(c, http.StatusInternalServerError, "test", "Произошла ошибка: "+"error: test")
+	// return
+
 	if err := h.service.Save(c, dto.Id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		// h.botApi.SendError(c, err.Error(), dto)

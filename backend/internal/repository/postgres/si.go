@@ -38,19 +38,19 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, 
 
 	switch req.Filter.CompareType {
 	case "contains":
-		filter = fmt.Sprintf("AND %s=%%$1%%", req.Filter.Field)
+		filter = fmt.Sprintf("AND LOWER(%s) LIKE LOWER('%%'||$1||'%%')", req.Filter.Field)
 		params = append(params, req.Filter.Values[0])
 		count++
 	case "start":
-		filter = fmt.Sprintf("AND %s=$1%%", req.Filter.Field)
+		filter = fmt.Sprintf("AND LOWER(%s) LIKE LOWER($1||'%%')", req.Filter.Field)
 		params = append(params, req.Filter.Values[0])
 		count++
 	case "end":
-		filter = fmt.Sprintf("AND %s=%%$1", req.Filter.Field)
+		filter = fmt.Sprintf("AND LOWER(%s) LIKE LOWER('%%'||$1)", req.Filter.Field)
 		params = append(params, req.Filter.Values[0])
 		count++
 	case "equals":
-		filter = fmt.Sprintf("AND %s=$1", req.Filter.Field)
+		filter = fmt.Sprintf("AND LOWER(%s)=LOWER($1)", req.Filter.Field)
 		params = append(params, req.Filter.Values[0])
 		count++
 	case "more":
