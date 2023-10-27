@@ -2,7 +2,7 @@ import { AppBar, Toolbar } from '@mui/material'
 
 export const LayoutHeader = () => {
 	return (
-		<AppBar>
+		<AppBar sx={{ borderRadius: 0 }}>
 			<Toolbar sx={{ justifyContent: 'space-between' }}></Toolbar>
 		</AppBar>
 	)

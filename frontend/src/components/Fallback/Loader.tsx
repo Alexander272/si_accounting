@@ -29,7 +29,7 @@ export const Loader: FC<ILoaderProps> = ({ size = 60, thickness = 5, text = 'Ð—Ð
 					variant='indeterminate'
 					disableShrink
 					sx={{
-						color: theme => alpha(theme.palette.primary.main, 0.5),
+						color: theme => alpha(theme.palette.primary.main, 0.8),
 						animationDuration: '2000ms',
 						position: 'absolute',
 						left: 0,

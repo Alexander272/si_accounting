@@ -16,6 +16,8 @@ export interface IDataItem {
 }
 
 export interface ISIParams {
+	page?: number
+	limit?: number
 	sort?: ISISort
 	filter?: ISIFilter
 }

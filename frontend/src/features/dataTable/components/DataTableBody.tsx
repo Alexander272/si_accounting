@@ -1,30 +1,50 @@
-import { TableBody, TableRow } from '@mui/material'
+import { useCallback } from 'react'
+import { TableBody } from '@mui/material'
 
-import { useAppSelector } from '@/hooks/redux'
-import { HeadCells } from './DataTableHead/DataTableHead'
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useGetAllSIQuery } from '../siApiSlice'
-import { DataTableCell } from './DataTableCell'
-import { getTableFilter, getTableSort } from '../dataTableSlice'
-import dayjs from 'dayjs'
+import {
+	addSelected,
+	getSelectedItems,
+	getTableFilter,
+	getTableLimit,
+	getTablePage,
+	getTableSort,
+	removeSelected,
+} from '../dataTableSlice'
+import { DataTableRow } from './DataTableRow'
 
 export const DataTableBody = () => {
+	const page = useAppSelector(getTablePage)
+	const limit = useAppSelector(getTableLimit)
+
 	const sort = useAppSelector(getTableSort)
 	const filter = useAppSelector(getTableFilter)
 
-	const { data } = useGetAllSIQuery({ sort: sort, filter })
+	const selectedItems = useAppSelector(getSelectedItems)
+
+	const dispatch = useAppDispatch()
+
+	const { data } = useGetAllSIQuery({ page, limit, sort, filter }, { pollingInterval: 5 * 60000 })
+
+	// const openHandler = (id: string) => () => {
+	// 	console.log(id)
+	// }
+
+	const selectHandler = useCallback(
+		(id: string, selected: boolean) => {
+			if (selected) dispatch(removeSelected(id))
+			else dispatch(addSelected(id))
+		},
+		[dispatch]
+	)
 
 	return (
 		<TableBody>
 			{data?.data.map(d => {
-				const deadline = dayjs().add(15, 'd').isAfter(dayjs(d.nextVerificationDate, 'DD.MM.YYYY'))
+				const selected = selectedItems.includes(d.id)
 
-				return (
-					<TableRow key={d.id} sx={{ background: deadline ? '#ff9393' : 'transparent' }}>
-						{HeadCells.map((c, i) => (
-							<DataTableCell key={d.id + c.id} index={i} width={c.width} label={d[c.id] || '-'} />
-						))}
-					</TableRow>
-				)
+				return <DataTableRow key={d.id} data={d} selected={selected} onSelect={selectHandler} />
 			})}
 		</TableBody>
 	)
