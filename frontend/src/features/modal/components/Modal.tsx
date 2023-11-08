@@ -4,9 +4,10 @@ import type { TransitionProps } from '@mui/material/transitions'
 
 import { useAppSelector } from '@/hooks/redux'
 import { CreateDataItem } from '@/components/Forms/CreateDataItem/CreateDataItem'
+import { NewVerification } from '@/components/Forms/NewVerification/NewVerification'
+import { ModalTitles } from '@/constants/modalTitles'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
-import { ModalTitles } from '@/constants/modalTitles'
 
 const Transition = forwardRef(function Transition(
 	props: TransitionProps & {
@@ -27,13 +28,19 @@ export const Modal = () => {
 	return (
 		<Dialog open={open} onClose={closeModal} fullWidth maxWidth='md' TransitionComponent={Transition}>
 			<Stack direction={'row'} width={'100%'} justifyContent={'space-between'} alignItems={'center'}>
-				<DialogTitle color={'primary'}>{selector == 'CreateDataItem' && ModalTitles.ADD_ITEM}</DialogTitle>
+				<DialogTitle color={'primary'}>
+					{selector == 'CreateDataItem' && ModalTitles.ADD_ITEM}
+					{selector == 'NewVerification' && ModalTitles.NEW_VERIFICATION}
+				</DialogTitle>
 
 				<IconButton onClick={closeModal} sx={{ lineHeight: '16px', mr: 2 }}>
 					&times;
 				</IconButton>
 			</Stack>
-			<DialogContent sx={{ pt: 0 }}>{selector == 'CreateDataItem' && <CreateDataItem />}</DialogContent>
+			<DialogContent sx={{ pt: 0 }}>
+				{selector == 'CreateDataItem' && <CreateDataItem />}
+				{selector == 'NewVerification' && <NewVerification />}
+			</DialogContent>
 		</Dialog>
 	)
 }

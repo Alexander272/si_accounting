@@ -3,7 +3,9 @@ import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { Autocomplete, Stack, TextField } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs from 'dayjs'
+import { toast } from 'react-toastify'
 
+import type { IFetchError } from '@/app/types/error'
 import { LocationFields, type LocationFormType } from '../fields'
 import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
 import { useCreateLocationMutation } from './locationApiSlice'
@@ -59,6 +61,8 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 			}
 			onSubmit()
 		} catch (error) {
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
 			console.log(error)
 		}
 	})
@@ -91,7 +95,6 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 					)
 				case 'list':
 					return (
-						//TODO проблема со значениями (value должно быть равно id => надо искать в списке нужный обЪект и onChange нужно менять)
 						<Controller
 							key={f.key}
 							control={methods.control}

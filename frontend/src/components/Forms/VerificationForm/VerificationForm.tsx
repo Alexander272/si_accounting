@@ -3,6 +3,7 @@ import { FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mu
 import { DatePicker } from '@mui/x-date-pickers'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import dayjs, { Dayjs } from 'dayjs'
+import { toast } from 'react-toastify'
 
 import { VerificationFields, type VerificationFormType } from '../fields'
 import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
@@ -11,6 +12,8 @@ import {
 	useGetLastVerificationQuery,
 	useUpdateVerificationMutation,
 } from './verificationApiSlice'
+import type { IFetchError } from '@/app/types/error'
+import { Upload } from '@/components/Upload/Upload'
 
 const defaultValues: VerificationFormType = {
 	verificationDate: dayjs(),
@@ -18,16 +21,18 @@ const defaultValues: VerificationFormType = {
 	verificationFile: '',
 	verificationLink: '',
 	verificationStatus: 'work',
+	notes: '',
 }
 
 type Props = {
+	instrumentId?: string
 	onSubmit: () => void
 }
 
-export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit }) => {
+export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instrumentId = 'draft', onSubmit }) => {
 	const methods = useForm<VerificationFormType>({ defaultValues })
 
-	const { data: instrument } = useGetInstrumentByIdQuery('draft')
+	const { data: instrument } = useGetInstrumentByIdQuery(instrumentId)
 
 	const { data } = useGetLastVerificationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
 
@@ -35,22 +40,30 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 	const [update] = useUpdateVerificationMutation()
 
 	useEffect(() => {
-		if (data)
+		if (data) {
+			let date = dayjs(data.data.date, 'DD.MM.YYYY')
+			let nextDate = dayjs(data.data.nextDate, 'DD.MM.YYYY')
+			if (instrumentId != 'draft') {
+				date = nextDate
+				if (instrument) nextDate = date.add(+instrument.data.interVerificationInterval, 'M').subtract(1, 'd')
+			}
+
 			methods.reset({
 				id: data.data.id,
-				verificationDate: dayjs(data.data.date, 'DD.MM.YYYY'),
-				nextVerificationDate: dayjs(data.data.nextDate, 'DD.MM.YYYY'),
+				verificationDate: date,
+				nextVerificationDate: nextDate,
 				verificationFile: data.data.fileLink,
 				verificationLink: data.data.registerLink,
 				verificationStatus: data.data.status,
+				notes: data.data.notes,
 			})
-		else if (instrument) {
+		} else if (instrument) {
 			methods.setValue(
 				'nextVerificationDate',
 				dayjs().add(+instrument.data.interVerificationInterval, 'M').subtract(1, 'd')
 			)
 		}
-	}, [data, methods, instrument])
+	}, [data, methods, instrument, instrumentId])
 
 	const submitHandler = methods.handleSubmit(async data => {
 		const verification = {
@@ -61,10 +74,11 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 			fileLink: data.verificationFile,
 			registerLink: data.verificationLink,
 			status: data.verificationStatus,
+			notes: data.notes,
 		}
 
 		try {
-			if (!data.id) {
+			if (!data.id || instrumentId != 'draft') {
 				console.log('submit', data)
 				await create(verification).unwrap()
 			} else if (Object.keys(methods.formState.dirtyFields).length) {
@@ -74,6 +88,8 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 			onSubmit()
 		} catch (error) {
 			console.log(error)
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
 		}
 	})
 
@@ -109,7 +125,6 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 									label={f.label}
 									showDaysOutsideCurrentMonth
 									fixedWeekNumber={6}
-									disableFuture
 									slotProps={{
 										textField: {
 											error: Boolean(error),
@@ -133,7 +148,7 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 
 									<Select labelId={f.key} label={f.label} error={Boolean(error)} {...field}>
 										<MenuItem value='work'>Пригоден</MenuItem>
-										<MenuItem value='repair'>Пригоден</MenuItem>
+										<MenuItem value='repair'>Нужен ремонт</MenuItem>
 										<MenuItem value='decommissioning'>Не пригоден</MenuItem>
 									</Select>
 								</FormControl>
@@ -141,7 +156,7 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, onSub
 						/>
 					)
 				case 'file':
-					break
+					return <Upload key={f.key} />
 				case 'link':
 					return (
 						<Controller

@@ -2,6 +2,7 @@ import { FC, PropsWithChildren, useEffect } from 'react'
 import { LinearProgress, Stack, TextField } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import dayjs from 'dayjs'
+import { toast } from 'react-toastify'
 
 import { type InstrumentFormType, InstrumentFields } from '../fields'
 import {
@@ -9,6 +10,7 @@ import {
 	useGetInstrumentByIdQuery,
 	useUpdateInstrumentMutation,
 } from './instrumentApiSlice'
+import type { IFetchError } from '@/app/types/error'
 
 const defaultValues: InstrumentFormType = {
 	name: '',
@@ -52,8 +54,10 @@ export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmi
 				console.log('dirty value')
 			}
 			onSubmit()
-		} catch {
-			console.log('error send data')
+		} catch (error) {
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
+			console.log(error)
 		}
 	})
 

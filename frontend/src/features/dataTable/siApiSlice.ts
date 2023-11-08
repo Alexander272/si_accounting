@@ -1,6 +1,9 @@
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
 import { IDataItem, ISIFilter, ISIParams, ISISort } from './types/data'
+import { IFetchError } from '@/app/types/error'
+import { toast } from 'react-toastify'
+import { SIMessages } from '@/constants/messages/siMessage'
 
 const SIApiSlice = apiSlice.injectEndpoints({
 	overrideExisting: false,
@@ -37,12 +40,11 @@ const SIApiSlice = apiSlice.injectEndpoints({
 			onQueryStarted: async (_arg, api) => {
 				try {
 					await api.queryFulfilled
-					// toast.success()
+					toast.success(SIMessages.SUCCESSFULLY_CREATED)
 				} catch (error) {
-					console.error(error)
-
-					// const fetchError = error as FetchBaseQueryError
-					// toast.error(fetchError.data.message)
+					const fetchError = error as IFetchError
+					console.error(fetchError)
+					toast.error(fetchError.data.message, { autoClose: false })
 				}
 			},
 		}),

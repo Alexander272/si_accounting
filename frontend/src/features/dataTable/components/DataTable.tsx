@@ -4,8 +4,12 @@ import { DataTableHead } from './DataTableHead/DataTableHead'
 import { DataTableBody } from './DataTableBody'
 import { DataHeader } from './DataHeader'
 import { DataFooter } from './DataFooter'
+// import { ContextMenu } from './ContextMenu/ContextMenu'
+// import { useContextMenu } from '../hooks/useContextMenu'
 
 export const DataTable = () => {
+	// const { coordinates, isSelected, itemId, positionHandler } = useContextMenu()
+
 	return (
 		<Box
 			borderRadius={3}
@@ -24,6 +28,12 @@ export const DataTable = () => {
 					<DataTableHead />
 					<DataTableBody />
 				</Table>
+				{/* <ContextMenu
+					coordinates={coordinates}
+					isSelected={isSelected}
+					itemId={itemId}
+					positionHandler={positionHandler}
+				/> */}
 			</TableContainer>
 
 			<DataFooter />

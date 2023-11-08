@@ -50,6 +50,7 @@ export type KeysOfVerification =
 	| 'verificationFile'
 	| 'verificationLink'
 	| 'verificationStatus'
+	| 'notes'
 
 // export type VerificationFormType = {
 // 	[item in KeysOfVerification]: string | Dayjs
@@ -61,12 +62,14 @@ export type VerificationFormType = {
 	verificationFile: string
 	verificationLink: string
 	verificationStatus: string
+	notes: string
 } & { id?: string }
 
 export const VerificationFields: IField<KeysOfVerification>[] = [
 	{ key: 'verificationDate', label: ColumnNames.VERIFICATION_DATE, type: 'date', rules: { required: true } },
 	{ key: 'nextVerificationDate', label: ColumnNames.NEXT_VERIFICATION_DATE, type: 'date' },
 	{ key: 'verificationStatus', label: 'Результат поверки', type: 'list', rules: { required: true } },
+	{ key: 'notes', label: 'Примечание' },
 	{ key: 'verificationLink', label: 'Ссылка на поверку', type: 'link' },
 	{ key: 'verificationFile', label: 'Файл', type: 'file' },
 ]

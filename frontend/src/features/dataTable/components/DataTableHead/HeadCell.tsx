@@ -36,7 +36,6 @@ export const HeadCell: FC<Props> = ({ label, onClick }) => {
 				onMouseLeave={mouseLeaveHandler}
 				onClick={onClick}
 				direction={'row'}
-				// spacing={1}
 				justifyContent={'center'}
 				alignItems={'center'}
 				width={'100%'}
@@ -44,6 +43,7 @@ export const HeadCell: FC<Props> = ({ label, onClick }) => {
 				padding={'6px 16px'}
 				pr={'4px'}
 				sx={{
+					cursor: 'pointer',
 					transition: 'all 0.3s ease-in-out',
 					':hover': { backgroundColor: '#0000000a' },
 				}}

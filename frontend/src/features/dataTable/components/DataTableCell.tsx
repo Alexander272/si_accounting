@@ -28,6 +28,7 @@ export const DataTableCell: FC<Props> = ({ index, label, width }) => {
 		setTitle('')
 	}
 
+	//TODO Tooltip заново рендерится при каждом наведении мыши (всего 1-4мс, но лучше подумать как сделать без лишних рендерингов)
 	return (
 		<Tooltip title={title} arrow>
 			<TableCell

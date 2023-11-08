@@ -108,17 +108,14 @@ export const DataTableHead = () => {
 				{HeadCells.map((c, i) => (
 					<TableCell
 						key={c.id}
-						// onClick={setSortHandler(c.id)}
 						width={c.width}
 						align='center'
 						sx={{
 							backgroundColor: '#fff',
-							cursor: 'pointer',
 							padding: 0,
 							minWidth: c.width,
 							maxWidth: c.width,
 							borderBottomColor: palette.primary.main,
-							// position: 'relative',
 							':before': {
 								content: i ? `""` : null,
 								width: '1px',

@@ -28,6 +28,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: data,
 			}),
+			invalidatesTags: [{ type: 'SI', id: 'ALL' }],
 		}),
 
 		updateLocation: builder.mutation<string, Location>({

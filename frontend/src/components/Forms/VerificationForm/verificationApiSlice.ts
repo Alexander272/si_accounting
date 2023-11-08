@@ -9,6 +9,7 @@ type Verification = {
 	fileLink: string
 	registerLink: string
 	status: string
+	notes: string
 }
 
 const verificationApiSlice = apiSlice.injectEndpoints({
@@ -28,6 +29,10 @@ const verificationApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: data,
 			}),
+			invalidatesTags: [
+				{ type: 'Verification', id: 'LAST' },
+				{ type: 'SI', id: 'ALL' },
+			],
 		}),
 
 		updateVerification: builder.mutation<string, Verification>({
