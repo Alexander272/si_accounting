@@ -51,6 +51,7 @@ export type KeysOfVerification =
 	| 'verificationLink'
 	| 'verificationStatus'
 	| 'notes'
+// | 'files'
 
 // export type VerificationFormType = {
 // 	[item in KeysOfVerification]: string | Dayjs
@@ -63,6 +64,7 @@ export type VerificationFormType = {
 	verificationLink: string
 	verificationStatus: string
 	notes: string
+	// files: File[]
 } & { id?: string }
 
 export const VerificationFields: IField<KeysOfVerification>[] = [

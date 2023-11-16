@@ -13,7 +13,7 @@ import {
 	useUpdateVerificationMutation,
 } from './verificationApiSlice'
 import type { IFetchError } from '@/app/types/error'
-import { Upload } from '@/components/Upload/Upload'
+import { Upload } from '@/features/files/components/Upload/Upload'
 
 const defaultValues: VerificationFormType = {
 	verificationDate: dayjs(),
@@ -22,6 +22,7 @@ const defaultValues: VerificationFormType = {
 	verificationLink: '',
 	verificationStatus: 'work',
 	notes: '',
+	// files: [],
 }
 
 type Props = {
@@ -77,6 +78,17 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 			notes: data.notes,
 		}
 
+		// const formData = new FormData()
+		// formData.append('id', data.id || '')
+		// formData.append('instrumentId', instrument?.data.id || '')
+		// formData.append('date', data.verificationDate.format('DD.MM.YYYY'))
+		// formData.append('nextDate', data.nextVerificationDate.format('DD.MM.YYYY'))
+		// // formData.append('fileLink', data.verificationFile)
+		// formData.append('registerLink', data.verificationLink)
+		// formData.append('status', data.verificationStatus)
+		// formData.append('notes', data.notes)
+		// data.files.forEach((file: File) => formData.append('files', file))
+
 		try {
 			if (!data.id || instrumentId != 'draft') {
 				console.log('submit', data)
@@ -87,7 +99,6 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 			}
 			onSubmit()
 		} catch (error) {
-			console.log(error)
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })
 		}
@@ -100,7 +111,7 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 
 		methods.setValue(
 			'nextVerificationDate',
-			value.add(+(instrument?.data.interVerificationInterval || 0), 'M').subtract(1, 'd')
+			(value as Dayjs).add(+(instrument?.data.interVerificationInterval || 0), 'M').subtract(1, 'd')
 		)
 	}
 
@@ -156,7 +167,28 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 						/>
 					)
 				case 'file':
-					return <Upload key={f.key} />
+					return (
+						<Upload
+							key={f.key}
+							instrumentId={instrument?.data.id || ''}
+							verificationId={data?.data.id || ''}
+						/>
+						// <Controller
+						// 	key={f.key}
+						// 	control={methods.control}
+						// 	name={f.key}
+						// 	render={({ field }) => (
+						// 		<Upload
+						// 			key={f.key}
+						// 			files={field.value as File[]}
+						// 			instrumentId={instrument?.data.id || ''}
+						// 			verificationId={data?.data.id || ''}
+						// 			documents={data?.data.documents || []}
+						// 			onChange={field.onChange}
+						// 		/>
+						// 	)}
+						// />
+					)
 				case 'link':
 					return (
 						<Controller

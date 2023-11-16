@@ -1,5 +1,6 @@
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
+import { IDocument } from '@/features/files/types/file'
 
 type Verification = {
 	id?: string
@@ -10,6 +11,8 @@ type Verification = {
 	registerLink: string
 	status: string
 	notes: string
+	// files?: File[]
+	documents?: IDocument[]
 }
 
 const verificationApiSlice = apiSlice.injectEndpoints({
@@ -34,6 +37,17 @@ const verificationApiSlice = apiSlice.injectEndpoints({
 				{ type: 'SI', id: 'ALL' },
 			],
 		}),
+		// createVerification: builder.mutation<string, FormData>({
+		// 	query: data => ({
+		// 		url: API.si.verification.base,
+		// 		method: 'POST',
+		// 		body: data,
+		// 	}),
+		// 	invalidatesTags: [
+		// 		{ type: 'Verification', id: 'LAST' },
+		// 		{ type: 'SI', id: 'ALL' },
+		// 	],
+		// }),
 
 		updateVerification: builder.mutation<string, Verification>({
 			query: data => ({
