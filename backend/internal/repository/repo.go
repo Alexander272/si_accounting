@@ -12,6 +12,9 @@ type Instrument interface {
 type Verification interface {
 	postgres.Verification
 }
+type Documents interface {
+	postgres.Documents
+}
 type Location interface {
 	postgres.Location
 }
@@ -22,6 +25,7 @@ type SI interface {
 type Repository struct {
 	Instrument
 	Verification
+	Documents
 	Location
 	SI
 }
@@ -30,6 +34,7 @@ func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
 	return &Repository{
 		Instrument:   postgres.NewInstrumentRepo(db),
 		Verification: postgres.NewVerificationRepo(db),
+		Documents:    postgres.NewDocumentsRepo(db),
 		Location:     postgres.NewLocationRepo(db),
 		SI:           postgres.NewSIRepo(db),
 	}

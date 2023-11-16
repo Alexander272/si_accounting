@@ -48,7 +48,7 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	siGroup := v1.Group("/si")
 	si.Register(siGroup, h.services.SI)
 	instrument.Register(siGroup, h.services.Instrument)
-	verification.Register(siGroup, h.services.Verification)
+	verification.Register(siGroup, h.services.Verification, h.services.Documents)
 	location.Register(siGroup, h.services.Location)
 	// 	criterionsGroup := v1.Group("/criterions", h.middleware.VerifyToken, h.middleware.CheckPermissions)
 	// 	criterions.Register(criterionsGroup, h.services.Criterions, botApi)

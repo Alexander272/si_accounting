@@ -10,12 +10,16 @@ import (
 )
 
 type VerificationService struct {
-	repo repository.Verification
+	repo       repository.Verification
+	documents  Documents
+	instrument Instrument
 }
 
-func NewVerificationService(repo repository.Verification) *VerificationService {
+func NewVerificationService(repo repository.Verification, documents Documents, instrument Instrument) *VerificationService {
 	return &VerificationService{
-		repo: repo,
+		repo:       repo,
+		documents:  documents,
+		instrument: instrument,
 	}
 }
 
@@ -37,9 +41,16 @@ func (s *VerificationService) GetLast(ctx context.Context, instrumentId string) 
 }
 
 func (s *VerificationService) Create(ctx context.Context, v models.CreateVerificationDTO) error {
-	if err := s.repo.Create(ctx, v); err != nil {
+	//TODO если status != work надо менять статус у инструмента либо не смотреть на статус инструмента
+	id, err := s.repo.Create(ctx, v)
+	if err != nil {
 		return fmt.Errorf("failed to create verification. error: %w", err)
 	}
+
+	if err := s.documents.ChangePath(ctx, models.PathParts{VerificationId: id, InstrumentId: v.InstrumentId}); err != nil {
+		return fmt.Errorf("failed to change path documents. error: %w", err)
+	}
+
 	return nil
 }
 

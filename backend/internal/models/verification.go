@@ -8,15 +8,18 @@ type Verification struct {
 	FileLink     string `json:"fileLink" db:"file_link"`
 	RegisterLink string `json:"registerLink" db:"register_link"`
 	Status       string `json:"status" db:"status"`
+	Notes        string `json:"notes" db:"notes"`
 }
 
 type CreateVerificationDTO struct {
-	InstrumentId string `json:"instrumentId" db:"instrument_id" binding:"required"`
-	Date         string `json:"date" db:"date" binding:"required"`
-	NextDate     string `json:"nextDate" db:"next_date"`
-	FileLink     string `json:"fileLink" db:"file_link"`
-	RegisterLink string `json:"registerLink" db:"register_link"`
-	Status       string `json:"status" db:"status"`
+	InstrumentId string `form:"instrumentId" json:"instrumentId" db:"instrument_id" binding:"required"`
+	Date         string `form:"date" json:"date" db:"date" binding:"required"`
+	NextDate     string `form:"nextDate" json:"nextDate" db:"next_date"`
+	FileLink     string `form:"fileLink" json:"fileLink" db:"file_link"`
+	RegisterLink string `form:"registerLink" json:"registerLink" db:"register_link"`
+	Status       string `form:"status" json:"status" db:"status"`
+	Notes        string `form:"notes" json:"notes" db:"notes"`
+	// Files        []*multipart.FileHeader `form:"files"`
 }
 
 type UpdateVerificationDTO struct {
@@ -27,4 +30,5 @@ type UpdateVerificationDTO struct {
 	FileLink     string `json:"fileLink" db:"file_link"`
 	RegisterLink string `json:"registerLink" db:"register_link"`
 	Status       string `json:"status" db:"status"`
+	Notes        string `json:"notes" db:"notes"`
 }

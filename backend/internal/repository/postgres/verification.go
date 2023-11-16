@@ -25,7 +25,7 @@ func NewVerificationRepo(db *sqlx.DB) *VerificationRepo {
 
 type Verification interface {
 	GetLast(context.Context, string) (*models.Verification, error)
-	Create(context.Context, models.CreateVerificationDTO) error
+	Create(context.Context, models.CreateVerificationDTO) (string, error)
 	Update(context.Context, models.UpdateVerificationDTO) error
 }
 
@@ -34,7 +34,7 @@ type Verification interface {
 // }
 
 func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*models.Verification, error) {
-	query := fmt.Sprintf(`SELECT id, instrument_id, date, next_date, file_link, register_link, status FROM %s
+	query := fmt.Sprintf(`SELECT id, instrument_id, date, next_date, file_link, register_link, status, notes FROM %s
 		WHERE instrument_id=$1 ORDER BY date DESC LIMIT 1`,
 		VerificationTable,
 	)
@@ -53,7 +53,7 @@ func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*m
 	}
 	verification.Date = time.Unix(date, 0).Format("02.01.2006")
 
-	nextDate, err := strconv.ParseInt(verification.Date, 10, 64)
+	nextDate, err := strconv.ParseInt(verification.NextDate, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse date. error: %w", err)
 	}
@@ -64,34 +64,34 @@ func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*m
 	return verification, nil
 }
 
-func (r *VerificationRepo) Create(ctx context.Context, v models.CreateVerificationDTO) error {
-	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date, next_date, file_link, register_link, status)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+func (r *VerificationRepo) Create(ctx context.Context, v models.CreateVerificationDTO) (string, error) {
+	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date, next_date, file_link, register_link, status, notes)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		VerificationTable,
 	)
 	id := uuid.New()
 
 	date, err := time.Parse("02.01.2006", v.Date)
 	if err != nil {
-		return fmt.Errorf("failed to parse date. error: %w", err)
+		return "", fmt.Errorf("failed to parse date. error: %w", err)
 	}
 	nextDate := time.Unix(0, 0)
 	if v.NextDate != "" {
 		nextDate, err = time.Parse("02.01.2006", v.NextDate)
 		if err != nil {
-			return fmt.Errorf("failed to parse date. error: %w", err)
+			return "", fmt.Errorf("failed to parse date. error: %w", err)
 		}
 	}
 
-	_, err = r.db.Exec(query, id, v.InstrumentId, date.Unix(), nextDate.Unix(), v.FileLink, v.RegisterLink, v.Status)
+	_, err = r.db.Exec(query, id, v.InstrumentId, date.Unix(), nextDate.Unix(), v.FileLink, v.RegisterLink, v.Status, v.Notes)
 	if err != nil {
-		return fmt.Errorf("failed to execute query. error: %w", err)
+		return "", fmt.Errorf("failed to execute query. error: %w", err)
 	}
-	return nil
+	return id.String(), nil
 }
 
 func (r *VerificationRepo) Update(ctx context.Context, v models.UpdateVerificationDTO) error {
-	query := fmt.Sprintf(`UPDATE %s SET date=$1, file_link=$2, register_link=$3, status=$4, next_date=$5 WHERE id=$6`,
+	query := fmt.Sprintf(`UPDATE %s SET date=$1, file_link=$2, register_link=$3, status=$4, next_date=$5, notes=$6 WHERE id=$7`,
 		VerificationTable,
 	)
 
@@ -107,7 +107,7 @@ func (r *VerificationRepo) Update(ctx context.Context, v models.UpdateVerificati
 		}
 	}
 
-	_, err = r.db.Exec(query, date.Unix(), v.FileLink, v.RegisterLink, v.Status, nextDate.Unix(), v.Id)
+	_, err = r.db.Exec(query, date.Unix(), v.FileLink, v.RegisterLink, v.Status, nextDate.Unix(), v.Notes, v.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

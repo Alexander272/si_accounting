@@ -26,7 +26,6 @@ type SI interface {
 }
 
 func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, int, error) {
-
 	order := ""
 	if req.Sort.Field != "" {
 		order = fmt.Sprintf(" ORDER BY %s %s", req.Sort.Field, req.Sort.Type)
@@ -85,7 +84,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, 
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, year_of_issue, 
 		inter_verification_interval, notes, i.status, v.date, v.next_date, m.place
 		FROM %s AS i
-		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date LIMIT 1) AS v ON TRUE
+		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN department WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place 
 			FROM %s WHERE instrument_id=i.id ORDER BY receipt_date LIMIT 1) as m ON TRUE
 		WHERE i.status='%s' %s %s LIMIT $%d OFFSET $%d`,
