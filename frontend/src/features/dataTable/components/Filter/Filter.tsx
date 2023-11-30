@@ -3,7 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { Button, Divider, IconButton, Menu, Stack, Tooltip, Typography } from '@mui/material'
 
 import type { IDataItem, ISIFilter } from '../../types/data'
-import type { IHeadCell } from '../DataTableHead/DataTableHead'
+import type { IHeadCell } from '../DataTableHead/columns'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { getTableFilter, setFilters } from '../../dataTableSlice'
 import { FilterIcon } from '@/components/Icons/FilterIcon'

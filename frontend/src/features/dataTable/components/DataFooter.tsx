@@ -3,6 +3,7 @@ import { useGetAllSIQuery } from '../siApiSlice'
 import { getSelectedItems, getTableFilter, getTableLimit, getTablePage, getTableSort } from '../dataTableSlice'
 import { Stack, Typography } from '@mui/material'
 import { Pagination } from './Pagination/Pagination'
+import { Limit } from './Limit'
 
 export const DataFooter = () => {
 	const page = useAppSelector(getTablePage)
@@ -19,10 +20,10 @@ export const DataFooter = () => {
 		<Stack direction={'row'} alignItems={'center'} mt={2} mx={3}>
 			<Typography>Строк выбрано: {selected.length}</Typography>
 
-			{/* //TODO место для элемента пагинации */}
 			<Pagination totalPages={Math.ceil((data?.total || 1) / limit)} />
 
-			<Typography sx={{ ml: 'auto' }}>
+			<Limit />
+			<Typography sx={{ ml: 2 }}>
 				{(page - 1) * limit || 1}-{(page - 1) * limit + (data?.data.length || 0)} из {data?.total}
 			</Typography>
 		</Stack>

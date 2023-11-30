@@ -3,8 +3,8 @@ import { TableRow } from '@mui/material'
 import dayjs from 'dayjs'
 
 import { DataTableCell } from './DataTableCell'
-import { HeadCells } from './DataTableHead/DataTableHead'
 import { IDataItem } from '../types/data'
+import { HeadCells } from './DataTableHead/columns'
 // import { useContextMenu } from '../hooks/useContextMenu'
 // import { useSingleAndDoubleClick } from '../utils/clicks'
 

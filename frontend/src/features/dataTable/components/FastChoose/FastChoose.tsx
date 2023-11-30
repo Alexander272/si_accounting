@@ -2,8 +2,8 @@ import { useRef, useState } from 'react'
 import { Button, ListItemIcon, Menu, MenuItem } from '@mui/material'
 
 import { CheckListIcon } from '@/components/Icons/CheckListIcon'
-import { useAppSelector } from '@/hooks/redux'
-import { getSelectedItems } from '../../dataTableSlice'
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { getSelectedItems, removeSelected } from '../../dataTableSlice'
 
 export const FastChoose = () => {
 	const anchor = useRef<HTMLButtonElement | null>(null)
@@ -11,9 +11,14 @@ export const FastChoose = () => {
 
 	const selected = useAppSelector(getSelectedItems)
 
+	const dispatch = useAppDispatch()
+
 	const toggleHandler = () => setOpen(prev => !prev)
 
-	// const allHandler = ()=> {}
+	const allHandler = () => {
+		if (selected.length) dispatch(removeSelected())
+		toggleHandler()
+	}
 
 	//TODO можно сделать выбор всех позиций, просроченных или всех за определенный месяц и кнопочку для отмены выбора
 	return (
@@ -63,7 +68,7 @@ export const FastChoose = () => {
 				}}
 			>
 				{/* //TODO решить как выбирать элементы и что делать если не все элементы которые должны быть выбраны влазят на одну страницу */}
-				<MenuItem>
+				<MenuItem onClick={allHandler}>
 					<ListItemIcon>IC</ListItemIcon>
 					{selected.length ? 'Отменить выбор' : 'Выбрать все'}
 				</MenuItem>
