@@ -23,7 +23,7 @@ export const DataTable = () => {
 		>
 			<DataHeader />
 
-			<TableContainer sx={{ maxHeight: 600, flexGrow: 1 }}>
+			<TableContainer sx={{ maxHeight: 640, height: '100%', flexGrow: 1 }}>
 				<Table stickyHeader size='small'>
 					<DataTableHead />
 					<DataTableBody />

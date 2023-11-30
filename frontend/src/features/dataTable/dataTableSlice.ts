@@ -12,8 +12,9 @@ interface IDataTableSlice {
 }
 
 const initialState: IDataTableSlice = {
-	page: 0,
-	limit: 50,
+	page: 1,
+	//TODO вернуть лимит в 50
+	limit: 15, // 15, 30, 50, 100 доступные лимиты. 15 строк макс который влазит без прокрутки
 	sort: {
 		field: 'nextVerificationDate',
 		type: 'ASC',

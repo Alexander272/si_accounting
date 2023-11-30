@@ -5,6 +5,7 @@ import { PlusIcon } from '@/components/Icons/PlusIcon'
 import { FastFilter } from './FastFilter/FastFilter'
 import { DataTableLoader } from './DataTableLoader'
 import { Tools } from './Tools/Tools'
+import { FastChoose } from './FastChoose/FastChoose'
 
 export const DataHeader = () => {
 	const { palette } = useTheme()
@@ -32,6 +33,7 @@ export const DataHeader = () => {
 				</Stack>
 
 				<Stack direction={'row'} spacing={2}>
+					<FastChoose />
 					<FastFilter />
 					<Tools />
 				</Stack>

@@ -31,6 +31,8 @@ export const DataTableRow: FC<Props> = memo(({ data, selected, onSelect }) => {
 
 	// const clickHandler = useSingleAndDoubleClick(selectHandler, openHandler)
 
+	//TODO подумать как выделять строки (цвета когда надо сдать, просроченные и тд)
+
 	return (
 		<TableRow
 			key={data.id}
