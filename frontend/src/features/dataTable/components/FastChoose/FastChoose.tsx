@@ -1,23 +1,82 @@
 import { useRef, useState } from 'react'
 import { Button, ListItemIcon, Menu, MenuItem } from '@mui/material'
+import dayjs from 'dayjs'
 
 import { CheckListIcon } from '@/components/Icons/CheckListIcon'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { getSelectedItems, removeSelected } from '../../dataTableSlice'
+import type { ISIFilter, ISISort } from '../../types/data'
+import {
+	addSelected,
+	getSelectedItems,
+	getTableFilter,
+	getTableLimit,
+	getTablePage,
+	getTableSort,
+	removeSelected,
+} from '../../dataTableSlice'
+import { useGetAllSIQuery, useLazyGetAllSIQuery } from '../../siApiSlice'
+import { toast } from 'react-toastify'
+import { IFetchError } from '@/app/types/error'
 
 export const FastChoose = () => {
 	const anchor = useRef<HTMLButtonElement | null>(null)
 	const [open, setOpen] = useState(false)
 
+	const [fetchSi] = useLazyGetAllSIQuery()
+
 	const selected = useAppSelector(getSelectedItems)
+	const page = useAppSelector(getTablePage)
+	const limit = useAppSelector(getTableLimit)
+
+	const sort = useAppSelector(getTableSort)
+	const filter = useAppSelector(getTableFilter)
 
 	const dispatch = useAppDispatch()
 
+	const { data } = useGetAllSIQuery({ page, limit, sort, filter })
+
 	const toggleHandler = () => setOpen(prev => !prev)
 
-	const allHandler = () => {
-		if (selected.length) dispatch(removeSelected())
-		toggleHandler()
+	const selectAllHandler = () => {
+		if (selected.length) {
+			dispatch(removeSelected())
+			toggleHandler()
+		} else fetching(filter, sort)
+	}
+
+	const selectOverdueHandler = async () => {
+		const filter: ISIFilter = {
+			field: 'nextVerificationDate',
+			compareType: 'less',
+			valueStart: dayjs().unix().toString(),
+			valueEnd: '',
+		}
+
+		fetching(filter)
+	}
+
+	const selectMonthHandler = async () => {
+		const filter: ISIFilter = {
+			field: 'nextVerificationDate',
+			compareType: 'period',
+			valueStart: dayjs().startOf('month').unix().toString(),
+			valueEnd: dayjs().endOf('month').unix().toString(),
+		}
+
+		fetching(filter)
+	}
+
+	const fetching = async (filter?: ISIFilter, sort?: ISISort) => {
+		try {
+			const payload = await fetchSi({ limit: data?.total, filter, sort })
+			const identifiers = payload.data?.data.map(si => si.id) || []
+			dispatch(addSelected(identifiers))
+		} catch (error) {
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
+		} finally {
+			toggleHandler()
+		}
 	}
 
 	//TODO можно сделать выбор всех позиций, просроченных или всех за определенный месяц и кнопочку для отмены выбора
@@ -68,15 +127,15 @@ export const FastChoose = () => {
 				}}
 			>
 				{/* //TODO решить как выбирать элементы и что делать если не все элементы которые должны быть выбраны влазят на одну страницу */}
-				<MenuItem onClick={allHandler}>
+				<MenuItem onClick={selectAllHandler}>
 					<ListItemIcon>IC</ListItemIcon>
 					{selected.length ? 'Отменить выбор' : 'Выбрать все'}
 				</MenuItem>
-				<MenuItem>
+				<MenuItem onClick={selectOverdueHandler}>
 					<ListItemIcon>IC</ListItemIcon>
 					Все просроченные
 				</MenuItem>
-				<MenuItem>
+				<MenuItem onClick={selectMonthHandler}>
 					<ListItemIcon>IC</ListItemIcon>
 					Все за текущий месяц
 				</MenuItem>

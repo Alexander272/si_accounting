@@ -49,8 +49,9 @@ const dataTableSlice = createSlice({
 			state.filter = action.payload
 		},
 
-		addSelected: (state, action: PayloadAction<string>) => {
-			state.selected.push(action.payload)
+		addSelected: (state, action: PayloadAction<string | string[]>) => {
+			if (typeof action.payload == 'string') state.selected.push(action.payload)
+			else state.selected.push(...action.payload)
 		},
 		removeSelected: (state, action: PayloadAction<string | undefined>) => {
 			if (action.payload != undefined) state.selected = state.selected.filter(s => s != action.payload)

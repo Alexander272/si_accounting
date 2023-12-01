@@ -69,10 +69,10 @@ export const FastFilter = () => {
 	const toggleHandler = () => setOpen(prev => !prev)
 
 	const activeHandler = (event: MouseEvent<HTMLButtonElement>) => {
-		const name = (event.target as HTMLButtonElement).name
+		const name = (event.target as HTMLButtonElement).name as 'overdue' | 'month'
 
 		if (active == name) setActive(undefined)
-		else setActive(name as 'overdue')
+		else setActive(name)
 	}
 
 	const clearHandler = () => {

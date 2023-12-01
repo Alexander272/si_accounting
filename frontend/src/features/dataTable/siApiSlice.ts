@@ -51,4 +51,4 @@ const SIApiSlice = apiSlice.injectEndpoints({
 	}),
 })
 
-export const { useGetAllSIQuery, useSaveSIMutation } = SIApiSlice
+export const { useGetAllSIQuery, useLazyGetAllSIQuery, useSaveSIMutation } = SIApiSlice
