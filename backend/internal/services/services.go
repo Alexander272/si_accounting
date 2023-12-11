@@ -13,6 +13,7 @@ type Services struct {
 	Documents
 	Location
 	SI
+	Department
 }
 
 type Deps struct {
@@ -30,11 +31,14 @@ func NewServices(deps Deps) *Services {
 
 	si := NewSIService(deps.Repos.SI, instrument, verification, location)
 
+	department := NewDepartmentService(deps.Repos.Department)
+
 	return &Services{
 		Instrument:   instrument,
 		Verification: verification,
 		Documents:    documents,
 		Location:     location,
 		SI:           si,
+		Department:   department,
 	}
 }

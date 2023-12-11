@@ -41,7 +41,6 @@ func (s *VerificationService) GetLast(ctx context.Context, instrumentId string) 
 }
 
 func (s *VerificationService) Create(ctx context.Context, v models.CreateVerificationDTO) error {
-	//TODO если status != work надо менять статус у инструмента либо не смотреть на статус инструмента
 	id, err := s.repo.Create(ctx, v)
 	if err != nil {
 		return fmt.Errorf("failed to create verification. error: %w", err)
@@ -49,6 +48,10 @@ func (s *VerificationService) Create(ctx context.Context, v models.CreateVerific
 
 	if err := s.documents.ChangePath(ctx, models.PathParts{VerificationId: id, InstrumentId: v.InstrumentId}); err != nil {
 		return fmt.Errorf("failed to change path documents. error: %w", err)
+	}
+
+	if err := s.instrument.ChangeStatus(ctx, models.UpdateStatus{Id: v.InstrumentId, Status: v.Status}); err != nil {
+		return err
 	}
 
 	return nil

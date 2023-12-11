@@ -104,6 +104,10 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DataResponse{Data: si, Total: total})
 }
 
+// func (h *SIHandlers) GetIdentifiers(c *gin.Context) {
+
+// }
+
 func (h *SIHandlers) Save(c *gin.Context) {
 	var dto models.UpdateStatus
 	if err := c.BindJSON(&dto); err != nil {
