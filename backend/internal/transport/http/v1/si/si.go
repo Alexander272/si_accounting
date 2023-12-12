@@ -82,6 +82,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 	}
 
 	filterField := c.Query("f-field")
+	filterFieldType := c.Query("f-fieldType")
 	filterType := c.Query("f-compareType")
 	filterValue1 := c.Query("f-valueStart")
 	filterValue2 := c.Query("f-valueEnd")
@@ -89,6 +90,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 	if filterField != "" && filterType != "" {
 		params.Filter = models.SIFilter{
 			Field:       h.formatFields[filterField],
+			FieldType:   filterFieldType,
 			CompareType: filterType,
 			Values:      []string{filterValue1, filterValue2},
 		}

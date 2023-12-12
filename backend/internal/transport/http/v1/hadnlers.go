@@ -5,6 +5,7 @@ import (
 
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/instrument"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/location"
@@ -50,6 +51,8 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	instrument.Register(siGroup, h.services.Instrument)
 	verification.Register(siGroup, h.services.Verification, h.services.Documents)
 	location.Register(siGroup, h.services.Location)
+
+	departments.Register(v1, h.services.Department)
 	// 	criterionsGroup := v1.Group("/criterions", h.middleware.VerifyToken, h.middleware.CheckPermissions)
 	// 	criterions.Register(criterionsGroup, h.services.Criterions, botApi)
 	// 	complete.Register(criterionsGroup, h.services.CompleteCriterion, botApi)

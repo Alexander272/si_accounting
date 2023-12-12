@@ -74,7 +74,7 @@ func (r *DocumentsRepo) CreateSeveral(ctx context.Context, docs []models.Documen
 
 func (r *DocumentsRepo) UpdatePath(ctx context.Context, req models.PathParts) error {
 	query := fmt.Sprintf(`UPDATE %s SET verification_id=$1, path=REPLACE(path, "temp", $1)
-		WHERE verification IS NULL AND instrument_id=$2`,
+		WHERE verification_id IS NULL AND instrument_id=$2`,
 		DocumentsTable,
 	)
 

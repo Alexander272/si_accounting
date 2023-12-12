@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
@@ -49,8 +50,16 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, 
 		params = append(params, req.Filter.Values[0])
 		count++
 	case "equals":
-		// TODO тут возникает проблема если сравнение по дате (тк она задана числом)
-		filter = fmt.Sprintf("AND LOWER(%s)=LOWER($1)", req.Filter.Field)
+		if req.Filter.FieldType == "string" {
+			filter = fmt.Sprintf("AND LOWER(%s)=LOWER($1)", req.Filter.Field)
+		} else if req.Filter.FieldType == "list" {
+			// LOWER(place) ~* 'test|Отдел технического сервиса'
+			// LOWER(place) ILIKE ANY (ARRAY['test %','Отдел технического сервиса %'])
+			filter = fmt.Sprintf("AND LOWER(%s) ~* $1", req.Filter.Field)
+			req.Filter.Values[0] = strings.ReplaceAll(req.Filter.Values[0], ",", "|")
+		} else {
+			filter = fmt.Sprintf("AND %s=$1", req.Filter.Field)
+		}
 		params = append(params, req.Filter.Values[0])
 		count++
 	case "more":
@@ -74,8 +83,11 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, 
 	}
 	totalQuery := fmt.Sprintf(`SELECT count(name) AS total FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC LIMIT 1) AS v ON TRUE
+		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN department || ' ('|| person ||')' WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place 
+			FROM %s WHERE instrument_id=i.id ORDER BY receipt_date LIMIT 1) as m ON TRUE
 		WHERE i.status='%s' %s`,
-		InstrumentTable, VerificationTable, constants.InstrumentStatusWork, filter,
+		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve,
+		SIMovementTable, constants.InstrumentStatusWork, filter,
 	)
 
 	if err := r.db.Get(&total, totalQuery, params[:count-1]...); err != nil {

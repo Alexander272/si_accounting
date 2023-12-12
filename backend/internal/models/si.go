@@ -18,6 +18,7 @@ type SISort struct {
 
 type SIFilter struct {
 	Field       string   `json:"field"`
+	FieldType   string   `json:"fieldType"`
 	CompareType string   `json:"compareType"`
 	Values      []string `json:"values"`
 }
