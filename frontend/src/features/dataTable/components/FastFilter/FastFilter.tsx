@@ -49,6 +49,7 @@ export const FastFilter = () => {
 		else {
 			const filter: ISIFilter = {
 				field: 'nextVerificationDate',
+				fieldType: 'date',
 				compareType: 'less',
 				valueStart: dayjs().unix().toString(),
 				valueEnd: '',
@@ -78,6 +79,7 @@ export const FastFilter = () => {
 	const clearHandler = () => {
 		setActive(undefined)
 		dispatch(setFilters())
+		// toggleHandler()
 	}
 
 	const monthHandler = (event: SelectChangeEvent<number>) => {

@@ -29,6 +29,7 @@ export interface ISISort {
 
 export interface ISIFilter {
 	field: keyof IDataItem
+	fieldType: string
 	compareType: string
 	valueStart: string
 	valueEnd: string

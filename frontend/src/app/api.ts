@@ -17,4 +17,5 @@ export const API = {
 		base: 'si',
 		save: 'si/save',
 	},
+	departments: '/departments',
 }

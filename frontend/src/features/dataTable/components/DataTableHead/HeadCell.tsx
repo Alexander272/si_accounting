@@ -13,23 +13,23 @@ export const HeadCell: FC<Props> = ({ label, onClick }) => {
 	const cellContainer = useRef<HTMLDivElement | null>(null)
 	const cellValue = useRef<HTMLParagraphElement | null>(null)
 
-	const [title, setTitle] = useState('')
+	const [visible, setVisible] = useState(false)
 
 	const mouseEnterHandler = (event: MouseEvent<HTMLDivElement>) => {
 		cellContainer.current = event.target as HTMLDivElement
 		const isCurrentlyOverflown = isOverflown(cellValue.current)
 
 		if (isCurrentlyOverflown) {
-			setTitle(cellValue.current?.textContent || '')
+			setVisible(true)
 		}
 	}
 
 	const mouseLeaveHandler = () => {
-		setTitle('')
+		setVisible(false)
 	}
 
 	return (
-		<Tooltip title={title} arrow>
+		<Tooltip open={visible} title={label} arrow>
 			<Stack
 				ref={cellContainer}
 				onMouseEnter={mouseEnterHandler}
@@ -44,6 +44,7 @@ export const HeadCell: FC<Props> = ({ label, onClick }) => {
 				pr={'4px'}
 				sx={{
 					cursor: 'pointer',
+					position: 'relative',
 					transition: 'all 0.3s ease-in-out',
 					':hover': { backgroundColor: '#0000000a' },
 				}}

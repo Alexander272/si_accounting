@@ -13,24 +13,23 @@ export const DataTableCell: FC<Props> = ({ index, label, width }) => {
 	const cellContainer = useRef<HTMLDivElement | null>(null)
 	const cellValue = useRef<HTMLParagraphElement | null>(null)
 
-	const [title, setTitle] = useState('')
+	const [visible, setVisible] = useState(false)
 
 	const mouseEnterHandler = (event: MouseEvent<HTMLDivElement>) => {
 		cellContainer.current = event.target as HTMLDivElement
 		const isCurrentlyOverflown = isOverflown(cellValue.current)
 
 		if (isCurrentlyOverflown) {
-			setTitle(cellValue.current?.textContent || '')
+			setVisible(true)
 		}
 	}
 
 	const mouseLeaveHandler = () => {
-		setTitle('')
+		setVisible(false)
 	}
 
-	//TODO Tooltip заново рендерится при каждом наведении мыши (всего 1-4мс, но лучше подумать как сделать без лишних рендерингов)
 	return (
-		<Tooltip title={title} arrow>
+		<Tooltip open={visible} title={label} arrow>
 			<TableCell
 				ref={cellContainer}
 				onMouseEnter={mouseEnterHandler}
@@ -41,7 +40,7 @@ export const DataTableCell: FC<Props> = ({ index, label, width }) => {
 					maxWidth: width,
 					position: 'relative',
 					':before': {
-						content: index ? `""` : null,
+						content: index ? '""' : null,
 						width: '1px',
 						height: '60%',
 						background: '#e0e0e0',

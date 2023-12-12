@@ -7,7 +7,7 @@ export interface IHeadCell {
 	id: keyof IDataItem
 	label: string
 	width: number
-	type?: 'string' | 'date' | 'number'
+	type?: 'string' | 'date' | 'number' | 'list'
 	// sorting?: 'none' | 'DESC' | 'ASC'
 }
 
@@ -54,6 +54,7 @@ export const HeadCells: readonly IHeadCell[] = [
 		id: 'place',
 		label: ColumnNames.PLACE,
 		width: initWidth,
+		type: 'list',
 	},
 	{
 		id: 'measurementLimits',

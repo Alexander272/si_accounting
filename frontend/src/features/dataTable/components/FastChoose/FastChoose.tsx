@@ -79,7 +79,6 @@ export const FastChoose = () => {
 		}
 	}
 
-	//TODO можно сделать выбор всех позиций, просроченных или всех за определенный месяц и кнопочку для отмены выбора
 	return (
 		<>
 			<Button
@@ -126,8 +125,8 @@ export const FastChoose = () => {
 					},
 				}}
 			>
-				{/* //TODO решить как выбирать элементы и что делать если не все элементы которые должны быть выбраны влазят на одну страницу */}
-				<MenuItem onClick={selectAllHandler}>
+				{/* //TODO сделать иконки для пунктов меню */}
+				<MenuItem onClick={selectAllHandler} sx={{ fontWeight: selected.length ? 'bold' : 'normal' }}>
 					<ListItemIcon>IC</ListItemIcon>
 					{selected.length ? 'Отменить выбор' : 'Выбрать все'}
 				</MenuItem>

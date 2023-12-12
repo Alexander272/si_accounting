@@ -10,13 +10,12 @@ import { FilterIcon } from '@/components/Icons/FilterIcon'
 import { DateFilter } from './DateFilter'
 import { TextFilter } from './TextFilter'
 import { NumberFilter } from './NumberFilter'
-
-// const defaultValue = {}
+import { useGetDepartmentsQuery } from '@/components/Forms/LocationForm/locationApiSlice'
+import { ListFilter } from './ListFilter'
 
 type Props = {
 	cell: IHeadCell
 	fieldId: keyof IDataItem
-	// type: 'string' |'number'|'date'
 }
 
 export const Filter: FC<Props> = ({ cell }) => {
@@ -30,11 +29,18 @@ export const Filter: FC<Props> = ({ cell }) => {
 	const methods = useForm<ISIFilter>({
 		defaultValues: {
 			field: cell.id,
+			fieldType: cell.type || 'string',
 			compareType: !cell.type ? 'contains' : 'equals',
 			valueStart: '',
 			valueEnd: '',
 		},
 	})
+
+	const { data: departments } = useGetDepartmentsQuery(null)
+
+	const options = {
+		place: departments?.data || [],
+	}
 
 	const toggleHandler = () => setOpen(prev => !prev)
 
@@ -123,6 +129,8 @@ export const Filter: FC<Props> = ({ cell }) => {
 					{cell.type == 'number' && <NumberFilter />}
 
 					{!cell.type || cell.type == 'string' ? <TextFilter /> : null}
+
+					{cell.type == 'list' && <ListFilter list={options[cell.id as 'place']} />}
 				</FormProvider>
 
 				<Stack direction={'row'} mt={3} spacing={2}>

@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 import type { IFetchError } from '@/app/types/error'
 import { LocationFields, type LocationFormType } from '../fields'
 import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
-import { useCreateLocationMutation } from './locationApiSlice'
+import { useCreateLocationMutation, useGetDepartmentsQuery } from './locationApiSlice'
 
 const defaultValues: LocationFormType = {
 	department: '',
@@ -27,7 +27,9 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 
 	// const { data } = useGetLastLocationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
 
-	const departments = [{ id: '1', name: 'test', leader: 'lead' }]
+	const { data: departments } = useGetDepartmentsQuery(null)
+
+	// const departments = [{ id: '1', name: 'test', leader: 'lead' }]
 	const users = [{ id: '1', name: 'user', departmentId: '1' }]
 
 	const [create] = useCreateLocationMutation()
@@ -39,7 +41,7 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 	// }, [data, methods])
 
 	const options = {
-		department: departments,
+		department: departments?.data || [],
 		person: users,
 	}
 
@@ -69,6 +71,8 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 
 	const renderFields = () => {
 		return LocationFields.map(f => {
+			const op = options[f.key as 'department']
+
 			switch (f.type) {
 				case 'date':
 					return (
@@ -102,13 +106,13 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 							rules={f.rules}
 							render={({ field, fieldState: { error } }) => (
 								<Autocomplete
-									value={departments.find(d => d.name == field.value) || ''}
+									value={op.find(d => d.name == field.value) || op[0]}
 									onChange={(_event, value) => {
 										field.onChange(typeof value == 'string' ? value : value.name)
 									}}
-									options={options[f.key as 'department']}
+									options={op}
 									getOptionLabel={option => (typeof option === 'string' ? option : option.name)}
-									freeSolo
+									// freeSolo
 									disableClearable
 									noOptionsText='Ничего не найдено'
 									renderInput={params => (

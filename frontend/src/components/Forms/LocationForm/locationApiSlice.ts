@@ -1,5 +1,8 @@
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
+import type { IDepartment } from './types'
+import { toast } from 'react-toastify'
+import { IFetchError } from '@/app/types/error'
 
 type Location = {
 	id?: string
@@ -20,6 +23,27 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				{ type: 'Location', id: 'LAST' },
 				{ type: 'SI', id: 'DRAFT' },
 			],
+			onQueryStarted: (_arg, api) => {
+				try {
+					api.queryFulfilled
+				} catch (error) {
+					const fetchError = error as IFetchError
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
+
+		getDepartments: builder.query<{ data: IDepartment[] }, null>({
+			query: () => `${API.departments}/all`,
+			providesTags: [{ type: 'Departments', id: 'All' }],
+			onQueryStarted: (_arg, api) => {
+				try {
+					api.queryFulfilled
+				} catch (error) {
+					const fetchError = error as IFetchError
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
 		}),
 
 		createLocation: builder.mutation<string, Location>({
@@ -42,4 +66,5 @@ const locationApiSlice = apiSlice.injectEndpoints({
 	}),
 })
 
-export const { useGetLastLocationQuery, useCreateLocationMutation, useUpdateLocationMutation } = locationApiSlice
+export const { useGetLastLocationQuery, useGetDepartmentsQuery, useCreateLocationMutation, useUpdateLocationMutation } =
+	locationApiSlice
