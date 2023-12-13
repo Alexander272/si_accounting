@@ -1,24 +1,28 @@
-import { useEffect } from 'react'
+// import { useEffect } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 
 import { getSelectedItems, removeSelected } from '@/features/dataTable/dataTableSlice'
-import { useModal } from '@/features/modal/hooks/useModal'
+// import { useModal } from '@/features/modal/hooks/useModal'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
 import { VerificationForm } from '../VerificationForm/VerificationForm'
+// import { toast } from 'react-toastify'
 
 export const NewVerification = () => {
 	const selected = useAppSelector(getSelectedItems)
 
 	const dispatch = useAppDispatch()
 
-	const { closeModal } = useModal()
+	// const { closeModal } = useModal()
 
 	const { data } = useGetInstrumentByIdQuery(selected[0], { skip: !selected[0] })
 
-	useEffect(() => {
-		if (selected.length == 0) closeModal()
-	}, [closeModal, selected])
+	// useEffect(() => {
+	// 	if (selected.length == 0) {
+	// 		toast.error('Инструменты не выбраны', { toastId: 'ver_empty' })
+	// 		closeModal()
+	// 	}
+	// }, [closeModal, selected])
 
 	// const skipHandler = () => {
 	// 	dispatch(removeSelected(selected[0]))

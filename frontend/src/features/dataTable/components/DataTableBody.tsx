@@ -3,6 +3,7 @@ import { TableBody } from '@mui/material'
 
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useGetAllSIQuery } from '../siApiSlice'
+import { useContextMenu } from '../hooks/useContextMenu'
 import {
 	addSelected,
 	getSelectedItems,
@@ -12,6 +13,7 @@ import {
 	getTableSort,
 	removeSelected,
 } from '../dataTableSlice'
+import { ContextMenu } from './ContextMenu/ContextMenu'
 import { DataTableRow } from './DataTableRow'
 
 export const DataTableBody = () => {
@@ -25,11 +27,9 @@ export const DataTableBody = () => {
 
 	const dispatch = useAppDispatch()
 
-	const { data } = useGetAllSIQuery({ page, limit, sort, filter }, { pollingInterval: 5 * 60000 })
+	const { coordinates, isSelected, itemId, positionHandler } = useContextMenu()
 
-	// const openHandler = (id: string) => () => {
-	// 	console.log(id)
-	// }
+	const { data } = useGetAllSIQuery({ page, limit, sort, filter }, { pollingInterval: 5 * 60000 })
 
 	const selectHandler = useCallback(
 		(id: string, selected: boolean) => {
@@ -44,8 +44,24 @@ export const DataTableBody = () => {
 			{data?.data.map(d => {
 				const selected = selectedItems.includes(d.id)
 
-				return <DataTableRow key={d.id} data={d} selected={selected} onSelect={selectHandler} />
+				return (
+					<DataTableRow
+						key={d.id}
+						data={d}
+						selected={selected}
+						itemId={itemId}
+						onSelect={selectHandler}
+						positionHandler={positionHandler}
+					/>
+				)
 			})}
+
+			<ContextMenu
+				coordinates={coordinates}
+				isSelected={isSelected}
+				itemId={itemId}
+				positionHandler={positionHandler}
+			/>
 		</TableBody>
 	)
 }

@@ -17,6 +17,9 @@ import {
 import { useGetAllSIQuery, useLazyGetAllSIQuery } from '../../siApiSlice'
 import { toast } from 'react-toastify'
 import { IFetchError } from '@/app/types/error'
+import { CheckAllIcon } from '@/components/Icons/CheckAllIcon'
+import { DelayIcon } from '@/components/Icons/DelayIcon'
+import { CalendarIcon } from '@/components/Icons/CalendarIcon'
 
 export const FastChoose = () => {
 	const anchor = useRef<HTMLButtonElement | null>(null)
@@ -47,6 +50,7 @@ export const FastChoose = () => {
 	const selectOverdueHandler = async () => {
 		const filter: ISIFilter = {
 			field: 'nextVerificationDate',
+			fieldType: 'date',
 			compareType: 'less',
 			valueStart: dayjs().unix().toString(),
 			valueEnd: '',
@@ -58,6 +62,7 @@ export const FastChoose = () => {
 	const selectMonthHandler = async () => {
 		const filter: ISIFilter = {
 			field: 'nextVerificationDate',
+			fieldType: 'date',
 			compareType: 'period',
 			valueStart: dayjs().startOf('month').unix().toString(),
 			valueEnd: dayjs().endOf('month').unix().toString(),
@@ -125,17 +130,22 @@ export const FastChoose = () => {
 					},
 				}}
 			>
-				{/* //TODO сделать иконки для пунктов меню */}
 				<MenuItem onClick={selectAllHandler} sx={{ fontWeight: selected.length ? 'bold' : 'normal' }}>
-					<ListItemIcon>IC</ListItemIcon>
+					<ListItemIcon>
+						<CheckAllIcon fontSize={18} fill={'#474747'} />
+					</ListItemIcon>
 					{selected.length ? 'Отменить выбор' : 'Выбрать все'}
 				</MenuItem>
 				<MenuItem onClick={selectOverdueHandler}>
-					<ListItemIcon>IC</ListItemIcon>
+					<ListItemIcon>
+						<DelayIcon fontSize={20} fill={'#474747'} />
+					</ListItemIcon>
 					Все просроченные
 				</MenuItem>
 				<MenuItem onClick={selectMonthHandler}>
-					<ListItemIcon>IC</ListItemIcon>
+					<ListItemIcon>
+						<CalendarIcon fontSize={18} fill='#474747' />
+					</ListItemIcon>
 					Все за текущий месяц
 				</MenuItem>
 			</Menu>

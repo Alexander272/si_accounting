@@ -28,7 +28,10 @@ const instrumentApiSlice = apiSlice.injectEndpoints({
 				method: 'PUT',
 				body: data,
 			}),
-			invalidatesTags: [{ type: 'Instrument', id: 'ID' }],
+			invalidatesTags: [
+				{ type: 'Instrument', id: 'ID' },
+				{ type: 'SI', id: 'ALL' },
+			],
 		}),
 	}),
 })

@@ -14,8 +14,6 @@ export const useContextMenu = () => {
 		setCoordinates(coordinates)
 		setItemId(itemId)
 		setIsSelected(isSelected)
-
-		console.log('hook', coordinates)
 	}
 
 	return { coordinates, itemId, isSelected, positionHandler }

@@ -8,6 +8,7 @@ import { NewVerification } from '@/components/Forms/NewVerification/NewVerificat
 import { ModalTitles } from '@/constants/modalTitles'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
+import { UpdateInstrument } from '@/components/Forms/UpdateInstrument/UpdateInstrument'
 
 const Transition = forwardRef(function Transition(
 	props: TransitionProps & {
@@ -31,6 +32,7 @@ export const Modal = () => {
 				<DialogTitle color={'primary'}>
 					{selector == 'CreateDataItem' && ModalTitles.ADD_ITEM}
 					{selector == 'NewVerification' && ModalTitles.NEW_VERIFICATION}
+					{selector == 'EditInstrument' && ModalTitles.EDIT_ITEM}
 				</DialogTitle>
 
 				<IconButton onClick={closeModal} sx={{ lineHeight: '16px', mr: 2 }}>
@@ -40,6 +42,7 @@ export const Modal = () => {
 			<DialogContent sx={{ pt: 0 }}>
 				{selector == 'CreateDataItem' && <CreateDataItem />}
 				{selector == 'NewVerification' && <NewVerification />}
+				{selector == 'EditInstrument' && <UpdateInstrument />}
 			</DialogContent>
 		</Dialog>
 	)

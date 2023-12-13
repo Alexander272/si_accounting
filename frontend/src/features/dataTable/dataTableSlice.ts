@@ -9,11 +9,11 @@ interface IDataTableSlice {
 	sort?: ISISort
 	filter?: ISIFilter
 	selected: string[]
+	active?: string
 }
 
 const initialState: IDataTableSlice = {
 	page: 1,
-	//TODO вернуть лимит в 50
 	limit: 15, // 15, 30, 50, 100 доступные лимиты. 15 строк макс который влазит без прокрутки
 	sort: {
 		field: 'nextVerificationDate',
@@ -58,6 +58,10 @@ const dataTableSlice = createSlice({
 			else state.selected = []
 		},
 
+		setActive: (state, action: PayloadAction<string | undefined>) => {
+			state.active = action.payload
+		},
+
 		resetDataTableState: () => initialState,
 	},
 })
@@ -67,9 +71,10 @@ export const getTableLimit = (state: RootState) => state.dataTable.limit
 export const getTableSort = (state: RootState) => state.dataTable.sort
 export const getTableFilter = (state: RootState) => state.dataTable.filter
 export const getSelectedItems = (state: RootState) => state.dataTable.selected
+export const getActiveItem = (state: RootState) => state.dataTable.active
 
 export const dataTablePath = dataTableSlice.name
 export const dataTableReducer = dataTableSlice.reducer
 
-export const { setPage, setLimit, setSort, setFilters, addSelected, removeSelected, resetDataTableState } =
+export const { setPage, setLimit, setSort, setFilters, addSelected, removeSelected, setActive, resetDataTableState } =
 	dataTableSlice.actions

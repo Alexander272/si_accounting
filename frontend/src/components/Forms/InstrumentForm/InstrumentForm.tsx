@@ -27,12 +27,13 @@ const defaultValues: InstrumentFormType = {
 
 type Props = {
 	onSubmit: () => void
+	instrumentId?: string
 }
 
-export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit }) => {
+export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit, instrumentId = 'draft' }) => {
 	const methods = useForm<InstrumentFormType>({ defaultValues })
 
-	const { data, isFetching, isError } = useGetInstrumentByIdQuery('draft')
+	const { data, isFetching, isError } = useGetInstrumentByIdQuery(instrumentId)
 
 	const [create] = useCreateInstrumentMutation()
 	const [update] = useUpdateInstrumentMutation()

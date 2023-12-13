@@ -2,17 +2,26 @@ import { useRef, useState } from 'react'
 import { Button, ListItemIcon, Menu, MenuItem } from '@mui/material'
 
 import { useModal } from '@/features/modal/hooks/useModal'
+import { useAppSelector } from '@/hooks/redux'
+import { getSelectedItems } from '../../dataTableSlice'
+import { toast } from 'react-toastify'
+import { VerifyIcon } from '@/components/Icons/VerifyIcon'
+import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
+import { FileDownloadIcon } from '@/components/Icons/FileDownloadIcon'
 
 export const Tools = () => {
 	const anchor = useRef<HTMLButtonElement>(null)
 	const [open, setOpen] = useState(false)
 	const { openModal } = useModal()
 
+	const selected = useAppSelector(getSelectedItems)
+
 	const toggleHandler = () => setOpen(prev => !prev)
 
 	const verificationHandler = () => {
 		toggleHandler()
-		openModal('NewVerification')
+		if (!selected.length) toast.error('Инструменты не выбраны')
+		else openModal('NewVerification')
 	}
 
 	return (
@@ -65,15 +74,24 @@ export const Tools = () => {
 				}}
 			>
 				<MenuItem>
-					<ListItemIcon>IC</ListItemIcon> Добавить перемещение
+					<ListItemIcon>
+						<ExchangeIcon fontSize={18} fill={'#757575'} />
+					</ListItemIcon>
+					Добавить перемещение
 				</MenuItem>
 				<MenuItem onClick={verificationHandler}>
-					<ListItemIcon>IC</ListItemIcon> Добавить поверку
+					<ListItemIcon>
+						<VerifyIcon fontSize={18} fill={'#757575'} />
+					</ListItemIcon>
+					Добавить поверку
 				</MenuItem>
 				<MenuItem>
-					<ListItemIcon>IC</ListItemIcon> Создать график поверки
+					<ListItemIcon>
+						<FileDownloadIcon fontSize={20} fill={'#757575'} />
+					</ListItemIcon>
+					Создать график поверки
 				</MenuItem>
-				{/* // возможно надо будет выгружать в excel таблицы которая выводится на экран */}
+				{/* //TODO возможно надо будет выгружать в excel таблицу которая выводится на экран */}
 			</Menu>
 		</>
 	)
