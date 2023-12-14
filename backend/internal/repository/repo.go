@@ -24,6 +24,9 @@ type SI interface {
 type Department interface {
 	postgres.Department
 }
+type User interface {
+	postgres.User
+}
 
 type Repository struct {
 	Instrument
@@ -32,6 +35,7 @@ type Repository struct {
 	Location
 	SI
 	Department
+	User
 }
 
 func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
@@ -42,5 +46,6 @@ func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
 		Location:     postgres.NewLocationRepo(db),
 		SI:           postgres.NewSIRepo(db),
 		Department:   postgres.NewDepartmentRepo(db),
+		User:         postgres.NewUserRepo(db),
 	}
 }

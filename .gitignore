@@ -9,6 +9,7 @@
 /storage
 /build
 */ssl
+/backend/files
 
 # Logs
 logs

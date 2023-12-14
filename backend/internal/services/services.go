@@ -14,6 +14,7 @@ type Services struct {
 	Location
 	SI
 	Department
+	User
 }
 
 type Deps struct {
@@ -32,6 +33,7 @@ func NewServices(deps Deps) *Services {
 	si := NewSIService(deps.Repos.SI, instrument, verification, location)
 
 	department := NewDepartmentService(deps.Repos.Department)
+	user := NewUserService(deps.Repos.User)
 
 	return &Services{
 		Instrument:   instrument,
@@ -40,5 +42,6 @@ func NewServices(deps Deps) *Services {
 		Location:     location,
 		SI:           si,
 		Department:   department,
+		User:         user,
 	}
 }
