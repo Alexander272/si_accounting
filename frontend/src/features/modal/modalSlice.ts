@@ -1,7 +1,7 @@
 import { RootState } from '@/app/store'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-export type ModalSelectors = 'CreateDataItem' | 'NewVerification' | 'EditInstrument'
+export type ModalSelectors = 'CreateDataItem' | 'NewVerification' | 'EditInstrument' | 'ChangeLocation'
 
 interface IModalState {
 	open: boolean

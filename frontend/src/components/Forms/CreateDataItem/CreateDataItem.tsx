@@ -23,7 +23,6 @@ export const CreateDataItem = () => {
 
 	const nextHandler = async () => {
 		if (active + 1 == steps.length) {
-			// TODO отправить запрос на сохранение всех черновиков
 			await save(data?.data.id || '').unwrap()
 		}
 		setActive(prev => (prev + 1) % steps.length)
@@ -38,7 +37,6 @@ export const CreateDataItem = () => {
 
 			{active == 0 && (
 				<InstrumentForm onSubmit={nextHandler}>
-					{/* //TODO надо как-то понимать заполнял ли пользователь форму или нет (чтобы не сохранять два раза одно и тоже) */}
 					<Button onClick={prevHandler} variant='outlined' fullWidth disabled sx={{ borderRadius: 3 }}>
 						Назад
 					</Button>

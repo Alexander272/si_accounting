@@ -79,12 +79,14 @@ export const Tools = () => {
 					</ListItemIcon>
 					Добавить перемещение
 				</MenuItem>
+
 				<MenuItem onClick={verificationHandler}>
 					<ListItemIcon>
 						<VerifyIcon fontSize={18} fill={'#757575'} />
 					</ListItemIcon>
 					Добавить поверку
 				</MenuItem>
+
 				<MenuItem>
 					<ListItemIcon>
 						<FileDownloadIcon fontSize={20} fill={'#757575'} />

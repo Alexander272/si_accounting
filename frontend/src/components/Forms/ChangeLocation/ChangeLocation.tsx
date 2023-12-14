@@ -1,17 +1,20 @@
 import { Box, Button, Typography } from '@mui/material'
 
 import { getActiveItem, getSelectedItems, removeSelected } from '@/features/dataTable/dataTableSlice'
+import { useModal } from '@/features/modal/hooks/useModal'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
-import { VerificationForm } from '../VerificationForm/VerificationForm'
+import { LocationForm } from '../LocationForm/LocationForm'
 
-export const NewVerification = () => {
+export const ChangeLocation = () => {
 	const active = useAppSelector(getActiveItem)
 	const selected = useAppSelector(getSelectedItems)
 
 	const dispatch = useAppDispatch()
 
 	const { data } = useGetInstrumentByIdQuery(active || selected[0], { skip: !active && !selected[0] })
+
+	const { closeModal } = useModal()
 
 	const saveHandler = () => {
 		dispatch(removeSelected(selected[0]))
@@ -24,14 +27,11 @@ export const NewVerification = () => {
 				{data?.data.name}
 			</Typography>
 
-			<VerificationForm instrumentId={active || selected[0]} onSubmit={saveHandler}>
-				{/* <Button onClick={skipHandler} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
-					Пропустить
-				</Button> */}
-				<Button variant='contained' type='submit' fullWidth sx={{ borderRadius: 3 }}>
-					Сохранить
+			<LocationForm onSubmit={saveHandler}>
+				<Button onClick={closeModal} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
+					Отмена
 				</Button>
-			</VerificationForm>
+			</LocationForm>
 		</Box>
 	)
 }

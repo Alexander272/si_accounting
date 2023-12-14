@@ -1,8 +1,9 @@
+import { Button } from '@mui/material'
+
 import { getActiveItem } from '@/features/dataTable/dataTableSlice'
+import { useModal } from '@/features/modal/hooks/useModal'
 import { useAppSelector } from '@/hooks/redux'
 import { InstrumentForm } from '../InstrumentForm/InstrumentForm'
-import { useModal } from '@/features/modal/hooks/useModal'
-import { Button } from '@mui/material'
 
 export const UpdateInstrument = () => {
 	const active = useAppSelector(getActiveItem)

@@ -3,12 +3,13 @@ import { Dialog, DialogContent, DialogTitle, IconButton, Slide, Stack } from '@m
 import type { TransitionProps } from '@mui/material/transitions'
 
 import { useAppSelector } from '@/hooks/redux'
+import { ModalTitles } from '@/constants/modalTitles'
 import { CreateDataItem } from '@/components/Forms/CreateDataItem/CreateDataItem'
 import { NewVerification } from '@/components/Forms/NewVerification/NewVerification'
-import { ModalTitles } from '@/constants/modalTitles'
+import { UpdateInstrument } from '@/components/Forms/UpdateInstrument/UpdateInstrument'
+import { ChangeLocation } from '@/components/Forms/ChangeLocation/ChangeLocation'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
-import { UpdateInstrument } from '@/components/Forms/UpdateInstrument/UpdateInstrument'
 
 const Transition = forwardRef(function Transition(
 	props: TransitionProps & {
@@ -33,6 +34,7 @@ export const Modal = () => {
 					{selector == 'CreateDataItem' && ModalTitles.ADD_ITEM}
 					{selector == 'NewVerification' && ModalTitles.NEW_VERIFICATION}
 					{selector == 'EditInstrument' && ModalTitles.EDIT_ITEM}
+					{selector == 'ChangeLocation' && ModalTitles.NEW_MOVEMENT}
 				</DialogTitle>
 
 				<IconButton onClick={closeModal} sx={{ lineHeight: '16px', mr: 2 }}>
@@ -43,6 +45,7 @@ export const Modal = () => {
 				{selector == 'CreateDataItem' && <CreateDataItem />}
 				{selector == 'NewVerification' && <NewVerification />}
 				{selector == 'EditInstrument' && <UpdateInstrument />}
+				{selector == 'ChangeLocation' && <ChangeLocation />}
 			</DialogContent>
 		</Dialog>
 	)

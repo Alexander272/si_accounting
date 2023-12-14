@@ -18,18 +18,20 @@ const defaultValues: LocationFormType = {
 
 type Props = {
 	onSubmit: () => void
+	instrumentId?: string
 }
 
-export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit }) => {
+export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit, instrumentId = 'draft' }) => {
 	const methods = useForm<LocationFormType>({ defaultValues })
 
-	const { data: instrument } = useGetInstrumentByIdQuery('draft')
+	const { data: instrument } = useGetInstrumentByIdQuery(instrumentId)
 
 	// const { data } = useGetLastLocationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
 
 	const { data: departments } = useGetDepartmentsQuery(null)
 
 	// const departments = [{ id: '1', name: 'test', leader: 'lead' }]
+	//TODO пользователи должно быть привязаны к подразделениям
 	const users = [{ id: '1', name: 'user', departmentId: '1' }]
 
 	const [create] = useCreateLocationMutation()
@@ -39,6 +41,9 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 	// 		methods.reset({ ...data.data, receiptDate: dayjs(data.data.receiptDate, 'DD.MM.YYYY') })
 	// 	}
 	// }, [data, methods])
+
+	//TODO надо определять это создание нового инструмента или нет
+	// сделать возможность поставить инструмент в резерв (для новых инструментов)
 
 	const options = {
 		department: departments?.data || [],
@@ -127,7 +132,6 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit 
 							)}
 						/>
 					)
-					break
 				default:
 					break
 			}

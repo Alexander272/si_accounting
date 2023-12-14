@@ -6,12 +6,13 @@ import type { Coordinates } from '../hooks/useContextMenu'
 import type { IDataItem } from '../types/data'
 import { DataTableCell } from './DataTableCell'
 import { HeadCells } from './DataTableHead/columns'
-// import { useContextMenu } from '../hooks/useContextMenu'
-// import { useSingleAndDoubleClick } from '../utils/clicks'
 
 const RowColors = {
+	overdue: '#ff3f3f',
 	deadline: '#ff9393',
 	active: '#dce6ff',
+	moved: '#eee',
+	reverse: '#fff4cb',
 }
 
 type Props = {
@@ -23,8 +24,6 @@ type Props = {
 }
 
 export const DataTableRow: FC<Props> = memo(({ data, selected, itemId, onSelect, positionHandler }) => {
-	// const { positionHandler } = useContextMenu()
-
 	const selectHandler = () => {
 		onSelect(data.id, selected)
 	}
@@ -34,15 +33,19 @@ export const DataTableRow: FC<Props> = memo(({ data, selected, itemId, onSelect,
 		positionHandler({ mouseX: event.clientX + 2, mouseY: event.clientY - 6 }, data.id, selected)
 	}
 
-	// const clickHandler = useSingleAndDoubleClick(selectHandler, openHandler)
-
 	//TODO подумать как выделять строки (цвета когда надо сдать, просроченные и тд)
 
 	const getRowColor = () => {
+		if (itemId == data.id) return RowColors['active']
+
 		const deadline = dayjs().add(15, 'd').isAfter(dayjs(data.nextVerificationDate, 'DD.MM.YYYY'))
 		if (deadline) return RowColors['deadline']
 
-		if (itemId == data.id) return RowColors['active']
+		const overdue = dayjs().isAfter(dayjs(data.nextVerificationDate, 'DD.MM.YYYY'))
+		if (overdue) return RowColors['overdue']
+
+		if (data.place == 'Перемещение') return RowColors['moved']
+		if (data.place == 'Резерв') return RowColors['reverse']
 
 		return 'transparent'
 	}
@@ -50,10 +53,8 @@ export const DataTableRow: FC<Props> = memo(({ data, selected, itemId, onSelect,
 	return (
 		<TableRow
 			key={data.id}
-			// onClick={clickHandler}
 			onClick={selectHandler}
 			onContextMenu={openHandler}
-			// onDoubleClick={openHandler(d.id)}
 			selected={selected}
 			hover
 			sx={{

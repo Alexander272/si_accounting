@@ -15,8 +15,8 @@ import {
 } from '@mui/material'
 import { toast } from 'react-toastify'
 
-import type { IDocument } from '@/features/files/types/file'
 import type { IFetchError } from '@/app/types/error'
+import type { IDocument } from '@/features/files/types/file'
 import { convertFileSize } from '@/features/files/utils/convertFileSize'
 import { useDeleteFileMutation, useGetFileListQuery, useUploadFilesMutation } from '@/features/files/filesApiSlice'
 import { AcceptedFiles } from '@/constants/accept'
@@ -33,10 +33,6 @@ import Button from './styled/Button'
 type Props = {
 	instrumentId: string
 	verificationId: string
-	// documents?: IDocument[]
-	// //TODO а нужно ли мне это тут
-	// files?: File[]
-	// onChange?: (files: File[]) => void
 }
 
 const Types = {
@@ -78,14 +74,10 @@ export const Upload: FC<Props> = ({ verificationId, instrumentId }) => {
 			acceptedFiles.push(file)
 		}
 		setFiles(acceptedFiles)
-		// if (!verificationId && onChange) onChange(acceptedFiles)
-		// else
 		void uploadFiles(acceptedFiles)
 	}
 
 	const uploadFiles = async (files: File[]) => {
-		// if (!verificationId) return
-		// if (!verificationId) verificationId = 'temp'
 		const data = new FormData()
 		files.forEach((file: File) => data.append('files', file))
 		data.append('instrumentId', instrumentId)
@@ -146,20 +138,7 @@ export const Upload: FC<Props> = ({ verificationId, instrumentId }) => {
 					</Box>
 				</Tooltip>
 
-				{/* <Typography color={'#828282'}>
-					Допустимые форматы: .doc, .docx, .xls, .xlsx, .pdf, .png, .jpeg, .jpg, .csv
-				</Typography> */}
-
 				<List dense disablePadding sx={{ mt: '0!important' }}>
-					{/* {documents.map(d => (
-						<ListItem key={d.id} sx={{ paddingY: 0, pl: 1 }}>
-							<ListItemIcon sx={{ minWidth: 40 }}>
-								{/* //TODO заменять иконку в соответствии с типом файла 
-								<PdfIcon />
-							</ListItemIcon>
-							<ListItemText primary={d.label} secondary={convertFileSize(d.size, 2) + ' МБ'} />
-						</ListItem>
-					))} */}
 					{(data?.data || []).map(d => (
 						<ListItem key={d.id} sx={{ paddingY: 0, pl: 1 }}>
 							<ListItemIcon sx={{ minWidth: 40 }}>{Types[d.type as 'doc']}</ListItemIcon>

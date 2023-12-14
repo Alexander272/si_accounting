@@ -66,7 +66,6 @@ export const DataTableHead = () => {
 								</IconButton>
 							</Tooltip>
 
-							{/* //TODO переделать фильтр по месту нахождения (сделать список с чекбоксами) */}
 							<Filter cell={c} fieldId={c.id} />
 						</Stack>
 					</TableCell>

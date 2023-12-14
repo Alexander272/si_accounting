@@ -2,6 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { RootState } from '@/app/store'
 import { IDataItem, ISIFilter, ISISort } from './types/data'
+import { changeModalIsOpen } from '../modal/modalSlice'
 
 interface IDataTableSlice {
 	page: number
@@ -64,6 +65,10 @@ const dataTableSlice = createSlice({
 
 		resetDataTableState: () => initialState,
 	},
+	extraReducers: builder =>
+		builder.addCase(changeModalIsOpen, (state, action) => {
+			if (!action.payload) state.active = undefined
+		}),
 })
 
 export const getTablePage = (state: RootState) => state.dataTable.page
