@@ -76,16 +76,16 @@ export const VerificationFields: IField<KeysOfVerification>[] = [
 	{ key: 'verificationFile', label: 'Файл', type: 'file' },
 ]
 
-export type KeysOfLocation = 'department' | 'person' | 'receiptDate'
+export type KeysOfLocation = 'department' | 'person' | 'dateOfIssue'
 
 export type LocationFormType = {
 	department: string
 	person: string
-	receiptDate: Dayjs
+	dateOfIssue: Dayjs
 } & { id?: string }
 
 export const LocationFields: IField<KeysOfLocation>[] = [
 	{ key: 'department', label: 'Подразделение', type: 'list', rules: { required: true } },
 	{ key: 'person', label: 'Лицо держащее СИ', type: 'list', rules: { required: true } },
-	{ key: 'receiptDate', label: 'дата выдачи', type: 'date', rules: { required: true } },
+	{ key: 'dateOfIssue', label: 'дата выдачи', type: 'date', rules: { required: true } },
 ]

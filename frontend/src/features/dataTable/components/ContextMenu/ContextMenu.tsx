@@ -61,6 +61,14 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, positionHandler })
 				</ListItemIcon>
 				Добавить перемещение
 			</MenuItem>
+
+			<MenuItem disabled>
+				<ListItemIcon>IC</ListItemIcon>История поверок
+			</MenuItem>
+
+			<MenuItem disabled>
+				<ListItemIcon>IC</ListItemIcon>История перемещений
+			</MenuItem>
 		</Menu>
 	)
 }

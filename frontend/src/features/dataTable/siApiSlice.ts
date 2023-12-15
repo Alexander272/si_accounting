@@ -15,7 +15,7 @@ const SIApiSlice = apiSlice.injectEndpoints({
 				params: new URLSearchParams([
 					// params.page && params.page != 0 ? ['page', params.page.toString()] : null,
 					...(params.page && params.page != 1 ? [['page', params.page.toString()]] : []),
-					...(params.limit && params.limit != 50 ? [['count', params.limit.toString()]] : []),
+					...(params.limit && params.limit != 15 ? [['count', params.limit.toString()]] : []),
 					...(params.sort
 						? Object.keys(params.sort).map(k => [`s-${k}`, params.sort![k as keyof ISISort]])
 						: []),

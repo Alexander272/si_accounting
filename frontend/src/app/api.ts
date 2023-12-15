@@ -18,4 +18,5 @@ export const API = {
 		save: 'si/save',
 	},
 	departments: '/departments',
+	employees: '/employees',
 }

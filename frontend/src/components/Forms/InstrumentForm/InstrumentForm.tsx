@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren, useEffect } from 'react'
-import { LinearProgress, Stack, TextField } from '@mui/material'
+import { Box, LinearProgress, Stack, TextField } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import dayjs from 'dayjs'
 import { toast } from 'react-toastify'
@@ -94,11 +94,17 @@ export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmi
 	}
 
 	return (
-		<Stack component={'form'} onSubmit={submitHandler} paddingX={2} mt={4}>
-			{isFetching && <LinearProgress />}
+		<Stack component={'form'} onSubmit={submitHandler} paddingX={2} mt={2}>
+			{isFetching && (
+				<Box height={0}>
+					<LinearProgress />
+				</Box>
+			)}
 
 			<FormProvider {...methods}>
-				<Stack spacing={2}>{renderFields()}</Stack>
+				<Stack spacing={2} mt={3}>
+					{renderFields()}
+				</Stack>
 				<Stack direction={'row'} spacing={3} mt={4}>
 					{children}
 				</Stack>

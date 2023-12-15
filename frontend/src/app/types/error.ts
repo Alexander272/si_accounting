@@ -4,3 +4,13 @@ export interface IFetchError {
 		code: string
 	}
 }
+
+export interface IBaseFetchError {
+	error: {
+		data: {
+			message: string
+			code: string
+		}
+	}
+	status: number
+}

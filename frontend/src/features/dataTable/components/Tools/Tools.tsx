@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react'
 import { Button, ListItemIcon, Menu, MenuItem } from '@mui/material'
+import { toast } from 'react-toastify'
 
 import { useModal } from '@/features/modal/hooks/useModal'
+import type { ModalSelectors } from '@/features/modal/modalSlice'
 import { useAppSelector } from '@/hooks/redux'
 import { getSelectedItems } from '../../dataTableSlice'
-import { toast } from 'react-toastify'
 import { VerifyIcon } from '@/components/Icons/VerifyIcon'
 import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
 import { FileDownloadIcon } from '@/components/Icons/FileDownloadIcon'
@@ -18,10 +19,16 @@ export const Tools = () => {
 
 	const toggleHandler = () => setOpen(prev => !prev)
 
-	const verificationHandler = () => {
+	// const verificationHandler = () => {
+	// 	toggleHandler()
+	// 	if (!selected.length) toast.error('Инструменты не выбраны')
+	// 	else openModal('NewVerification')
+	// }
+
+	const modalHandler = (selector: ModalSelectors) => () => {
 		toggleHandler()
 		if (!selected.length) toast.error('Инструменты не выбраны')
-		else openModal('NewVerification')
+		else openModal(selector)
 	}
 
 	return (
@@ -73,14 +80,14 @@ export const Tools = () => {
 					},
 				}}
 			>
-				<MenuItem>
+				<MenuItem onClick={modalHandler('ChangeLocation')}>
 					<ListItemIcon>
 						<ExchangeIcon fontSize={18} fill={'#757575'} />
 					</ListItemIcon>
 					Добавить перемещение
 				</MenuItem>
 
-				<MenuItem onClick={verificationHandler}>
+				<MenuItem onClick={modalHandler('NewVerification')}>
 					<ListItemIcon>
 						<VerifyIcon fontSize={18} fill={'#757575'} />
 					</ListItemIcon>

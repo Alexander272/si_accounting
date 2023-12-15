@@ -1,16 +1,17 @@
+import { toast } from 'react-toastify'
+
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
-import type { IDepartment } from './types'
-import { toast } from 'react-toastify'
-import { IFetchError } from '@/app/types/error'
+import type { IBaseFetchError } from '@/app/types/error'
+import type { IDepartment, IEmployee } from './types'
 
 type Location = {
 	id?: string
 	instrumentId: string
 	department: string
 	person: string
-	receiptDate: string
-	deliveryDate: string
+	dateOfIssue: string
+	dateOfReceiving: string
 	status: string
 }
 
@@ -27,7 +28,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				try {
 					api.queryFulfilled
 				} catch (error) {
-					const fetchError = error as IFetchError
+					const fetchError = (error as IBaseFetchError).error
 					toast.error(fetchError.data.message, { autoClose: false })
 				}
 			},
@@ -36,11 +37,24 @@ const locationApiSlice = apiSlice.injectEndpoints({
 		getDepartments: builder.query<{ data: IDepartment[] }, null>({
 			query: () => `${API.departments}/all`,
 			providesTags: [{ type: 'Departments', id: 'All' }],
-			onQueryStarted: (_arg, api) => {
+			onQueryStarted: async (_arg, api) => {
 				try {
-					api.queryFulfilled
+					await api.queryFulfilled
 				} catch (error) {
-					const fetchError = error as IFetchError
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
+
+		getEmployees: builder.query<{ data: IEmployee[] }, string>({
+			query: departmentId => `${API.employees}/${departmentId}`,
+			providesTags: (_result, _error, arg) => [{ type: 'Employees', id: arg }],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
 					toast.error(fetchError.data.message, { autoClose: false })
 				}
 			},
@@ -66,5 +80,10 @@ const locationApiSlice = apiSlice.injectEndpoints({
 	}),
 })
 
-export const { useGetLastLocationQuery, useGetDepartmentsQuery, useCreateLocationMutation, useUpdateLocationMutation } =
-	locationApiSlice
+export const {
+	useGetLastLocationQuery,
+	useGetDepartmentsQuery,
+	useGetEmployeesQuery,
+	useCreateLocationMutation,
+	useUpdateLocationMutation,
+} = locationApiSlice

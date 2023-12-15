@@ -17,7 +17,9 @@ export const ChangeLocation = () => {
 	const { closeModal } = useModal()
 
 	const saveHandler = () => {
-		dispatch(removeSelected(selected[0]))
+		if (active) closeModal()
+		else dispatch(removeSelected(selected[0]))
+		if (selected.length == 1) closeModal()
 	}
 
 	return (
@@ -27,9 +29,12 @@ export const ChangeLocation = () => {
 				{data?.data.name}
 			</Typography>
 
-			<LocationForm onSubmit={saveHandler}>
+			<LocationForm onSubmit={saveHandler} instrumentId={active || selected[0]}>
 				<Button onClick={closeModal} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
 					Отмена
+				</Button>
+				<Button type='submit' variant='contained' fullWidth sx={{ borderRadius: 3 }}>
+					Сохранить
 				</Button>
 			</LocationForm>
 		</Box>
