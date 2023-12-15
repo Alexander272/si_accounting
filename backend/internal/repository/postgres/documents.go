@@ -22,7 +22,7 @@ func NewDocumentsRepo(db *sqlx.DB) *DocumentsRepo {
 type Documents interface {
 	Get(context.Context, models.GetDocumentsDTO) ([]models.Document, error)
 	CreateSeveral(context.Context, []models.Document) error
-	UpdatePath(context.Context, models.PathParts) error
+	UpdatePath(context.Context, models.PathParts) (int64, error)
 	DeleteById(context.Context, string) error
 }
 
@@ -72,17 +72,23 @@ func (r *DocumentsRepo) CreateSeveral(ctx context.Context, docs []models.Documen
 	return nil
 }
 
-func (r *DocumentsRepo) UpdatePath(ctx context.Context, req models.PathParts) error {
-	query := fmt.Sprintf(`UPDATE %s SET verification_id=$1, path=REPLACE(path, "temp", $1)
+func (r *DocumentsRepo) UpdatePath(ctx context.Context, req models.PathParts) (int64, error) {
+	query := fmt.Sprintf(`UPDATE %s SET verification_id=$1::uuid, path=REPLACE(path, 'temp', $1::text)
 		WHERE verification_id IS NULL AND instrument_id=$2`,
 		DocumentsTable,
 	)
 
-	_, err := r.db.Exec(query, req.VerificationId, req.InstrumentId)
+	res, err := r.db.Exec(query, req.VerificationId, req.InstrumentId)
 	if err != nil {
-		return fmt.Errorf("failed to execute query. error: %w", err)
+		return 0, fmt.Errorf("failed to execute query. error: %w", err)
 	}
-	return nil
+
+	count, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get number of rows affected. error: %w", err)
+	}
+
+	return count, nil
 }
 
 func (r *DocumentsRepo) DeleteById(ctx context.Context, id string) error {

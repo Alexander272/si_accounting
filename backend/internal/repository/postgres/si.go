@@ -84,7 +84,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, 
 	totalQuery := fmt.Sprintf(`SELECT count(name) AS total FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN department || ' ('|| person ||')' WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place 
-			FROM %s WHERE instrument_id=i.id ORDER BY receipt_date LIMIT 1) as m ON TRUE
+			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC LIMIT 1) as m ON TRUE
 		WHERE i.status='%s' %s`,
 		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve,
 		SIMovementTable, constants.InstrumentStatusWork, filter,
@@ -99,7 +99,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, 
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN department || ' ('|| person ||')' WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place 
-			FROM %s WHERE instrument_id=i.id ORDER BY receipt_date LIMIT 1) as m ON TRUE
+			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC LIMIT 1) as m ON TRUE
 		WHERE i.status='%s' %s %s LIMIT $%d OFFSET $%d`,
 		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable, constants.InstrumentStatusWork,
 		filter, order, count, count+1,

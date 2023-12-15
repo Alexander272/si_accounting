@@ -6,11 +6,11 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/employees"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/instrument"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/location"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/verification"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/users"
 	"github.com/gin-gonic/gin"
 )
 
@@ -54,7 +54,7 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	location.Register(siGroup, h.services.Location)
 
 	departments.Register(v1, h.services.Department)
-	users.Register(v1, h.services.User)
+	employees.Register(v1, h.services.Employee)
 
 	// 	criterionsGroup := v1.Group("/criterions", h.middleware.VerifyToken, h.middleware.CheckPermissions)
 	// 	criterions.Register(criterionsGroup, h.services.Criterions, botApi)

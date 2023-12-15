@@ -124,16 +124,20 @@ func (s *DocumentsService) SaveUploadedFile(file *multipart.FileHeader, dst stri
 }
 
 func (s *DocumentsService) ChangePath(ctx context.Context, req models.PathParts) error {
-	if err := s.repo.UpdatePath(ctx, req); err != nil {
+	count, err := s.repo.UpdatePath(ctx, req)
+	if err != nil {
 		return fmt.Errorf("failed to update path documents. error: %w", err)
 	}
 
-	newPath := path.Join(s.path, req.InstrumentId, req.VerificationId)
-	srcPath := path.Join(s.path, req.InstrumentId, "temp")
+	if count > 0 {
+		newPath := path.Join(s.path, req.InstrumentId, req.VerificationId)
+		srcPath := path.Join(s.path, req.InstrumentId, "temp")
 
-	if err := os.Rename(srcPath, newPath); err != nil {
-		return fmt.Errorf("failed to move files. error: %w", err)
+		if err := os.Rename(srcPath, newPath); err != nil {
+			return fmt.Errorf("failed to move files. error: %w", err)
+		}
 	}
+
 	return nil
 }
 

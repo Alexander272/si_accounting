@@ -1,4 +1,4 @@
-package users
+package employees
 
 import (
 	"net/http"
@@ -9,29 +9,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserHandlers struct {
-	service services.User
+type EmployeeHandlers struct {
+	service services.Employee
 }
 
-func NewUserHandlers(service services.User) *UserHandlers {
-	return &UserHandlers{
+func NewEmployeeHandlers(service services.Employee) *EmployeeHandlers {
+	return &EmployeeHandlers{
 		service: service,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.User) {
-	handlers := NewUserHandlers(service)
+func Register(api *gin.RouterGroup, service services.Employee) {
+	handlers := NewEmployeeHandlers(service)
 
-	users := api.Group("/users")
+	employees := api.Group("/employees")
 	{
-		users.GET("/:departmentId", handlers.GetByDepartment)
-		users.POST("", handlers.Create)
-		users.PUT("/:id", handlers.Update)
-		users.DELETE("/:id", handlers.Delete)
+		employees.GET("/:departmentId", handlers.GetByDepartment)
+		employees.POST("", handlers.Create)
+		employees.PUT("/:id", handlers.Update)
+		employees.DELETE("/:id", handlers.Delete)
 	}
 }
 
-func (h *UserHandlers) GetByDepartment(c *gin.Context) {
+func (h *EmployeeHandlers) GetByDepartment(c *gin.Context) {
 	departmentId := c.Param("departmentId")
 	if departmentId == "" {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id подразделения не задан")
@@ -48,8 +48,8 @@ func (h *UserHandlers) GetByDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DataResponse{Data: users})
 }
 
-func (h *UserHandlers) Create(c *gin.Context) {
-	var dto models.WriteUserDTO
+func (h *EmployeeHandlers) Create(c *gin.Context) {
+	var dto models.WriteEmployeeDTO
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
@@ -64,14 +64,14 @@ func (h *UserHandlers) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Пользователь создан"})
 }
 
-func (h *UserHandlers) Update(c *gin.Context) {
+func (h *EmployeeHandlers) Update(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id пользователя не задан")
 		return
 	}
 
-	var dto models.WriteUserDTO
+	var dto models.WriteEmployeeDTO
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
@@ -87,7 +87,7 @@ func (h *UserHandlers) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные пользователя обновлены"})
 }
 
-func (h *UserHandlers) Delete(c *gin.Context) {
+func (h *EmployeeHandlers) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id пользователя не задан")

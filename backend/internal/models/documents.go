@@ -1,6 +1,8 @@
 package models
 
-import "mime/multipart"
+import (
+	"mime/multipart"
+)
 
 type Document struct {
 	Id             string `json:"id" db:"id"`
@@ -33,4 +35,8 @@ type DeleteDocumentsDTO struct {
 	InstrumentId   string
 	VerificationId string
 	Filename       string
+}
+
+type UpdateCount struct {
+	VerificationId string `db:"verification_id"`
 }

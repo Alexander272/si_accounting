@@ -9,55 +9,55 @@ import (
 	"golang.org/x/net/context"
 )
 
-type UserRepo struct {
+type EmployeeRepo struct {
 	db *sqlx.DB
 }
 
-func NewUserRepo(db *sqlx.DB) *UserRepo {
-	return &UserRepo{
+func NewEmployeeRepo(db *sqlx.DB) *EmployeeRepo {
+	return &EmployeeRepo{
 		db: db,
 	}
 }
 
-type User interface {
-	GetByDepartment(context.Context, string) ([]models.User, error)
-	Create(context.Context, models.WriteUserDTO) error
-	Update(context.Context, models.WriteUserDTO) error
+type Employee interface {
+	GetByDepartment(context.Context, string) ([]models.Employee, error)
+	Create(context.Context, models.WriteEmployeeDTO) error
+	Update(context.Context, models.WriteEmployeeDTO) error
 	Delete(context.Context, string) error
 }
 
-func (r *UserRepo) GetByDepartment(ctx context.Context, departmentId string) (users []models.User, err error) {
-	query := fmt.Sprintf(`SELECT id, name, most_id FROM %s WHERE department_id=$1`, UserTable)
+func (r *EmployeeRepo) GetByDepartment(ctx context.Context, departmentId string) (employees []models.Employee, err error) {
+	query := fmt.Sprintf(`SELECT id, name, most_id FROM %s WHERE department_id=$1`, EmployeeTable)
 
-	if err := r.db.Select(&users, query, departmentId); err != nil {
+	if err := r.db.Select(&employees, query, departmentId); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
-	return users, nil
+	return employees, nil
 }
 
-func (r *UserRepo) Create(ctx context.Context, user models.WriteUserDTO) error {
-	query := fmt.Sprintf(`INSERT INTO %s(id, name, department_id, most_id) VALUES ($1, $2, $3, $4)`, UserTable)
+func (r *EmployeeRepo) Create(ctx context.Context, employee models.WriteEmployeeDTO) error {
+	query := fmt.Sprintf(`INSERT INTO %s(id, name, department_id, most_id) VALUES ($1, $2, $3, $4)`, EmployeeTable)
 	id := uuid.New()
 
-	_, err := r.db.Exec(query, id, user.Name, user.DepartmentId, user.MattermostId)
+	_, err := r.db.Exec(query, id, employee.Name, employee.DepartmentId, employee.MattermostId)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return nil
 }
 
-func (r *UserRepo) Update(ctx context.Context, user models.WriteUserDTO) error {
-	query := fmt.Sprintf(`UPDATE %s SET name=$1, department_id=$2, most_id=$3 WHERE id=$4`, UserTable)
+func (r *EmployeeRepo) Update(ctx context.Context, employee models.WriteEmployeeDTO) error {
+	query := fmt.Sprintf(`UPDATE %s SET name=$1, department_id=$2, most_id=$3 WHERE id=$4`, EmployeeTable)
 
-	_, err := r.db.Exec(query, user.Name, user.DepartmentId, user.MattermostId, user.Id)
+	_, err := r.db.Exec(query, employee.Name, employee.DepartmentId, employee.MattermostId, employee.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return nil
 }
 
-func (r *UserRepo) Delete(ctx context.Context, id string) error {
-	query := fmt.Sprintf("DELETE FROM %s WHERE id=$1", UserTable)
+func (r *EmployeeRepo) Delete(ctx context.Context, id string) error {
+	query := fmt.Sprintf("DELETE FROM %s WHERE id=$1", EmployeeTable)
 
 	_, err := r.db.Exec(query, id)
 	if err != nil {

@@ -6,5 +6,5 @@ const (
 	SIMovementTable   = "si_movement_history"
 	DocumentsTable    = "documents"
 	DepartmentTable   = "departments"
-	UserTable         = "users"
+	EmployeeTable     = "employee"
 )

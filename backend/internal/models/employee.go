@@ -1,6 +1,6 @@
 package models
 
-type User struct {
+type Employee struct {
 	Id string `json:"id" db:"id"`
 	// DepartmentId только для db
 	Name string `json:"name" db:"name"`
@@ -10,7 +10,7 @@ type User struct {
 	MattermostId       string   `json:"mattermostId" db:"most_id"` //TODO возможно на клиенте это мне не нужно будет
 }
 
-type WriteUserDTO struct {
+type WriteEmployeeDTO struct {
 	Id           string `json:"id"`
 	Name         string `json:"name"`
 	DepartmentId string `json:"departmentId"`

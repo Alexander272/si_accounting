@@ -53,7 +53,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 
 	limit, err := strconv.Atoi(count)
 	if err != nil {
-		params.Page.Limit = 50
+		params.Page.Limit = 15
 	} else {
 		params.Page.Limit = limit
 

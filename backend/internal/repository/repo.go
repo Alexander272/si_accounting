@@ -24,8 +24,8 @@ type SI interface {
 type Department interface {
 	postgres.Department
 }
-type User interface {
-	postgres.User
+type Employee interface {
+	postgres.Employee
 }
 
 type Repository struct {
@@ -35,7 +35,7 @@ type Repository struct {
 	Location
 	SI
 	Department
-	User
+	Employee
 }
 
 func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
@@ -46,6 +46,6 @@ func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
 		Location:     postgres.NewLocationRepo(db),
 		SI:           postgres.NewSIRepo(db),
 		Department:   postgres.NewDepartmentRepo(db),
-		User:         postgres.NewUserRepo(db),
+		Employee:     postgres.NewEmployeeRepo(db),
 	}
 }
