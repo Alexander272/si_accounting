@@ -28,6 +28,22 @@ type Employee interface {
 	postgres.Employee
 }
 
+type Role interface {
+	postgres.Role
+}
+type ApiPaths interface {
+	postgres.Api
+}
+type MenuItem interface {
+	postgres.MenuItem
+}
+type MenuWithApi interface {
+	postgres.MenuWithApi
+}
+type Menu interface {
+	postgres.Menu
+}
+
 type Repository struct {
 	Instrument
 	Verification
@@ -36,6 +52,11 @@ type Repository struct {
 	SI
 	Department
 	Employee
+	Role
+	ApiPaths
+	MenuItem
+	MenuWithApi
+	Menu
 }
 
 func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
@@ -47,5 +68,10 @@ func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
 		SI:           postgres.NewSIRepo(db),
 		Department:   postgres.NewDepartmentRepo(db),
 		Employee:     postgres.NewEmployeeRepo(db),
+		Role:         postgres.NewRoleRepo(db),
+		ApiPaths:     postgres.NewApiRepo(db),
+		MenuItem:     postgres.NewMenuItemRepo(db),
+		MenuWithApi:  postgres.NewMenuWithApiRepo(db),
+		Menu:         postgres.NewMenuRepo(db),
 	}
 }

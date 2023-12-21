@@ -7,4 +7,10 @@ const (
 	DocumentsTable    = "documents"
 	DepartmentTable   = "departments"
 	EmployeeTable     = "employee"
+
+	RoleTable        = "roles"
+	ApiTable         = "api_paths"
+	MenuWithApiTable = "menu_items_with_api"
+	MenuItemTable    = "menu_items"
+	MenuByRoleTable  = "menu_by_role"
 )

@@ -15,6 +15,12 @@ type Services struct {
 	SI
 	Department
 	Employee
+	Role
+	ApiPaths
+	MenuItem
+	MenuWithApi
+	Menu
+	Private
 }
 
 type Deps struct {
@@ -35,6 +41,14 @@ func NewServices(deps Deps) *Services {
 	department := NewDepartmentService(deps.Repos.Department)
 	employee := NewEmployeeService(deps.Repos.Employee)
 
+	role := NewRoleService(deps.Repos.Role)
+	api := NewApiPathsService(deps.Repos.ApiPaths)
+	menuItem := NewMenuItemService(deps.Repos.MenuItem)
+	menuWithApi := NewMenuWithApiService(deps.Repos.MenuWithApi)
+	menu := NewMenuService(deps.Repos.Menu, menuWithApi)
+
+	// private := NewPrivateService("configs/privacy.conf", menu)
+
 	return &Services{
 		Instrument:   instrument,
 		Verification: verification,
@@ -43,5 +57,11 @@ func NewServices(deps Deps) *Services {
 		SI:           si,
 		Department:   department,
 		Employee:     employee,
+		Role:         role,
+		ApiPaths:     api,
+		MenuItem:     menuItem,
+		MenuWithApi:  menuWithApi,
+		Menu:         menu,
+		// Private:      private,
 	}
 }

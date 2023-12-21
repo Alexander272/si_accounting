@@ -28,6 +28,7 @@ type Location interface {
 	GetLast(context.Context, string) (*models.Location, error)
 	Create(context.Context, models.CreateLocationDTO) error
 	Update(context.Context, models.UpdateLocationDTO) error
+	Receiving(context.Context, models.ReceivingDTO) error
 }
 
 // TODO заменить везде даты со строк на числа
@@ -104,7 +105,7 @@ func (r *LocationRepo) Update(ctx context.Context, l models.UpdateLocationDTO) e
 		return fmt.Errorf("failed to parse issue date. error: %w", err)
 	}
 	receiptDate := time.Unix(0, 0)
-	if l.ReceiptDate != "" {
+	if l.DateOfReceiving != "" {
 		receiptDate, err = time.Parse("02.01.2006", l.DateOfReceiving)
 		if err != nil {
 			return fmt.Errorf("failed to parse receipt date. error: %w", err)
@@ -112,6 +113,22 @@ func (r *LocationRepo) Update(ctx context.Context, l models.UpdateLocationDTO) e
 	}
 
 	_, err = r.db.Exec(query, issueDate.Unix(), receiptDate.Unix(), l.Status, l.Person, l.Department, l.Id)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return nil
+}
+
+// // По идее это все входит в update -> надо как-то переписать update чтобы записывались только переданные данные даже если они пустые
+func (r *LocationRepo) Receiving(ctx context.Context, data models.ReceivingDTO) error {
+	query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE instrument_id=$3 AND date_of_receiving=0`, SIMovementTable)
+
+	receiptDate, err := time.Parse("02.01.2006", data.DateOfReceiving)
+	if err != nil {
+		return fmt.Errorf("failed to parse receipt date. error: %w", err)
+	}
+
+	_, err = r.db.Exec(query, data.Status, receiptDate.Unix(), data.InstrumentId)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

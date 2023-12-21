@@ -1,12 +1,10 @@
 package v1
 
 import (
-	"net/http"
-
-	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/employees"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/roles"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/instrument"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/location"
@@ -39,9 +37,9 @@ func NewHandler(services *services.Services) *Handler {
 
 func (h *Handler) Init(group *gin.RouterGroup) {
 	v1 := group.Group("/v1")
-	{
-		v1.GET("/", h.notImplemented)
-	}
+	// {
+	// 	v1.GET("/", h.notImplemented)
+	// }
 
 	// botApi := api.NewMostApi(h.bot.Url)
 
@@ -56,6 +54,8 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	departments.Register(v1, h.services.Department)
 	employees.Register(v1, h.services.Employee)
 
+	roles.Register(v1, h.services.Role)
+
 	// 	criterionsGroup := v1.Group("/criterions", h.middleware.VerifyToken, h.middleware.CheckPermissions)
 	// 	criterions.Register(criterionsGroup, h.services.Criterions, botApi)
 	// 	complete.Register(criterionsGroup, h.services.CompleteCriterion, botApi)
@@ -67,6 +67,6 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	// production_plan.Register(criterionsGroup, h.services.ProductionPlan, botApi)
 }
 
-func (h *Handler) notImplemented(c *gin.Context) {
-	response.NewErrorResponse(c, http.StatusInternalServerError, "not implemented", "not implemented")
-}
+// func (h *Handler) notImplemented(c *gin.Context) {
+// 	response.NewErrorResponse(c, http.StatusInternalServerError, "not implemented", "not implemented")
+// }

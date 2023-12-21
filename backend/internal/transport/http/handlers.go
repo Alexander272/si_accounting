@@ -1,12 +1,15 @@
 package http
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Alexander272/si_accounting/backend/internal/config"
+	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	httpV1 "github.com/Alexander272/si_accounting/backend/internal/transport/http/v1"
 	"github.com/Alexander272/si_accounting/backend/pkg/limiter"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,6 +39,8 @@ func (h *Handler) Init(conf *config.Config) *gin.Engine {
 		limiter.Limit(conf.Limiter.RPS, conf.Limiter.Burst, conf.Limiter.TTL),
 	)
 
+	// router.Routes()
+
 	// Init router
 	router.GET("/api/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
@@ -48,9 +53,24 @@ func (h *Handler) Init(conf *config.Config) *gin.Engine {
 
 func (h *Handler) initAPI(router *gin.Engine, auth config.AuthConfig, bot config.BotConfig) {
 	// handlerV1 := httpV1.NewHandler(h.services, auth, bot, middleware.NewMiddleware(h.services, auth, h.permissions, h.keycloak))
+
 	handlerV1 := httpV1.NewHandler(h.services)
 	api := router.Group("/api")
 	{
 		handlerV1.Init(api)
+	}
+
+	allPaths := make(map[string]models.ApiDTO)
+	routes := router.Routes()
+	for _, v := range routes {
+		if v.Path != "/api/ping" {
+			allPaths[v.Path] = models.ApiDTO{
+				Path:   v.Path,
+				Method: v.Method,
+			}
+		}
+	}
+	if err := h.services.ApiPaths.Load(context.Background(), allPaths); err != nil {
+		logger.Error("failed to load api paths. error: ", err.Error())
 	}
 }

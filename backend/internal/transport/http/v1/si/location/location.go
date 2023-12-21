@@ -29,6 +29,7 @@ func Register(api *gin.RouterGroup, service services.Location) {
 		locations.GET("/:instrumentId", handlers.GetLast)
 		locations.POST("", handlers.Create)
 		locations.PUT("/:id", handlers.Update)
+		locations.POST("/receiving", handlers.Receiving)
 	}
 }
 
@@ -82,6 +83,22 @@ func (h *LocationHandlers) Update(c *gin.Context) {
 	dto.Id = id
 
 	if err := h.service.Update(c, dto); err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		// h.botApi.SendError(c, err.Error(), dto)
+		return
+	}
+	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
+}
+
+func (h *LocationHandlers) Receiving(c *gin.Context) {
+	//TODO надо как-то определять статус, а еще есть вопрос как я буду получать id инструмента
+	var dto models.ReceivingDTO
+	if err := c.BindJSON(&dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+
+	if err := h.service.Receiving(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		// h.botApi.SendError(c, err.Error(), dto)
 		return
