@@ -25,7 +25,7 @@ type rateLimiter struct {
 	ttl      time.Duration
 }
 
-// newRateLimiter creates an instance of the rateLimite
+// newRateLimiter creates an instance of the rateLimiter
 func newRateLimiter(rps, burst int, ttl time.Duration) *rateLimiter {
 	return &rateLimiter{
 		visitors: make(map[string]*visitor),
@@ -80,7 +80,7 @@ func Limit(rps, burst int, ttl time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ip, _, err := net.SplitHostPort(c.Request.RemoteAddr)
 		if err != nil {
-			logrus.Errorf("failed to run limiter middleware. error: %w", err)
+			logrus.Errorf("failed to run limiter middleware. error: %s", err.Error())
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}

@@ -4,6 +4,9 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/employees"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/menu"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/menu_item"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/menu_with_api"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/roles"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/instrument"
@@ -55,6 +58,9 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	employees.Register(v1, h.services.Employee)
 
 	roles.Register(v1, h.services.Role)
+	menu.Register(v1, h.services.Menu)
+	menu_item.Register(v1, h.services.MenuItem)
+	menu_with_api.Register(v1, h.services.MenuWithApi)
 
 	// 	criterionsGroup := v1.Group("/criterions", h.middleware.VerifyToken, h.middleware.CheckPermissions)
 	// 	criterions.Register(criterionsGroup, h.services.Criterions, botApi)

@@ -45,7 +45,7 @@ func (r *MenuItemRepo) GetAll(ctx context.Context) (menu []models.MenuItem, err 
 			Description: m.ApiDescription,
 		}
 
-		if i == 0 || menu[len(menu)-1].Id == m.MenuId {
+		if i == 0 || menu[len(menu)-1].Id != m.MenuId {
 			menu = append(menu, models.MenuItem{
 				Id:          m.MenuId,
 				Name:        m.Name,

@@ -9,60 +9,33 @@ import (
 )
 
 func (m *Middleware) VerifyToken(c *gin.Context) {
-	tokenInHeader := c.GetHeader("Authorization")
-	tokenInCookie, _ := c.Cookie(m.CookieName)
+	token := strings.Replace(c.GetHeader("Authorization"), "Bearer ", "", 1)
 
-	if tokenInHeader == "" && tokenInCookie == "" {
-		response.NewErrorResponse(c, http.StatusUnauthorized, "empty token", "сессия не найдена")
-		return
-	}
-
-	token := tokenInCookie
-	if tokenInHeader != "" {
-		token = strings.Replace(tokenInHeader, "Bearer ", "", 1)
-	}
-
+	// TODO надо попробовать забирать из keycloak ключи и проверять токен здесь
 	result, err := m.Keycloak.Client.RetrospectToken(c, token, m.Keycloak.ClientId, m.Keycloak.ClientSecret, m.Keycloak.Realm)
 	if err != nil {
-		c.SetCookie(m.CookieName, "", -1, "/", c.Request.Host, m.auth.Secure, true)
+		domain := m.auth.Domain
+		if !strings.Contains(c.Request.Host, domain) {
+			domain = c.Request.Host
+		}
+
+		c.SetCookie(m.CookieName, "", -1, "/", domain, m.auth.Secure, true)
 		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
 		return
 	}
 
-	// logger.Debug("result ", result)
-
 	if !*result.Active {
-		// если он протух надо пробовать его обновлять
-
-		_, token, err = m.services.Session.Refresh(c, token)
-		if err != nil {
-			c.SetCookie(m.CookieName, "", -1, "/", c.Request.Host, m.auth.Secure, true)
-			response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "не удалось обновить сессию")
-			return
-		}
-
-		c.SetCookie(m.CookieName, token, int(m.auth.RefreshTokenTTL.Seconds()), "/", m.auth.Domain, m.auth.Secure, true)
-
-		// response.NewErrorResponse(c, http.StatusUnauthorized, "Invalid or expired Token", "user in not authorized")
-		// return
+		response.NewErrorResponse(c, http.StatusUnauthorized, "token is not active", "время сессии истекло, повторите вход")
+		return
 	}
 
-	// m.Keycloak.Client.RefreshToken()
-
-	// jwt, claims, err := m.Keycloak.Client.DecodeAccessToken(c, token, m.Keycloak.Realm)
-	user, err := m.services.Session.DecodeToken(c, token)
+	user, err := m.services.Session.DecodeAccessToken(c, token)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "токен доступа не валиден")
 		return
 	}
 
-	// logger.Debug(user)
-	c.Set(m.CtxUser, user)
-
-	// logger.Debug(" ")
-	// logger.Debug("jwt ", jwt)
-	// logger.Debug(" ")
-	// logger.Debug("claims ", claims)
+	c.Set(m.CtxUser, *user)
 
 	c.Next()
 }

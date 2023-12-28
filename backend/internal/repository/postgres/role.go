@@ -27,7 +27,17 @@ type Role interface {
 }
 
 func (r *RoleRepo) GetAll(ctx context.Context, req models.GetRolesDTO) (roles []models.RoleFull, err error) {
-	query := fmt.Sprintf(`SELECT id, name, number, extends FROM %s`, RoleTable)
+	/*
+		Если делать extends массивом, то нужен такой запрос
+
+		SELECT id, name, description, "number", COALESCE(extends, '{}') AS extends, is_show
+		FROM public.roles_test WHERE is_show=true ORDER BY number, name
+	*/
+
+	query := fmt.Sprintf(`SELECT id, name, number, description, COALESCE(extends::text, '') AS extends FROM %s WHERE is_show=true 
+		ORDER BY number, name`,
+		RoleTable,
+	)
 
 	if err := r.db.Select(&roles, query); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
@@ -35,8 +45,14 @@ func (r *RoleRepo) GetAll(ctx context.Context, req models.GetRolesDTO) (roles []
 	return roles, nil
 }
 
+func (r *RoleRepo) Get(ctx context.Context, role string) (roles []models.Role, err error) {
+	// query := fmt.Sprintf(`SELECT `)
+
+	return nil, fmt.Errorf("not implemented")
+}
+
 func (r *RoleRepo) Create(ctx context.Context, role models.RoleDTO) error {
-	query := fmt.Sprintf(`INSERT INTO %s(id, name, number, extends) VALUES ($1, $2, $3, $4)`, RoleTable)
+	query := fmt.Sprintf(`INSERT INTO %s(id, name, number, extends, description) VALUES ($1, $2, $3, $4, $5)`, RoleTable)
 	id := uuid.New()
 
 	_, err := r.db.Exec(query, id, role.Name, role.Number, role.Extends)
@@ -47,9 +63,9 @@ func (r *RoleRepo) Create(ctx context.Context, role models.RoleDTO) error {
 }
 
 func (r *RoleRepo) Update(ctx context.Context, role models.RoleDTO) error {
-	query := fmt.Sprintf(`UPDATE %s SET name=$1, number=$2, extends=$3 WHERE id=$4`, RoleTable)
+	query := fmt.Sprintf(`UPDATE %s SET name=$1, number=$2, extends=$3, description=$4 WHERE id=$5`, RoleTable)
 
-	_, err := r.db.Exec(query, role.Name, role.Number, role.Extends, role.Id)
+	_, err := r.db.Exec(query, role.Name, role.Number, role.Extends, role.Description, role.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

@@ -6,7 +6,6 @@ import (
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/repository"
-	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 )
 
 type MenuService struct {
@@ -48,7 +47,7 @@ func (s *MenuService) GetAll(ctx context.Context) (menu []models.MenuFull, err e
 			}
 		}
 
-		if i == 0 || menu[len(menu)-1].Id == m2.RoleId {
+		if i == 0 || menu[len(menu)-1].Id != m2.RoleId {
 			menu = append(menu, models.MenuFull{
 				Id: m2.RoleId,
 				Role: models.RoleFull{
@@ -64,9 +63,7 @@ func (s *MenuService) GetAll(ctx context.Context) (menu []models.MenuFull, err e
 		}
 	}
 
-	logger.Debug(menu)
-
-	return nil, fmt.Errorf("not implemented")
+	return menu, nil
 }
 
 func (s *MenuService) Create(ctx context.Context, menu models.MenuDTO) error {

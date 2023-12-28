@@ -24,6 +24,9 @@ func NewKeycloakClient(url, clientId, realm string, adminName, adminPass string)
 		logger.Fatalf("failed to login admin to keycloak. error: %s", err.Error())
 	}
 
+	// store, err := client.GetKeyStoreConfig()
+	// store.ActiveKeys.RS256
+
 	clients, err := client.GetClients(ctx, token.AccessToken, realm, gocloak.GetClientsParams{ClientID: &clientId})
 	if err != nil {
 		logger.Fatalf("failed to get clients to keycloak. error: %s", err.Error())

@@ -10,24 +10,24 @@ import (
 	"github.com/casbin/casbin/v2/persist"
 )
 
-type PrivateService struct {
+type PermissionService struct {
 	enforcer casbin.IEnforcer
 }
 
-type Private interface {
+type Permission interface {
 	Register(confPath string, menu Menu) error
 	Enforce(params ...interface{}) (bool, error)
 }
 
-func NewPrivateService(confPath string, menu Menu) *PrivateService {
-	private := &PrivateService{}
-	if err := private.Register(confPath, menu); err != nil {
-		logger.Fatalf("failed to initialize private service. error: %s", err.Error())
+func NewPermissionService(confPath string, menu Menu) *PermissionService {
+	permission := &PermissionService{}
+	if err := permission.Register(confPath, menu); err != nil {
+		logger.Fatalf("failed to initialize permission service. error: %s", err.Error())
 	}
-	return private
+	return permission
 }
 
-func (s *PrivateService) Register(path string, menu Menu) error {
+func (s *PermissionService) Register(path string, menu Menu) error {
 	var err error
 	adapter := NewPolicyAdapter(menu)
 
@@ -43,7 +43,7 @@ func (s *PrivateService) Register(path string, menu Menu) error {
 	return nil
 }
 
-func (s *PrivateService) Enforce(params ...interface{}) (bool, error) {
+func (s *PermissionService) Enforce(params ...interface{}) (bool, error) {
 	return s.enforcer.Enforce(params...)
 }
 
@@ -71,31 +71,28 @@ func (s *PolicyAdapter) LoadPolicy(model model.Model) error {
 		return err
 	}
 
-	lines := []string{}
+	// lines := []string{}
 
 	// load api paths
 	for _, mf := range menu {
 		for _, mi := range mf.MenuItems {
 			for _, a := range mi.Api {
-				// line := fmt.Sprintf("p, %s, %s, %s", mf.Role.Name, a.Path, a.Method)
-				lines = append(lines, fmt.Sprintf("p, %s, %s, %s", mf.Role.Name, a.Path, a.Method))
+				line := fmt.Sprintf("p, %s, %s, %s", mf.Role.Name, a.Path, a.Method)
+				if err := persist.LoadPolicyLine(line, model); err != nil {
+					return fmt.Errorf("failed to load policy. error: %w", err)
+				}
+				// lines = append(lines, fmt.Sprintf("p, %s, %s, %s", mf.Role.Name, a.Path, a.Method))
 			}
 		}
 	}
 
 	// load users group (role)
 	for _, mf := range menu {
-		// line := fmt.Sprintf("g, %s, %s", us.UserName, us.Role)
-		extends := ""
-		if mf.Role.Extends != nil && *mf.Role.Extends != "" {
-			extends = *mf.Role.Extends
+		// lines = append(lines, fmt.Sprintf("g, %s, %s", mf.Role.Name, mf.Role.Extends))
+		line := fmt.Sprintf("g, %s, %s", mf.Role.Name, mf.Role.Extends)
+		if err := persist.LoadPolicyLine(line, model); err != nil {
+			return fmt.Errorf("failed to load group policy. error: %w", err)
 		}
-
-		lines = append(lines, fmt.Sprintf("g, %s, %s", mf.Role.Name, extends))
-	}
-
-	if err := persist.LoadPolicyArray(lines, model); err != nil {
-		return fmt.Errorf("failed to load policy. error: %w", err)
 	}
 	return nil
 }

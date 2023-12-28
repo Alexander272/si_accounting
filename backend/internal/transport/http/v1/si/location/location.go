@@ -7,6 +7,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -91,6 +92,8 @@ func (h *LocationHandlers) Update(c *gin.Context) {
 }
 
 func (h *LocationHandlers) Receiving(c *gin.Context) {
+	logger.Debug("receiving ", c.Query("instruments"))
+
 	//TODO надо как-то определять статус, а еще есть вопрос как я буду получать id инструмента
 	var dto models.ReceivingDTO
 	if err := c.BindJSON(&dto); err != nil {
@@ -98,10 +101,10 @@ func (h *LocationHandlers) Receiving(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Receiving(c, dto); err != nil {
-		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
-		return
-	}
+	// if err := h.service.Receiving(c, dto); err != nil {
+	// 	response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+	// 	// h.botApi.SendError(c, err.Error(), dto)
+	// 	return
+	// }
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
 }

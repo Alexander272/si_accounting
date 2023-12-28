@@ -27,8 +27,17 @@ type Menu interface {
 }
 
 func (r *MenuRepo) GetAll(ctx context.Context) (menu []models.Menu, err error) {
+	/*
+		Если extends сделать массивом то нужен такой запрос
+		//надо выяснить как casbin будет реагировать на то, что одна роль наследуется от двух других (все норм)
+		@return массив с наименованиями ролей от которых наследуется текущая
+
+		SELECT m.id, role_id, name, number, menu_item_id, CASE WHEN extends IS NOT NULL THEN
+			ARRAY(SELECT name FROM roles_test WHERE ARRAY[id] <@ r.extends) ELSE '{}' END AS extends
+			FROM menu_by_role AS m INNER JOIN roles_test AS r ON role_id=r.id ORDER BY number, name
+	*/
 	query := fmt.Sprintf(`SELECT m.id, role_id, name, number, menu_item_id, CASE WHEN extends IS NOT NULL THEN
-		(SELECT name FROM %s WHERE id=extends) ELSE '' END AS extends
+		(SELECT name FROM %s WHERE id=r.extends) ELSE '' END AS extends
 		FROM %s AS m INNER JOIN %s AS r ON role_id=r.id ORDER BY number, name`,
 		RoleTable, MenuByRoleTable, RoleTable,
 	)

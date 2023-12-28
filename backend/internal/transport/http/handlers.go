@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/Alexander272/si_accounting/backend/internal/config"
@@ -34,13 +35,6 @@ func (h *Handler) Init(conf *config.Config) *gin.Engine {
 		limiter.Limit(conf.Limiter.RPS, conf.Limiter.Burst, conf.Limiter.TTL),
 	)
 
-	router.Use(
-		// static.Serve("/", static.LocalFile("../frontend/dist/", true)),
-		limiter.Limit(conf.Limiter.RPS, conf.Limiter.Burst, conf.Limiter.TTL),
-	)
-
-	// router.Routes()
-
 	// Init router
 	router.GET("/api/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
@@ -64,7 +58,7 @@ func (h *Handler) initAPI(router *gin.Engine, auth config.AuthConfig, bot config
 	routes := router.Routes()
 	for _, v := range routes {
 		if v.Path != "/api/ping" {
-			allPaths[v.Path] = models.ApiDTO{
+			allPaths[fmt.Sprintf("%s:%s", v.Path, v.Method)] = models.ApiDTO{
 				Path:   v.Path,
 				Method: v.Method,
 			}

@@ -20,7 +20,8 @@ type Services struct {
 	MenuItem
 	MenuWithApi
 	Menu
-	Private
+	Session
+	Permission
 }
 
 type Deps struct {
@@ -47,7 +48,8 @@ func NewServices(deps Deps) *Services {
 	menuWithApi := NewMenuWithApiService(deps.Repos.MenuWithApi)
 	menu := NewMenuService(deps.Repos.Menu, menuWithApi)
 
-	// private := NewPrivateService("configs/privacy.conf", menu)
+	session := NewSessionService(deps.Keycloak)
+	permission := NewPermissionService("configs/privacy.conf", menu)
 
 	return &Services{
 		Instrument:   instrument,
@@ -62,6 +64,7 @@ func NewServices(deps Deps) *Services {
 		MenuItem:     menuItem,
 		MenuWithApi:  menuWithApi,
 		Menu:         menu,
-		// Private:      private,
+		Session:      session,
+		Permission:   permission,
 	}
 }

@@ -60,9 +60,9 @@ func (s *ApiPathsService) Load(ctx context.Context, allPaths map[string]models.A
 	}
 
 	for _, a := range paths {
-		_, exists := allPaths[a.Path]
+		_, exists := allPaths[fmt.Sprintf("%s:%s", a.Path, a.Method)]
 		if exists {
-			delete(allPaths, a.Path)
+			delete(allPaths, fmt.Sprintf("%s:%s", a.Path, a.Method))
 		}
 	}
 
