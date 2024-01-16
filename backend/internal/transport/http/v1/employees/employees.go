@@ -24,11 +24,30 @@ func Register(api *gin.RouterGroup, service services.Employee) {
 
 	employees := api.Group("/employees")
 	{
+		employees.GET("", handlers.GetAll)
 		employees.GET("/:departmentId", handlers.GetByDepartment)
 		employees.POST("", handlers.Create)
 		employees.PUT("/:id", handlers.Update)
 		employees.DELETE("/:id", handlers.Delete)
 	}
+}
+
+func (h *EmployeeHandlers) GetAll(c *gin.Context) {
+	filter := make(map[string]string, 0)
+
+	departmentId := c.Query("departmentId")
+	if departmentId != "" {
+		filter["department_id"] = departmentId
+	}
+
+	employees, err := h.service.GetAll(c, models.GetEmployeesDTO{Filters: filter})
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		// h.botApi.SendError(c, err.Error(), filter)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DataResponse{Data: employees})
 }
 
 func (h *EmployeeHandlers) GetByDepartment(c *gin.Context) {

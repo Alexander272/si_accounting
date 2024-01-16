@@ -1,79 +1,79 @@
 package services
 
-import (
-	"context"
-	"fmt"
+// import (
+// 	"context"
+// 	"fmt"
 
-	"github.com/Alexander272/si_accounting/backend/internal/models"
-	"github.com/mattermost/mattermost-server/v6/model"
-)
+// 	"github.com/Alexander272/si_accounting/backend/internal/models"
+// 	"github.com/mattermost/mattermost-server/v6/model"
+// )
 
-type MostService struct {
-	URL string
-}
+// type MostService struct {
+// 	URL string
+// }
 
-func NewMostService(url string) *MostService {
-	return &MostService{
-		URL: url,
-	}
-}
+// func NewMostService(url string) *MostService {
+// 	return &MostService{
+// 		URL: url,
+// 	}
+// }
 
-type Most interface{}
+// type Most interface{}
 
-func (s *MostService) SendNotification(ctx context.Context, notification models.Notification) error {
-	attachment := &model.SlackAttachment{
-		Fields: []*model.SlackAttachmentField{
-			{
-				Title: "Инструмент",
-				Short: true,
-			},
-		},
-		Actions: []*model.PostAction{},
-	}
+// func (s *MostService) SendNotification(ctx context.Context, notification models.Notification) error {
+// 	attachment := &model.SlackAttachment{
+// 		Fields: []*model.SlackAttachmentField{
+// 			{
+// 				Title: "Инструмент",
+// 				Short: true,
+// 			},
+// 		},
+// 		Actions: []*model.PostAction{},
+// 	}
 
-	nameField := &model.SlackAttachmentField{
-		Title: "ФИО держателя",
-		Short: true,
-	}
-	if notification.Type == "receiving" {
-		nameField.Title = "ФИО получателя"
-	}
-	attachment.Fields = append(attachment.Fields, nameField)
+// 	nameField := &model.SlackAttachmentField{
+// 		Title: "ФИО держателя",
+// 		Short: true,
+// 	}
+// 	if notification.Type == "receiving" {
+// 		nameField.Title = "ФИО получателя"
+// 	}
+// 	attachment.Fields = append(attachment.Fields, nameField)
 
-	instrumentsId := []string{}
+// 	instrumentsId := []string{}
 
-	for _, ss := range notification.SI {
-		instrumentsId = append(instrumentsId, ss.Id)
+// 	for _, ss := range notification.SI {
+// 		instrumentsId = append(instrumentsId, ss.Id)
 
-		attachment.Fields = append(attachment.Fields,
-			&model.SlackAttachmentField{
-				Title: ss.Name,
-				Value: ss.FactoryNumber,
-				Short: true,
-			},
-			&model.SlackAttachmentField{
-				Title: ss.Person,
-				Short: true,
-			},
-		)
-	}
+// 		attachment.Fields = append(attachment.Fields,
+// 			&model.SlackAttachmentField{
+// 				Title: ss.Name,
+// 				Value: ss.FactoryNumber,
+// 				Short: true,
+// 			},
+// 			&model.SlackAttachmentField{
+// 				Title: ss.Person,
+// 				Short: true,
+// 			},
+// 		)
+// 	}
 
-	if notification.Type == "receiving" {
-		attachment.Actions = append(attachment.Actions,
-			&model.PostAction{
-				Id:   "all",
-				Name: "Получено",
-				// Style: ,
-				Integration: &model.PostActionIntegration{},
-			},
-			// &model.PostAction{
-			// 	Id:          "part",
-			// 	Name:        "",
-			// 	Integration: &model.PostActionIntegration{},
-			// },
-		)
+// 	if notification.Type == "receiving" {
+// 		attachment.Actions = append(attachment.Actions,
+// 			&model.PostAction{
+// 				Id:   "all",
+// 				Name: "Получено",
+// 				// Style: ,
+// 				Integration: &model.PostActionIntegration{},
+// 			},
+// 			// &model.PostAction{
+// 			// 	Id:          "part",
+// 			// 	Name:        "",
+// 			// 	Integration: &model.PostActionIntegration{},
+// 			// },
+// 		)
 
-	}
+// 	}
 
-	return fmt.Errorf("not implement")
-}
+// 	return fmt.Errorf("not implement")
+// }

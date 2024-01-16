@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/google/uuid"
@@ -20,10 +21,38 @@ func NewEmployeeRepo(db *sqlx.DB) *EmployeeRepo {
 }
 
 type Employee interface {
+	GetAll(context.Context, models.GetEmployeesDTO) ([]models.Employee, error)
 	GetByDepartment(context.Context, string) ([]models.Employee, error)
+	GetByMostId(context.Context, string) (*models.EmployeeData, error)
 	Create(context.Context, models.WriteEmployeeDTO) error
 	Update(context.Context, models.WriteEmployeeDTO) error
 	Delete(context.Context, string) error
+}
+
+func (r *EmployeeRepo) GetAll(ctx context.Context, req models.GetEmployeesDTO) (employees []models.Employee, err error) {
+	query := fmt.Sprintf(`SELECT id, name, department_id, most_id, is_lead FROM %s`, EmployeeTable)
+
+	params := []interface{}{}
+	filters := []string{}
+
+	i := 0
+	for k, v := range req.Filters {
+		i++
+		filters = append(filters, fmt.Sprintf("%s=$%d", k, i))
+		params = append(params, v)
+	}
+	filter := ""
+	if len(filters) > 0 {
+		filter = fmt.Sprintf(" WHERE %s", strings.Join(filters, " AND "))
+	}
+	sort := " ORDER BY department_id, name"
+
+	query += filter + sort
+
+	if err := r.db.Select(&employees, query, params...); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return employees, nil
 }
 
 func (r *EmployeeRepo) GetByDepartment(ctx context.Context, departmentId string) (employees []models.Employee, err error) {
@@ -33,6 +62,19 @@ func (r *EmployeeRepo) GetByDepartment(ctx context.Context, departmentId string)
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return employees, nil
+}
+
+func (r *EmployeeRepo) GetByMostId(ctx context.Context, mostId string) (*models.EmployeeData, error) {
+	query := fmt.Sprintf(`SELECT e.id, e.name, d.name AS department, most_id, d.leader_id=e.id AS is_lead
+		FROM %s AS e INNER JOIN %s AS d ON department_id=d.id WHERE most_id=$1`,
+		EmployeeTable, DepartmentTable,
+	)
+	employee := &models.EmployeeData{}
+
+	if err := r.db.Get(employee, query, mostId); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return employee, nil
 }
 
 func (r *EmployeeRepo) Create(ctx context.Context, employee models.WriteEmployeeDTO) error {

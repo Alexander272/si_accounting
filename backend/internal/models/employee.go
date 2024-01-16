@@ -1,14 +1,28 @@
 package models
 
+type GetEmployeesDTO struct {
+	Filters map[string]string
+	// DepartmentId string `json:"departmentId"`
+}
+
 type Employee struct {
-	Id string `json:"id" db:"id"`
-	// DepartmentId только для db
-	Name string `json:"name" db:"name"`
+	Id           string `json:"id" db:"id"`
+	Name         string `json:"name" db:"name"`
+	DepartmentId string `json:"departmentId" db:"department_id"`
+	// IncludeDepartments []string `json:"includeDepartments" db:"include_departments"` //TODO возможно это нужно делать в другом месте
+	// DefaultFilters     string   // TODO определиться с типом и форматом фильтров (возможно фильтры нужно делать в другом месте)
+	MattermostId string `json:"mattermostId" db:"most_id"` //TODO возможно на клиенте это мне не нужно будет
 	// Type string => member or leader
-	IncludeDepartments []string `json:"includeDepartments" db:"include_departments"` //TODO возможно это нужно делать в другом месте
-	DefaultFilters     string   // TODO определиться с типом и форматом фильтров (возможно фильтры нужно делать в другом месте)
-	MattermostId       string   `json:"mattermostId" db:"most_id"` //TODO возможно на клиенте это мне не нужно будет
+	IsLead bool `json:"isLead" db:"is_lead"`
 	//TODO нужно как-то связывать работника и пользователя (чтобы пользователь мог вернуть инструмент) можно сгенерировать какой-нибудь код, записать его в keycloak и бд, а потом по нему искать запись
+}
+
+type EmployeeData struct {
+	Id         string `json:"id" db:"id"`
+	Name       string `json:"name" db:"name"`
+	Department string `json:"department" db:"department"`
+	MostId     string `json:"mostId" db:"most_id"`
+	IsLead     bool   `json:"isLead" db:"is_lead"`
 }
 
 type WriteEmployeeDTO struct {

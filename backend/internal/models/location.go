@@ -50,3 +50,7 @@ type ReceivingDTO struct {
 	Status          string `json:"status" db:"status"`
 	DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
 }
+
+type ReceivingFromBotDTO struct {
+	UserMostId string `json:"userId" binding:"required"`
+}

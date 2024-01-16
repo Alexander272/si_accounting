@@ -19,10 +19,20 @@ func NewEmployeeService(repo repository.Employee) *EmployeeService {
 }
 
 type Employee interface {
+	GetAll(context.Context, models.GetEmployeesDTO) ([]models.Employee, error)
 	GetByDepartment(context.Context, string) ([]models.Employee, error)
+	GetByMostId(context.Context, string) (*models.EmployeeData, error)
 	Create(context.Context, models.WriteEmployeeDTO) error
 	Update(context.Context, models.WriteEmployeeDTO) error
 	Delete(context.Context, string) error
+}
+
+func (s *EmployeeService) GetAll(ctx context.Context, req models.GetEmployeesDTO) ([]models.Employee, error) {
+	employees, err := s.repo.GetAll(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get employees. error: %w", err)
+	}
+	return employees, nil
 }
 
 func (s *EmployeeService) GetByDepartment(ctx context.Context, departmentId string) ([]models.Employee, error) {
@@ -31,6 +41,14 @@ func (s *EmployeeService) GetByDepartment(ctx context.Context, departmentId stri
 		return nil, fmt.Errorf("failed to get employees by department. error: %w", err)
 	}
 	return users, nil
+}
+
+func (s *EmployeeService) GetByMostId(ctx context.Context, mostId string) (*models.EmployeeData, error) {
+	employee, err := s.repo.GetByMostId(ctx, mostId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get employee by most id. error: %w", err)
+	}
+	return employee, nil
 }
 
 func (s *EmployeeService) Create(ctx context.Context, employee models.WriteEmployeeDTO) error {

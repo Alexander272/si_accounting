@@ -48,6 +48,17 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 
 	// auth.Register(v1, h.services.Session, h.auth, botApi, h.cookieName)
 
+	// TODO что осталось сделать:
+	// - отправлять уведомления о необходимости сдачи инструментов
+	// - добавить возможность для редактора добавлять и изменять пользователей и подразделения
+	// - сделать для бота возможность подтверждения получения инструментов прямо в нем (не переходя в сервис)
+	// - сделать авторизацию в сервисе
+	// - разделить функционал на клиенте по ролям
+	// - сделать фильтры по умолчанию для ролей (или для конкретных пользователей)
+	// - сделать возможность скрывать колонки в таблице
+	// - добавить страницы с историями (возможно модальные окна)
+	// -
+
 	siGroup := v1.Group("/si")
 	si.Register(siGroup, h.services.SI)
 	instrument.Register(siGroup, h.services.Instrument)
@@ -61,16 +72,6 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	menu.Register(v1, h.services.Menu)
 	menu_item.Register(v1, h.services.MenuItem)
 	menu_with_api.Register(v1, h.services.MenuWithApi)
-
-	// 	criterionsGroup := v1.Group("/criterions", h.middleware.VerifyToken, h.middleware.CheckPermissions)
-	// 	criterions.Register(criterionsGroup, h.services.Criterions, botApi)
-	// 	complete.Register(criterionsGroup, h.services.CompleteCriterion, botApi)
-
-	// output_volume.Register(criterionsGroup, h.services.OutputVolume, botApi)
-	// shipment_plan.Register(criterionsGroup, h.services.ShipmentPlan, botApi)
-	// orders_volume.Register(criterionsGroup, h.services.OrdersVolume, botApi)
-	// production_load.Register(criterionsGroup, h.services.ProductionLoad, botApi)
-	// production_plan.Register(criterionsGroup, h.services.ProductionPlan, botApi)
 }
 
 // func (h *Handler) notImplemented(c *gin.Context) {

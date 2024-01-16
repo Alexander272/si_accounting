@@ -32,15 +32,15 @@ type Deps struct {
 }
 
 func NewServices(deps Deps) *Services {
+	department := NewDepartmentService(deps.Repos.Department)
+	employee := NewEmployeeService(deps.Repos.Employee)
+
 	instrument := NewInstrumentService(deps.Repos.Instrument)
 	documents := NewDocumentsService(deps.Repos.Documents)
 	verification := NewVerificationService(deps.Repos.Verification, documents, instrument)
-	location := NewLocationService(deps.Repos.Location)
+	location := NewLocationService(deps.Repos.Location, employee)
 
 	si := NewSIService(deps.Repos.SI, instrument, verification, location)
-
-	department := NewDepartmentService(deps.Repos.Department)
-	employee := NewEmployeeService(deps.Repos.Employee)
 
 	role := NewRoleService(deps.Repos.Role)
 	api := NewApiPathsService(deps.Repos.ApiPaths)

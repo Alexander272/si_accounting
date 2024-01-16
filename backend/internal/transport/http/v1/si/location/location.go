@@ -31,6 +31,7 @@ func Register(api *gin.RouterGroup, service services.Location) {
 		locations.POST("", handlers.Create)
 		locations.PUT("/:id", handlers.Update)
 		locations.POST("/receiving", handlers.Receiving)
+		locations.DELETE("/:id", handlers.Delete)
 	}
 }
 
@@ -91,10 +92,13 @@ func (h *LocationHandlers) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
 }
 
+// TODO проверить эти две функции не получается с ботом проблемы жуткие
 func (h *LocationHandlers) Receiving(c *gin.Context) {
 	logger.Debug("receiving ", c.Query("instruments"))
 
-	//TODO надо как-то определять статус, а еще есть вопрос как я буду получать id инструмента
+	logger.Debug("request ", c.Request)
+
+	// TODO надо как-то определять статус, а еще есть вопрос как я буду получать id инструмента
 	var dto models.ReceivingDTO
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
@@ -107,4 +111,27 @@ func (h *LocationHandlers) Receiving(c *gin.Context) {
 	// 	return
 	// }
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
+}
+
+func (h *LocationHandlers) ReceivingFromBot(c *gin.Context) {
+	var dto models.ReceivingFromBotDTO
+	if err := c.BindJSON(&dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+
+}
+
+func (h *LocationHandlers) Delete(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "id не задан")
+		return
+	}
+
+	if err := h.service.Delete(c, id); err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		return
+	}
+	c.JSON(http.StatusNoContent, response.IdResponse{})
 }

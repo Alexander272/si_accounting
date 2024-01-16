@@ -24,7 +24,7 @@ func Register(api *gin.RouterGroup, service services.Department) {
 
 	departments := api.Group("/departments")
 	{
-		departments.GET("/all", handlers.GetAll)
+		departments.GET("", handlers.GetAll)
 		departments.POST("", handlers.Create)
 		departments.PUT("/:id", handlers.Update)
 		departments.DELETE("/:id", handlers.Delete)

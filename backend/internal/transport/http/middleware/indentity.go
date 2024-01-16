@@ -12,7 +12,7 @@ func (m *Middleware) VerifyToken(c *gin.Context) {
 	token := strings.Replace(c.GetHeader("Authorization"), "Bearer ", "", 1)
 
 	// TODO надо попробовать забирать из keycloak ключи и проверять токен здесь
-	result, err := m.Keycloak.Client.RetrospectToken(c, token, m.Keycloak.ClientId, m.Keycloak.ClientSecret, m.Keycloak.Realm)
+	result, err := m.keycloak.Client.RetrospectToken(c, token, m.keycloak.ClientId, m.keycloak.ClientSecret, m.keycloak.Realm)
 	if err != nil {
 		domain := m.auth.Domain
 		if !strings.Contains(c.Request.Host, domain) {

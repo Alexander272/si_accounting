@@ -29,6 +29,7 @@ type Location interface {
 	Create(context.Context, models.CreateLocationDTO) error
 	Update(context.Context, models.UpdateLocationDTO) error
 	Receiving(context.Context, models.ReceivingDTO) error
+	Delete(context.Context, string) error
 }
 
 // TODO заменить везде даты со строк на числа
@@ -129,6 +130,28 @@ func (r *LocationRepo) Receiving(ctx context.Context, data models.ReceivingDTO) 
 	}
 
 	_, err = r.db.Exec(query, data.Status, receiptDate.Unix(), data.InstrumentId)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return nil
+}
+
+func (r *LocationRepo) ReceivingFromBot(ctx context.Context) error {
+	// если пользователь лидер то будут обновляться все инструменты в соответствующем подразделении
+	// если пользователь не лидер то нужно обновить только инструмент закрепленный за ним
+	// если работники сами получают инструменты, то лидера подразделения указывать не нужно
+	// если подразделение и работник не указаны значит инструмент сдают в резерв (//? тут могут быть проблемы, если несколько пользователей отправят инструменты)
+	// может все таки нужно делать кнопочку в каждом таком списке, либо надо чтобы пользователи указывали id поста
+
+	// query := fmt.Sprintf(``)
+
+	return fmt.Errorf("not implemented")
+}
+
+func (r *LocationRepo) Delete(ctx context.Context, id string) error {
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id=$1`, SIMovementTable)
+
+	_, err := r.db.Exec(query, id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
