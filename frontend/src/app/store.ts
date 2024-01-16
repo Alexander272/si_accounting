@@ -8,6 +8,7 @@ import { apiSlice } from './apiSlice'
 // import { userPath, userReducer } from '@/features/user/userSlice'
 import { dataTablePath, dataTableReducer } from '@/features/dataTable/dataTableSlice'
 import { modalPath, modalReducer } from '@/features/modal/modalSlice'
+import { employeesPath, employeesReducer } from '@/features/employees/employeeSlice'
 
 const rootReducer = combineReducers({
 	[apiSlice.reducerPath]: apiSlice.reducer,
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
 	// [userPath]: userReducer,
 	[dataTablePath]: dataTableReducer,
 	[modalPath]: modalReducer,
+	[employeesPath]: employeesReducer,
 })
 
 export const store = configureStore({

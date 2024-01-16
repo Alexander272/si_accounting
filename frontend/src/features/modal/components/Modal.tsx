@@ -8,6 +8,8 @@ import { CreateDataItem } from '@/components/Forms/CreateDataItem/CreateDataItem
 import { NewVerification } from '@/components/Forms/NewVerification/NewVerification'
 import { UpdateInstrument } from '@/components/Forms/UpdateInstrument/UpdateInstrument'
 import { ChangeLocation } from '@/components/Forms/ChangeLocation/ChangeLocation'
+import { EmployeeForm } from '@/features/employees/components/EmployeeForm'
+import { DepartmentForm } from '@/features/employees/components/DepartmentForm'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
 
@@ -35,6 +37,9 @@ export const Modal = () => {
 					{selector == 'NewVerification' && ModalTitles.NEW_VERIFICATION}
 					{selector == 'EditInstrument' && ModalTitles.EDIT_ITEM}
 					{selector == 'ChangeLocation' && ModalTitles.NEW_MOVEMENT}
+
+					{selector == 'Employee' && ModalTitles.EMPLOYEE}
+					{selector == 'Department' && ModalTitles.DEPARTMENT}
 				</DialogTitle>
 
 				<IconButton onClick={closeModal} sx={{ lineHeight: '16px', mr: 2 }}>
@@ -46,6 +51,9 @@ export const Modal = () => {
 				{selector == 'NewVerification' && <NewVerification />}
 				{selector == 'EditInstrument' && <UpdateInstrument />}
 				{selector == 'ChangeLocation' && <ChangeLocation />}
+
+				{selector == 'Employee' && <EmployeeForm />}
+				{selector == 'Department' && <DepartmentForm />}
 			</DialogContent>
 		</Dialog>
 	)

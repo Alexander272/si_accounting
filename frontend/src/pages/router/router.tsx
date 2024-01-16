@@ -6,6 +6,7 @@ import { Layout } from '@/components/Layout/Layout'
 import { NotFound } from '@/pages/notFound/NotFoundLazy'
 import { Home } from '@/pages/home/HomeLazy'
 import { Auth } from '@/pages/auth/AuthLazy'
+import { Employees } from '@/pages/admin/employees/EmployeesLazy'
 import PrivateRoute from './PrivateRoute'
 
 const config: RouteObject[] = [
@@ -22,6 +23,14 @@ const config: RouteObject[] = [
 				element: (
 					<PrivateRoute>
 						<Home />
+					</PrivateRoute>
+				),
+			},
+			{
+				path: AppRoutes.EMPLOYEES,
+				element: (
+					<PrivateRoute>
+						<Employees />
 					</PrivateRoute>
 				),
 			},

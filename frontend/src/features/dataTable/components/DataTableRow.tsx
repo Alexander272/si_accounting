@@ -33,7 +33,7 @@ export const DataTableRow: FC<Props> = memo(({ data, selected, itemId, onSelect,
 		positionHandler({ mouseX: event.clientX + 2, mouseY: event.clientY - 6 }, data.id, selected)
 	}
 
-	//TODO подумать как выделять строки (цвета когда надо сдать, просроченные и тд)
+	//TODO подумать как выделять строки (цвета когда надо сдать, просроченные, то что закреплено за текущим пользователем и тд)
 
 	const getRowColor = () => {
 		if (itemId == data.id) return RowColors['active']

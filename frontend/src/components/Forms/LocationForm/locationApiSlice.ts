@@ -35,7 +35,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 		}),
 
 		getDepartments: builder.query<{ data: IDepartment[] }, null>({
-			query: () => `${API.departments}/all`,
+			query: () => `${API.departments}`,
 			providesTags: [{ type: 'Departments', id: 'All' }],
 			onQueryStarted: async (_arg, api) => {
 				try {
