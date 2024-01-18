@@ -38,8 +38,10 @@ export const Modal = () => {
 					{selector == 'EditInstrument' && ModalTitles.EDIT_ITEM}
 					{selector == 'ChangeLocation' && ModalTitles.NEW_MOVEMENT}
 
-					{selector == 'Employee' && ModalTitles.EMPLOYEE}
-					{selector == 'Department' && ModalTitles.DEPARTMENT}
+					{selector == 'EditEmployee' && ModalTitles.EDIT_EMPLOYEE}
+					{selector == 'CreateEmployee' && ModalTitles.CREATE_EMPLOYEE}
+					{selector == 'EditDepartment' && ModalTitles.EDIT_DEPARTMENT}
+					{selector == 'CreateDepartment' && ModalTitles.CREATE_DEPARTMENT}
 				</DialogTitle>
 
 				<IconButton onClick={closeModal} sx={{ lineHeight: '16px', mr: 2 }}>
@@ -52,8 +54,8 @@ export const Modal = () => {
 				{selector == 'EditInstrument' && <UpdateInstrument />}
 				{selector == 'ChangeLocation' && <ChangeLocation />}
 
-				{selector == 'Employee' && <EmployeeForm />}
-				{selector == 'Department' && <DepartmentForm />}
+				{selector == 'EditEmployee' || selector == 'CreateEmployee' ? <EmployeeForm /> : null}
+				{selector == 'EditDepartment' || selector == 'CreateDepartment' ? <DepartmentForm /> : null}
 			</DialogContent>
 		</Dialog>
 	)

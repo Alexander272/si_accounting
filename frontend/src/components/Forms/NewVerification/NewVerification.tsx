@@ -33,10 +33,10 @@ export const NewVerification = () => {
 				{/* <Button onClick={skipHandler} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
 					Пропустить
 				</Button> */}
-				<Button onClick={closeModal} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
+				<Button onClick={closeModal} variant='outlined' fullWidth>
 					Отмена
 				</Button>
-				<Button variant='contained' type='submit' fullWidth sx={{ borderRadius: 3 }}>
+				<Button variant='contained' type='submit' fullWidth>
 					Сохранить
 				</Button>
 			</VerificationForm>

@@ -37,30 +37,30 @@ export const CreateDataItem = () => {
 
 			{active == 0 && (
 				<InstrumentForm onSubmit={nextHandler}>
-					<Button onClick={prevHandler} variant='outlined' fullWidth disabled sx={{ borderRadius: 3 }}>
+					<Button onClick={prevHandler} variant='outlined' fullWidth disabled>
 						Назад
 					</Button>
-					<Button variant='contained' type='submit' fullWidth sx={{ borderRadius: 3 }}>
+					<Button variant='contained' type='submit' fullWidth>
 						{active === steps.length - 1 ? 'Сохранить' : 'Далее'}
 					</Button>
 				</InstrumentForm>
 			)}
 			{active == 1 && (
 				<VerificationForm onSubmit={nextHandler}>
-					<Button onClick={prevHandler} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
+					<Button onClick={prevHandler} variant='outlined' fullWidth>
 						Назад
 					</Button>
-					<Button variant='contained' type='submit' fullWidth sx={{ borderRadius: 3 }}>
+					<Button variant='contained' type='submit' fullWidth>
 						Далее
 					</Button>
 				</VerificationForm>
 			)}
 			{active == 2 && (
 				<LocationForm onSubmit={nextHandler}>
-					<Button onClick={prevHandler} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
+					<Button onClick={prevHandler} variant='outlined' fullWidth>
 						Назад
 					</Button>
-					<Button variant='contained' type='submit' fullWidth sx={{ borderRadius: 3 }}>
+					<Button variant='contained' type='submit' fullWidth>
 						Сохранить
 					</Button>
 				</LocationForm>

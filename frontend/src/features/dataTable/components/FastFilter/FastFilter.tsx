@@ -94,7 +94,7 @@ export const FastFilter = () => {
 				size='small'
 				variant='outlined'
 				color='inherit'
-				sx={{ borderRadius: 3, paddingX: 1.5 }}
+				sx={{ paddingX: 1.5 }}
 			>
 				<Badge color='secondary' variant='dot' invisible={!filter} sx={{ mr: 1 }}>
 					<FilterIcon fontSize={16} /*color={filter ? 'black' : '#adadad'}*/ />
@@ -163,16 +163,10 @@ export const FastFilter = () => {
 						name='overdue'
 						onClick={activeHandler}
 						variant={active == 'overdue' ? 'contained' : 'outlined'}
-						sx={{ borderRadius: 3 }}
 					>
 						Просроченные
 					</Button>
-					<Button
-						name='month'
-						onClick={activeHandler}
-						variant={active == 'month' ? 'contained' : 'outlined'}
-						sx={{ borderRadius: 3 }}
-					>
+					<Button name='month' onClick={activeHandler} variant={active == 'month' ? 'contained' : 'outlined'}>
 						По месяцам
 					</Button>
 				</ButtonGroup>
@@ -188,7 +182,7 @@ export const FastFilter = () => {
 				)}
 
 				{filter && (
-					<Button onClick={clearHandler} variant='outlined' fullWidth sx={{ borderRadius: 3, mt: 2 }}>
+					<Button onClick={clearHandler} variant='outlined' fullWidth sx={{ mt: 2 }}>
 						Сбросить фильтры
 					</Button>
 				)}

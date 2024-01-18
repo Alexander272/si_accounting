@@ -113,6 +113,8 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 							name={f.key}
 							rules={f.rules}
 							render={({ field, fieldState: { error } }) => (
+								// TODO It's recommended to avoid using custom objects containing prototype methods, such as Moment or Luxon, as defaultValues.
+								// надо подумать может стоит это все изменить (передавать строку и парсить ее, а потом возвращать строку)
 								<DatePicker
 									{...field}
 									label={f.label}

@@ -26,7 +26,7 @@ export const DataHeader = () => {
 					<Button
 						onClick={openHandler}
 						variant='outlined'
-						sx={{ borderWidth: 2, borderRadius: 3, minWidth: 54, ':hover': { borderWidth: 2 } }}
+						sx={{ borderWidth: 2, minWidth: 54, ':hover': { borderWidth: 2 } }}
 					>
 						<PlusIcon fontSize={14} color={palette.primary.main} />
 					</Button>

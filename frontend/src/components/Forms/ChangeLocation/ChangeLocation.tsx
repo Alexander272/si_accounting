@@ -30,10 +30,10 @@ export const ChangeLocation = () => {
 			</Typography>
 
 			<LocationForm onSubmit={saveHandler} instrumentId={active || selected[0]}>
-				<Button onClick={closeModal} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
+				<Button onClick={closeModal} variant='outlined' fullWidth>
 					Отмена
 				</Button>
-				<Button type='submit' variant='contained' fullWidth sx={{ borderRadius: 3 }}>
+				<Button type='submit' variant='contained' fullWidth>
 					Сохранить
 				</Button>
 			</LocationForm>

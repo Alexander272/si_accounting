@@ -1,6 +1,7 @@
-import { Box } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 
 import { GroupList } from './GroupList'
+import { CreateButtons } from './CreateButtons'
 
 export const EmployeesList = () => {
 	return (
@@ -15,6 +16,10 @@ export const EmployeesList = () => {
 			flexDirection={'column'}
 			sx={{ backgroundColor: '#fff', userSelect: 'none' }}
 		>
+			<Typography variant='h5' align='center'>
+				Сотрудники
+			</Typography>
+			<CreateButtons />
 			<GroupList />
 		</Box>
 	)

@@ -134,11 +134,11 @@ export const Filter: FC<Props> = ({ cell }) => {
 				</FormProvider>
 
 				<Stack direction={'row'} mt={3} spacing={2}>
-					<Button onClick={clearHandler} fullWidth sx={{ borderRadius: 3 }}>
+					<Button onClick={clearHandler} fullWidth>
 						Отменить
 					</Button>
 
-					<Button onClick={submitHandler} fullWidth variant='outlined' sx={{ borderRadius: 3 }}>
+					<Button onClick={submitHandler} fullWidth variant='outlined'>
 						Применить
 					</Button>
 				</Stack>

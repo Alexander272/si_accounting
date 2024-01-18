@@ -19,7 +19,7 @@ export const GroupList = () => {
 		if (!id || !index || employees.data?.data[+index].id != id) return
 
 		dispatch(setEmployee(employees.data?.data[+index]))
-		openModal('Employee')
+		openModal('EditEmployee')
 	}
 
 	const openDepartmentHandler = (event: MouseEvent<HTMLDivElement>) => {
@@ -27,7 +27,7 @@ export const GroupList = () => {
 		if (!id || !index || departments.data?.data[+index].id != id) return
 
 		dispatch(setDepartment(departments.data.data[+index]))
-		openModal('Department')
+		openModal('EditDepartment')
 	}
 
 	return (

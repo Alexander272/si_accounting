@@ -4,6 +4,8 @@ export const ModalTitles = {
 	NEW_VERIFICATION: 'Добавить поверку',
 	NEW_MOVEMENT: 'Добавить перемещение',
 
-	EMPLOYEE: 'Сотрудник',
-	DEPARTMENT: 'Подразделение',
+	CREATE_EMPLOYEE: 'Добавить сотрудника',
+	EDIT_EMPLOYEE: 'Редактировать сотрудника',
+	CREATE_DEPARTMENT: 'Добавить подразделение',
+	EDIT_DEPARTMENT: 'Редактировать подразделение',
 }

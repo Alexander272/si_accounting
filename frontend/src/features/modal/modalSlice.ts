@@ -7,8 +7,10 @@ export type ModalSelectors =
 	| 'NewVerification'
 	| 'EditInstrument'
 	| 'ChangeLocation'
-	| 'Employee'
-	| 'Department'
+	| 'CreateEmployee'
+	| 'EditEmployee'
+	| 'CreateDepartment'
+	| 'EditDepartment'
 	| 'Confirm'
 
 interface IModalState {

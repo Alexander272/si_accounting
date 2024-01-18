@@ -68,7 +68,7 @@ export const Pagination: FC<Props> = ({ totalPages }) => {
 				onClick={startHandler}
 				variant='outlined'
 				disabled={currentPage == 1}
-				sx={{ minWidth: 36, width: 40, borderRadius: 3 }}
+				sx={{ minWidth: 36, width: 40 }}
 			>
 				<LeftArrowEndIcon
 					fontSize={12}
@@ -79,7 +79,7 @@ export const Pagination: FC<Props> = ({ totalPages }) => {
 				onClick={prevHandler}
 				variant='outlined'
 				disabled={currentPage == 1}
-				sx={{ minWidth: 36, width: 40, borderRadius: 3 }}
+				sx={{ minWidth: 36, width: 40 }}
 			>
 				<LeftArrowIcon fontSize={12} fill={currentPage == 1 ? palette.action.disabled : palette.primary.main} />
 			</Button>
@@ -90,7 +90,7 @@ export const Pagination: FC<Props> = ({ totalPages }) => {
 				onClick={nextHandler}
 				variant='outlined'
 				disabled={currentPage == totalPages}
-				sx={{ minWidth: 36, width: 40, borderRadius: 3 }}
+				sx={{ minWidth: 36, width: 40 }}
 			>
 				<LeftArrowIcon
 					fontSize={12}
@@ -102,7 +102,7 @@ export const Pagination: FC<Props> = ({ totalPages }) => {
 				onClick={endHandler}
 				variant='outlined'
 				disabled={currentPage == totalPages}
-				sx={{ minWidth: 36, width: 40, borderRadius: 3 }}
+				sx={{ minWidth: 36, width: 40 }}
 			>
 				<LeftArrowEndIcon
 					fontSize={12}

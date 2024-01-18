@@ -39,7 +39,7 @@ export const Tools = () => {
 				size='small'
 				variant='outlined'
 				color='inherit'
-				sx={{ borderRadius: 3, paddingX: 1.5 }}
+				sx={{ paddingX: 1.5 }}
 			>
 				Инструменты
 			</Button>
