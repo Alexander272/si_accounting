@@ -14,12 +14,20 @@ type KeycloakClient struct {
 	Realm        string           // realm specified in Keycloak
 }
 
-func NewKeycloakClient(url, clientId, realm string, adminName, adminPass string) *KeycloakClient {
-	client := gocloak.NewClient(url)
+type Deps struct {
+	Url       string
+	ClientId  string
+	Realm     string
+	AdminName string
+	AdminPass string
+}
+
+func NewKeycloakClient(deps Deps) *KeycloakClient {
+	client := gocloak.NewClient(deps.Url)
 
 	ctx := context.Background()
 
-	token, err := client.LoginAdmin(ctx, adminName, adminPass, realm)
+	token, err := client.LoginAdmin(ctx, deps.AdminName, deps.AdminPass, deps.Realm)
 	if err != nil {
 		logger.Fatalf("failed to login admin to keycloak. error: %s", err.Error())
 	}
@@ -27,7 +35,7 @@ func NewKeycloakClient(url, clientId, realm string, adminName, adminPass string)
 	// store, err := client.GetKeyStoreConfig()
 	// store.ActiveKeys.RS256
 
-	clients, err := client.GetClients(ctx, token.AccessToken, realm, gocloak.GetClientsParams{ClientID: &clientId})
+	clients, err := client.GetClients(ctx, token.AccessToken, deps.Realm, gocloak.GetClientsParams{ClientID: &deps.ClientId})
 	if err != nil {
 		logger.Fatalf("failed to get clients to keycloak. error: %s", err.Error())
 	}
@@ -37,8 +45,8 @@ func NewKeycloakClient(url, clientId, realm string, adminName, adminPass string)
 
 	return &KeycloakClient{
 		Client:       client,
-		ClientId:     clientId,
+		ClientId:     deps.ClientId,
 		ClientSecret: secret,
-		Realm:        realm,
+		Realm:        deps.Realm,
 	}
 }

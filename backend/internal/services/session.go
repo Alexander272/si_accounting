@@ -12,11 +12,13 @@ import (
 type SessionService struct {
 	keycloak *auth.KeycloakClient
 	//TODO menu or role
+	role Role
 }
 
-func NewSessionService(keycloak *auth.KeycloakClient) *SessionService {
+func NewSessionService(keycloak *auth.KeycloakClient, role Role) *SessionService {
 	return &SessionService{
 		keycloak: keycloak,
+		role:     role,
 	}
 }
 
@@ -38,12 +40,17 @@ func (s *SessionService) SignIn(ctx context.Context, u models.SignIn) (*models.U
 		return nil, err
 	}
 
-	//TODO get menu
+	// get menu
+	role, err := s.role.Get(ctx, user.Role)
+	if err != nil {
+		return nil, err
+	}
 
 	user.AccessToken = res.AccessToken
 	user.RefreshToken = res.RefreshToken
+	user.Menu = role.Menu
 
-	return nil, fmt.Errorf("not implemented")
+	return user, nil
 }
 
 func (s *SessionService) SignOut(ctx context.Context, refreshToken string) error {
@@ -65,21 +72,27 @@ func (s *SessionService) Refresh(ctx context.Context, refreshToken string) (*mod
 		return nil, err
 	}
 
-	//TODO get menu
+	// get menu
+	role, err := s.role.Get(ctx, user.Role)
+	if err != nil {
+		return nil, err
+	}
 
 	user.AccessToken = res.AccessToken
 	user.RefreshToken = res.RefreshToken
+	user.Menu = role.Menu
 
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *SessionService) DecodeAccessToken(ctx context.Context, token string) (user *models.User, err error) {
+func (s *SessionService) DecodeAccessToken(ctx context.Context, token string) (*models.User, error) {
 	//TODO расшифровку токена тоже лучше делать здесь, а в keycloak
 	_, claims, err := s.keycloak.Client.DecodeAccessToken(ctx, token, s.keycloak.Realm)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode access token. error: %w", err)
 	}
 
+	user := &models.User{}
 	var role, username, userId string
 	c := *claims
 	access, ok := c["realm_access"]
@@ -87,8 +100,8 @@ func (s *SessionService) DecodeAccessToken(ctx context.Context, token string) (u
 		a := access.(map[string]interface{})["roles"]
 		roles := a.([]interface{})
 		for _, r := range roles {
-			if strings.Contains(r.(string), "si") {
-				role = strings.Replace(r.(string), "si_", "", 1)
+			if strings.Contains(r.(string), "sia") {
+				role = strings.Replace(r.(string), "sia_", "", 1)
 				break
 			}
 		}

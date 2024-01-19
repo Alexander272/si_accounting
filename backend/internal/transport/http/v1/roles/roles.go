@@ -25,6 +25,7 @@ func Register(api *gin.RouterGroup, service services.Role) {
 	roles := api.Group("/roles")
 	{
 		roles.GET("", handlers.GetAll)
+		roles.GET("/:name", handlers.Get)
 		roles.POST("", handlers.Create)
 		roles.PUT("/:id", handlers.Update)
 		roles.DELETE("/:id", handlers.Delete)
@@ -40,6 +41,18 @@ func (h *RoleHandlers) GetAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.DataResponse{Data: roles})
+}
+
+func (h *RoleHandlers) Get(c *gin.Context) {
+	roleName := c.Param("name")
+
+	role, err := h.service.Get(c, roleName)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DataResponse{Data: role})
 }
 
 func (h *RoleHandlers) Create(c *gin.Context) {

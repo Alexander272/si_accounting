@@ -20,6 +20,7 @@ func NewRoleService(repo repository.Role) *RoleService {
 
 type Role interface {
 	GetAll(context.Context, models.GetRolesDTO) ([]models.RoleFull, error)
+	Get(context.Context, string) (*models.Role, error)
 	Create(context.Context, models.RoleDTO) error
 	Update(context.Context, models.RoleDTO) error
 	Delete(context.Context, string) error
@@ -31,6 +32,14 @@ func (s *RoleService) GetAll(ctx context.Context, req models.GetRolesDTO) ([]mod
 		return nil, fmt.Errorf("failed to get all roles. error: %w", err)
 	}
 	return roles, nil
+}
+
+func (s *RoleService) Get(ctx context.Context, roleName string) (*models.Role, error) {
+	role, err := s.repo.Get(ctx, roleName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get role. error: %w", err)
+	}
+	return role, nil
 }
 
 func (s *RoleService) Create(ctx context.Context, role models.RoleDTO) error {

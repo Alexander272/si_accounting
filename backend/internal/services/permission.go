@@ -89,11 +89,14 @@ func (s *PolicyAdapter) LoadPolicy(model model.Model) error {
 	// load users group (role)
 	for _, mf := range menu {
 		// lines = append(lines, fmt.Sprintf("g, %s, %s", mf.Role.Name, mf.Role.Extends))
-		line := fmt.Sprintf("g, %s, %s", mf.Role.Name, mf.Role.Extends)
-		if err := persist.LoadPolicyLine(line, model); err != nil {
-			return fmt.Errorf("failed to load group policy. error: %w", err)
+		for _, v := range mf.Role.Extends {
+			line := fmt.Sprintf("g, %s, %s", mf.Role.Name, v)
+			if err := persist.LoadPolicyLine(line, model); err != nil {
+				return fmt.Errorf("failed to load group policy. error: %w", err)
+			}
 		}
 	}
+
 	return nil
 }
 

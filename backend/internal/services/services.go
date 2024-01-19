@@ -48,7 +48,7 @@ func NewServices(deps Deps) *Services {
 	menuWithApi := NewMenuWithApiService(deps.Repos.MenuWithApi)
 	menu := NewMenuService(deps.Repos.Menu, menuWithApi)
 
-	session := NewSessionService(deps.Keycloak)
+	session := NewSessionService(deps.Keycloak, role)
 	permission := NewPermissionService("configs/privacy.conf", menu)
 
 	return &Services{

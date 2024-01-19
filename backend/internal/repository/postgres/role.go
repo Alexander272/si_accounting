@@ -7,6 +7,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type RoleRepo struct {
@@ -21,41 +22,98 @@ func NewRoleRepo(db *sqlx.DB) *RoleRepo {
 
 type Role interface {
 	GetAll(context.Context, models.GetRolesDTO) ([]models.RoleFull, error)
+	Get(context.Context, string) (*models.Role, error)
 	Create(context.Context, models.RoleDTO) error
 	Update(context.Context, models.RoleDTO) error
 	Delete(context.Context, string) error
 }
 
 func (r *RoleRepo) GetAll(ctx context.Context, req models.GetRolesDTO) (roles []models.RoleFull, err error) {
-	/*
-		Если делать extends массивом, то нужен такой запрос
-
-		SELECT id, name, description, "number", COALESCE(extends, '{}') AS extends, is_show
-		FROM public.roles_test WHERE is_show=true ORDER BY number, name
-	*/
-
-	query := fmt.Sprintf(`SELECT id, name, number, description, COALESCE(extends::text, '') AS extends FROM %s WHERE is_show=true 
-		ORDER BY number, name`,
+	var data []models.RoleFullDTO
+	query := fmt.Sprintf(`SELECT id, name, number, description, COALESCE(extends, '{}') AS extends 
+		FROM %s WHERE is_show=true ORDER BY number, name`,
 		RoleTable,
 	)
 
-	if err := r.db.Select(&roles, query); err != nil {
+	if err := r.db.Select(&data, query); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
+
+	for _, rfd := range data {
+		roles = append(roles, models.RoleFull{
+			Id:          rfd.Id,
+			Name:        rfd.Name,
+			Number:      rfd.Number,
+			Extends:     rfd.Extends,
+			Description: rfd.Description,
+		})
+	}
+
 	return roles, nil
 }
 
-func (r *RoleRepo) Get(ctx context.Context, role string) (roles []models.Role, err error) {
-	// query := fmt.Sprintf(`SELECT `)
+func (r *RoleRepo) Get(ctx context.Context, roleName string) (*models.Role, error) {
+	var data []models.RoleWithMenuDTO
+	query := fmt.Sprintf(`SELECT r.id, r.name, COALESCE(extends, '{}') AS extends, i.name AS menu
+		FROM %s AS r 
+		LEFT JOIN %s AS m ON r.id=role_id 
+		LEFT JOIN %s AS i ON menu_item_id=i.id
+		WHERE i.is_show=true ORDER BY number`,
+		RoleTable, MenuByRoleTable, MenuItemTable,
+	)
 
-	return nil, fmt.Errorf("not implemented")
+	if err := r.db.Select(&data, query); err != nil {
+		return nil, fmt.Errorf("failed to get roles with menu. error: %w", err)
+	}
+
+	role := &models.Role{}
+	menu := make(map[string][]string, 0)
+	extends := make(map[string]struct{})
+
+	//EDIT Возможно можно это как-то покрасивее написать
+	for _, r := range data {
+		m, exist := menu[r.Id]
+		if !exist {
+			menu[r.Id] = []string{r.Menu}
+
+			if r.Name == roleName {
+				role.Id = r.Id
+				role.Name = r.Name
+				extends[r.Id] = struct{}{}
+				for _, v := range r.Extends {
+					extends[v] = struct{}{}
+				}
+			}
+		} else {
+			m = append(m, r.Menu)
+			menu[r.Id] = m
+		}
+	}
+
+	for i := 1; i < len(extends); i++ {
+		for _, r := range data {
+			_, exist := extends[r.Id]
+			if exist {
+				for _, v := range r.Extends {
+					extends[v] = struct{}{}
+				}
+				break
+			}
+		}
+	}
+
+	for k := range extends {
+		role.Menu = append(role.Menu, menu[k]...)
+	}
+
+	return role, nil
 }
 
 func (r *RoleRepo) Create(ctx context.Context, role models.RoleDTO) error {
 	query := fmt.Sprintf(`INSERT INTO %s(id, name, number, extends, description) VALUES ($1, $2, $3, $4, $5)`, RoleTable)
 	id := uuid.New()
 
-	_, err := r.db.Exec(query, id, role.Name, role.Number, role.Extends)
+	_, err := r.db.Exec(query, id, role.Name, role.Number, pq.Array(role.Extends))
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
@@ -65,7 +123,7 @@ func (r *RoleRepo) Create(ctx context.Context, role models.RoleDTO) error {
 func (r *RoleRepo) Update(ctx context.Context, role models.RoleDTO) error {
 	query := fmt.Sprintf(`UPDATE %s SET name=$1, number=$2, extends=$3, description=$4 WHERE id=$5`, RoleTable)
 
-	_, err := r.db.Exec(query, role.Name, role.Number, role.Extends, role.Description, role.Id)
+	_, err := r.db.Exec(query, role.Name, role.Number, pq.Array(role.Extends), role.Description, role.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

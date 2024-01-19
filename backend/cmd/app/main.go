@@ -14,6 +14,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/server"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	transport "github.com/Alexander272/si_accounting/backend/internal/transport/http"
+	"github.com/Alexander272/si_accounting/backend/pkg/auth"
 	"github.com/Alexander272/si_accounting/backend/pkg/database/postgres"
 	"github.com/Alexander272/si_accounting/backend/pkg/database/redis"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
@@ -56,20 +57,19 @@ func main() {
 		logger.Fatalf("failed to initialize redis %s", err.Error())
 	}
 
-	// keycloak := auth.NewKeycloakClient(
-	// 	conf.Keycloak.Url,
-	// 	conf.Keycloak.ClientId,
-	// 	//conf.Keycloak.ClientSecret,
-	// 	conf.Keycloak.Realm,
-	// 	conf.Keycloak.Root,
-	// 	conf.Keycloak.RootPass,
-	// )
+	keycloak := auth.NewKeycloakClient(auth.Deps{
+		Url:       conf.Keycloak.Url,
+		ClientId:  conf.Keycloak.ClientId,
+		Realm:     conf.Keycloak.Realm,
+		AdminName: conf.Keycloak.Root,
+		AdminPass: conf.Keycloak.RootPass,
+	})
 
 	//* Services, Repos & API Handlers
 	repos := repository.NewRepository(db, redis)
 	services := services.NewServices(services.Deps{
-		Repos: repos,
-		// Keycloak:        keycloak,
+		Repos:           repos,
+		Keycloak:        keycloak,
 		AccessTokenTTL:  conf.Auth.AccessTokenTTL,
 		RefreshTokenTTL: conf.Auth.RefreshTokenTTL,
 	})

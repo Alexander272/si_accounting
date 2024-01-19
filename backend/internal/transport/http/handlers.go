@@ -14,6 +14,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const CookieName = "si_accounting_session"
+
 type Handler struct {
 	// permissions casbin.Casbin
 	// keycloak *auth.KeycloakClient
@@ -40,15 +42,16 @@ func (h *Handler) Init(conf *config.Config) *gin.Engine {
 		c.String(http.StatusOK, "pong")
 	})
 
-	h.initAPI(router, conf.Auth, conf.Bot)
+	h.initAPI(router, conf)
 
 	return router
 }
 
-func (h *Handler) initAPI(router *gin.Engine, auth config.AuthConfig, bot config.BotConfig) {
+func (h *Handler) initAPI(router *gin.Engine, conf *config.Config) {
 	// handlerV1 := httpV1.NewHandler(h.services, auth, bot, middleware.NewMiddleware(h.services, auth, h.permissions, h.keycloak))
 
-	handlerV1 := httpV1.NewHandler(h.services)
+	//TODO add middleware
+	handlerV1 := httpV1.NewHandler(httpV1.Deps{Services: h.services, Conf: conf, CookieName: CookieName})
 	api := router.Group("/api")
 	{
 		handlerV1.Init(api)

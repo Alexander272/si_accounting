@@ -1,7 +1,10 @@
 package v1
 
 import (
+	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/auth"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/employees"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/menu"
@@ -15,26 +18,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const CookieName = "si_accounting_session"
-
 type Handler struct {
-	services *services.Services
-	// auth     config.AuthConfig
-	// bot      config.BotConfig
-	// middleware *middleware.Middleware
+	services   *services.Services
+	conf       *config.Config
+	middleware *middleware.Middleware
 	cookieName string
 }
 
-// func NewHandler(services *services.Services, auth config.AuthConfig, bot config.BotConfig, middleware *middleware.Middleware) *Handler {
-func NewHandler(services *services.Services) *Handler {
-	// middleware.CookieName = CookieName
+type Deps struct {
+	Services   *services.Services
+	Conf       *config.Config
+	Middleware *middleware.Middleware
+	CookieName string
+}
 
+func NewHandler(deps Deps) *Handler {
 	return &Handler{
-		services: services,
-		// auth:       auth,
-		// bot:        bot,
-		// middleware: middleware,
-		cookieName: CookieName,
+		services:   deps.Services,
+		conf:       deps.Conf,
+		middleware: deps.Middleware,
+		cookieName: deps.CookieName,
 	}
 }
 
@@ -50,14 +53,17 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 
 	// TODO что осталось сделать:
 	// - отправлять уведомления о необходимости сдачи инструментов
-	// - добавить возможность для редактора добавлять и изменять пользователей и подразделения
+	// + добавить возможность для редактора добавлять и изменять пользователей и подразделения
 	// - сделать для бота возможность подтверждения получения инструментов прямо в нем (не переходя в сервис)
 	// - сделать авторизацию в сервисе
 	// - разделить функционал на клиенте по ролям
 	// - сделать фильтры по умолчанию для ролей (или для конкретных пользователей)
-	// - сделать возможность скрывать колонки в таблице
 	// - добавить страницы с историями (возможно модальные окна)
+	// - сделать страницу с настройками прав доступа (для админа)
+	// - сделать возможность скрывать колонки в таблице
 	// -
+
+	auth.Register(v1, auth.Deps{Service: h.services.Session, Auth: h.conf.Auth, CookieName: h.cookieName})
 
 	siGroup := v1.Group("/si")
 	si.Register(siGroup, h.services.SI)
