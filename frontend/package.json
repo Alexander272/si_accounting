@@ -16,6 +16,7 @@
     "@mui/material": "^5.14.13",
     "@mui/x-date-pickers": "^6.16.2",
     "@reduxjs/toolkit": "^1.9.7",
+    "async-mutex": "^0.4.1",
     "dayjs": "^1.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
