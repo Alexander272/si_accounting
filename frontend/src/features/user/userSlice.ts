@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
+import type { RootState } from '@/app/store'
 import type { IUser } from './types/user'
 
 interface IUserState {
@@ -36,6 +37,9 @@ const userSlice = createSlice({
 		resetUser: () => initialState,
 	},
 })
+
+export const getToken = (state: RootState) => state.user.token
+export const getMenu = (state: RootState) => state.user.menu
 
 export const userPath = userSlice.name
 export const userReducer = userSlice.reducer

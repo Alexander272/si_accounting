@@ -1,13 +1,15 @@
-// import { Navigate, useLocation } from 'react-router-dom'
-// import { useAppSelector } from '@/hooks/redux'
+import { Navigate, useLocation } from 'react-router-dom'
+
+import { useAppSelector } from '@/hooks/redux'
+import { getToken } from '@/features/user/userSlice'
+import { AppRoutes } from '@/constants/routes'
 
 // проверка авторизации пользователя
 export default function PrivateRoute({ children }: { children: JSX.Element }) {
-	//TODO вернуть проверку
-	// const isAuth = useAppSelector(state => state.user.isAuth)
-	// const location = useLocation()
+	const token = useAppSelector(getToken)
+	const location = useLocation()
 
-	// if (!isAuth) return <Navigate to='/auth' state={{ from: location }} />
+	if (!token) return <Navigate to={AppRoutes.AUTH} state={{ from: location }} />
 
 	return children
 }

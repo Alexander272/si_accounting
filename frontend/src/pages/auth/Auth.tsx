@@ -1,10 +1,28 @@
+import { useEffect } from 'react'
 import { Box, useTheme } from '@mui/material'
+import { useLocation, useNavigate } from 'react-router-dom'
 
+import { useAppSelector } from '@/hooks/redux'
 import { SignInForm } from '@/features/auth/components/SignInForm'
+import { getToken } from '@/features/user/userSlice'
 import { PageBox } from '@/styled/PageBox'
+
+type LocationState = {
+	from?: Location
+}
 
 export default function Auth() {
 	const { palette } = useTheme()
+
+	const navigate = useNavigate()
+	const location = useLocation()
+
+	const token = useAppSelector(getToken)
+
+	useEffect(() => {
+		const to: string = (location.state as LocationState)?.from?.pathname || '/'
+		if (token) navigate(to, { replace: true })
+	}, [token, navigate, location.state])
 
 	return (
 		<PageBox>
