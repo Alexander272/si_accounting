@@ -9,6 +9,8 @@ export default function PrivateRoute({ children }: { children: JSX.Element }) {
 	const token = useAppSelector(getToken)
 	const location = useLocation()
 
+	if (!token) console.log('navigate to auth')
+
 	if (!token) return <Navigate to={AppRoutes.AUTH} state={{ from: location }} />
 
 	return children

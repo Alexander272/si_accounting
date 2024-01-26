@@ -2,10 +2,12 @@ import { useRef, useState } from 'react'
 import { Button, ListItemIcon, Menu, MenuItem } from '@mui/material'
 import { toast } from 'react-toastify'
 
-import { useModal } from '@/features/modal/hooks/useModal'
 import type { ModalSelectors } from '@/features/modal/modalSlice'
 import { useAppSelector } from '@/hooks/redux'
-import { getSelectedItems } from '../../dataTableSlice'
+import { PermRules } from '@/constants/permissions'
+import { useModal } from '@/features/modal/hooks/useModal'
+import { useCheckPermission } from '@/features/auth/hooks/check'
+import { getSelectedItems } from '@/features/dataTable/dataTableSlice'
 import { VerifyIcon } from '@/components/Icons/VerifyIcon'
 import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
 import { FileDownloadIcon } from '@/components/Icons/FileDownloadIcon'
@@ -19,17 +21,26 @@ export const Tools = () => {
 
 	const toggleHandler = () => setOpen(prev => !prev)
 
-	// const verificationHandler = () => {
-	// 	toggleHandler()
-	// 	if (!selected.length) toast.error('Инструменты не выбраны')
-	// 	else openModal('NewVerification')
-	// }
-
 	const modalHandler = (selector: ModalSelectors) => () => {
 		toggleHandler()
 		if (!selected.length) toast.error('Инструменты не выбраны')
 		else openModal(selector)
 	}
+
+	const menuItems = [
+		<MenuItem key='location' onClick={modalHandler('ChangeLocation')}>
+			<ListItemIcon>
+				<ExchangeIcon fontSize={18} fill={'#757575'} />
+			</ListItemIcon>
+			Добавить перемещение
+		</MenuItem>,
+		<MenuItem key='verification' onClick={modalHandler('NewVerification')}>
+			<ListItemIcon>
+				<VerifyIcon fontSize={18} fill={'#757575'} />
+			</ListItemIcon>
+			Добавить поверку
+		</MenuItem>,
+	]
 
 	return (
 		<>
@@ -80,21 +91,9 @@ export const Tools = () => {
 					},
 				}}
 			>
-				<MenuItem onClick={modalHandler('ChangeLocation')}>
-					<ListItemIcon>
-						<ExchangeIcon fontSize={18} fill={'#757575'} />
-					</ListItemIcon>
-					Добавить перемещение
-				</MenuItem>
+				{useCheckPermission(PermRules.SI.Write) ? menuItems : null}
 
-				<MenuItem onClick={modalHandler('NewVerification')}>
-					<ListItemIcon>
-						<VerifyIcon fontSize={18} fill={'#757575'} />
-					</ListItemIcon>
-					Добавить поверку
-				</MenuItem>
-
-				<MenuItem>
+				<MenuItem disabled>
 					<ListItemIcon>
 						<FileDownloadIcon fontSize={20} fill={'#757575'} />
 					</ListItemIcon>

@@ -40,7 +40,7 @@ export const SignInForm = () => {
 	}
 
 	return (
-		<Stack component='form' sx={{ position: 'relative' }}>
+		<Stack component='form' onSubmit={handleSubmit(signInHandler)} sx={{ position: 'relative' }}>
 			{isLoading ? <LinearProgress sx={{ position: 'absolute', bottom: -20, left: 0, right: 0 }} /> : null}
 
 			<Typography
@@ -107,12 +107,7 @@ export const SignInForm = () => {
 				/>
 			</Stack>
 
-			<Button
-				onClick={handleSubmit(signInHandler)}
-				disabled={isLoading}
-				variant='contained'
-				sx={{ borderRadius: 10, marginY: 3 }}
-			>
+			<Button type='submit' disabled={isLoading} variant='contained' sx={{ borderRadius: 10, marginY: 3 }}>
 				Войти
 			</Button>
 		</Stack>

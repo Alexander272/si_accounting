@@ -38,11 +38,11 @@ export const DataTableRow: FC<Props> = memo(({ data, selected, itemId, onSelect,
 	const getRowColor = () => {
 		if (itemId == data.id) return RowColors['active']
 
-		const deadline = dayjs().add(15, 'd').isAfter(dayjs(data.nextVerificationDate, 'DD.MM.YYYY'))
-		if (deadline) return RowColors['deadline']
-
 		const overdue = dayjs().isAfter(dayjs(data.nextVerificationDate, 'DD.MM.YYYY'))
 		if (overdue) return RowColors['overdue']
+
+		const deadline = dayjs().add(15, 'd').isAfter(dayjs(data.nextVerificationDate, 'DD.MM.YYYY'))
+		if (deadline) return RowColors['deadline']
 
 		if (data.place == 'Перемещение') return RowColors['moved']
 		if (data.place == 'Резерв') return RowColors['reverse']
