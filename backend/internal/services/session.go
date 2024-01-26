@@ -82,7 +82,7 @@ func (s *SessionService) Refresh(ctx context.Context, refreshToken string) (*mod
 	user.RefreshToken = res.RefreshToken
 	user.Menu = role.Menu
 
-	return nil, fmt.Errorf("not implemented")
+	return user, nil
 }
 
 func (s *SessionService) DecodeAccessToken(ctx context.Context, token string) (*models.User, error) {

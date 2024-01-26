@@ -55,29 +55,41 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	// - отправлять уведомления о необходимости сдачи инструментов
 	// + добавить возможность для редактора добавлять и изменять пользователей и подразделения
 	// - сделать для бота возможность подтверждения получения инструментов прямо в нем (не переходя в сервис)
-	// - сделать авторизацию в сервисе
-	// - разделить функционал на клиенте по ролям
-	// - сделать фильтры по умолчанию для ролей (или для конкретных пользователей)
+	// + сделать авторизацию в сервисе
+	// + защитить необходимые api
+	// +- разделить функционал на клиенте по ролям
+	// - сделать фильтры по умолчанию для ролей (или для конкретных пользователей) |>
 	// - добавить страницы с историями (возможно модальные окна)
 	// - сделать страницу с настройками прав доступа (для админа)
 	// - сделать возможность скрывать колонки в таблице
+	// - сделать возможность нескольких одновременных сортировок
+	// - перенести проверку токена из keycloak в программу
+	// - сделать расшифровку токена локально, а не в keycloak
 	// -
+
+	/*
+		|> можно сделать чтобы если роль == user добавлялся фильтр по месту нахождения (только подразделение где пользователь работает, проблема в том что
+		список сотрудников и пользователей никак не связаны между собой)
+		также сам фильтр лучше прописать в бд. так будет проще менять в случае чего
+	*/
 
 	auth.Register(v1, auth.Deps{Service: h.services.Session, Auth: h.conf.Auth, CookieName: h.cookieName})
 
-	siGroup := v1.Group("/si")
+	secure := v1.Group("", h.middleware.VerifyToken, h.middleware.CheckPermissions)
+
+	siGroup := secure.Group("/si")
 	si.Register(siGroup, h.services.SI)
 	instrument.Register(siGroup, h.services.Instrument)
 	verification.Register(siGroup, h.services.Verification, h.services.Documents)
 	location.Register(siGroup, h.services.Location)
 
-	departments.Register(v1, h.services.Department)
-	employees.Register(v1, h.services.Employee)
+	departments.Register(secure, h.services.Department)
+	employees.Register(secure, h.services.Employee)
 
-	roles.Register(v1, h.services.Role)
-	menu.Register(v1, h.services.Menu)
-	menu_item.Register(v1, h.services.MenuItem)
-	menu_with_api.Register(v1, h.services.MenuWithApi)
+	roles.Register(secure, h.services.Role)
+	menu.Register(secure, h.services.Menu)
+	menu_item.Register(secure, h.services.MenuItem)
+	menu_with_api.Register(secure, h.services.MenuWithApi)
 }
 
 // func (h *Handler) notImplemented(c *gin.Context) {

@@ -77,7 +77,7 @@ func main() {
 	// casbin := casbin.NewCasbinService(services.Role, services.User, "configs/privacy.conf")
 
 	// handlers := transport.NewHandler(services, casbin, keycloak)
-	handlers := transport.NewHandler(services)
+	handlers := transport.NewHandler(services, keycloak)
 
 	//* HTTP Server
 
