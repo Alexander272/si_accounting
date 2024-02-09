@@ -22,10 +22,14 @@ export const DataFooter = () => {
 
 			<Pagination totalPages={Math.ceil((data?.total || 1) / limit)} />
 
-			<Limit />
-			<Typography sx={{ ml: 2 }}>
-				{(page - 1) * limit || 1}-{(page - 1) * limit + (data?.data.length || 0)} из {data?.total}
-			</Typography>
+			{data?.data.length ? (
+				<>
+					<Limit />
+					<Typography sx={{ ml: 2 }}>
+						{(page - 1) * limit || 1}-{(page - 1) * limit + (data?.data.length || 0)} из {data?.total}
+					</Typography>
+				</>
+			) : null}
 		</Stack>
 	)
 }

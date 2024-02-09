@@ -56,7 +56,7 @@ export const CreateDataItem = () => {
 				</VerificationForm>
 			)}
 			{active == 2 && (
-				<LocationForm onSubmit={nextHandler}>
+				<LocationForm onSubmit={nextHandler} isNew>
 					<Button onClick={prevHandler} variant='outlined' fullWidth>
 						Назад
 					</Button>

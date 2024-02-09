@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Button, ListItemIcon, Menu, MenuItem } from '@mui/material'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 import type { ModalSelectors } from '@/features/modal/modalSlice'
 import { useAppSelector } from '@/hooks/redux'
@@ -17,6 +18,8 @@ export const Tools = () => {
 	const [open, setOpen] = useState(false)
 	const { openModal } = useModal()
 
+	const navigate = useNavigate()
+
 	const selected = useAppSelector(getSelectedItems)
 
 	const toggleHandler = () => setOpen(prev => !prev)
@@ -25,6 +28,10 @@ export const Tools = () => {
 		toggleHandler()
 		if (!selected.length) toast.error('Инструменты не выбраны')
 		else openModal(selector)
+	}
+
+	const linkHandler = (link: string) => () => {
+		navigate(link)
 	}
 
 	const menuItems = [
@@ -39,6 +46,10 @@ export const Tools = () => {
 				<VerifyIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>
 			Добавить поверку
+		</MenuItem>,
+		<MenuItem key='departments' onClick={linkHandler('/employees')}>
+			<ListItemIcon>IC</ListItemIcon>
+			Редактировать подразделения
 		</MenuItem>,
 	]
 

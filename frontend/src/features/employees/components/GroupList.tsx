@@ -2,9 +2,9 @@ import { MouseEvent } from 'react'
 import { Box, Typography } from '@mui/material'
 
 import { useAppDispatch } from '@/hooks/redux'
+import { useModal } from '@/features/modal/hooks/useModal'
 import { useGetDepartmentsQuery, useGetEmployeesQuery } from '../employeesApiSlice'
 import { setDepartment, setEmployee } from '../employeeSlice'
-import { useModal } from '@/features/modal/hooks/useModal'
 
 export const GroupList = () => {
 	const departments = useGetDepartmentsQuery(null)

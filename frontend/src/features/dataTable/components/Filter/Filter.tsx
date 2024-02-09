@@ -5,12 +5,12 @@ import { Button, Divider, IconButton, Menu, Stack, Tooltip, Typography } from '@
 import type { IDataItem, ISIFilter } from '../../types/data'
 import type { IHeadCell } from '../DataTableHead/columns'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { getTableFilter, setFilters } from '../../dataTableSlice'
+import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
 import { FilterIcon } from '@/components/Icons/FilterIcon'
+import { getTableFilter, setFilters } from '../../dataTableSlice'
 import { DateFilter } from './DateFilter'
 import { TextFilter } from './TextFilter'
 import { NumberFilter } from './NumberFilter'
-import { useGetDepartmentsQuery } from '@/components/Forms/LocationForm/locationApiSlice'
 import { ListFilter } from './ListFilter'
 
 type Props = {

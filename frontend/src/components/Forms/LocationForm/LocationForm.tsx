@@ -1,14 +1,15 @@
 import { FC, PropsWithChildren, useEffect } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Autocomplete, Box, LinearProgress, Stack, TextField } from '@mui/material'
+import { Autocomplete, Box, LinearProgress, Stack, TextField, Typography } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
-import dayjs from 'dayjs'
 import { toast } from 'react-toastify'
+import dayjs from 'dayjs'
 
 import type { IFetchError } from '@/app/types/error'
+import { useGetDepartmentsQuery, useGetEmployeesQuery } from '@/features/employees/employeesApiSlice'
 import { LocationFields, type LocationFormType } from '../fields'
 import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
-import { useCreateLocationMutation, useGetDepartmentsQuery, useGetEmployeesQuery } from './locationApiSlice'
+import { useCreateLocationMutation } from './locationApiSlice'
 
 const defaultValues: LocationFormType = {
 	department: '',
@@ -19,9 +20,10 @@ const defaultValues: LocationFormType = {
 type Props = {
 	onSubmit: () => void
 	instrumentId?: string
+	isNew?: boolean
 }
 
-export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit, instrumentId = 'draft' }) => {
+export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit, instrumentId = 'draft', isNew }) => {
 	const methods = useForm<LocationFormType>({ defaultValues })
 
 	const department = methods.watch('department')
@@ -42,27 +44,16 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 		data: employees,
 		isLoading: loadEmployees,
 		isFetching: isFetchingEmployees,
-	} = useGetEmployeesQuery(departmentId || departments?.data[0].id || '', {
-		skip: !departmentId && !departments?.data[0].id,
-	})
-
-	// const departments = [{ id: '1', name: 'test', leader: 'lead' }]
-	// const users = [{ id: '1', name: 'user', departmentId: '1' }]
+	} = useGetEmployeesQuery(departmentId || departments?.data[0].id || null)
 
 	const [create] = useCreateLocationMutation()
 
 	useEffect(() => {
-		if (departments?.data) methods.setValue('department', departments.data[0].name)
+		if (departments?.data.length) methods.setValue('department', departments.data[0].name)
 	}, [departments, methods])
 	useEffect(() => {
-		if (employees?.data) methods.setValue('person', employees.data[0].name)
+		if (employees?.data.length) methods.setValue('person', employees.data[0].name)
 	}, [employees, methods])
-
-	// useEffect(() => {
-	// 	if (data) {
-	// 		methods.reset({ ...data.data, receiptDate: dayjs(data.data.receiptDate, 'DD.MM.YYYY') })
-	// 	}
-	// }, [data, methods])
 
 	//TODO надо определять это создание нового инструмента или нет
 	//TODO сделать возможность поставить инструмент в резерв (для новых инструментов)
@@ -113,7 +104,7 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 							name={f.key}
 							rules={f.rules}
 							render={({ field, fieldState: { error } }) => (
-								// TODO It's recommended to avoid using custom objects containing prototype methods, such as Moment or Luxon, as defaultValues.
+								// TODO It's recommended to avoid using custom objects containing prototype methods, such as Moment or Luxon, as defaultValues. =>
 								// надо подумать может стоит это все изменить (передавать строку и парсить ее, а потом возвращать строку)
 								<DatePicker
 									{...field}
@@ -178,6 +169,7 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 			<FormProvider {...methods}>
 				{!loadDepartments && !loadEmployees ? (
 					<Stack spacing={2} mt={3}>
+						{isNew && <Typography>Новый</Typography>}
 						{renderFields()}
 					</Stack>
 				) : null}

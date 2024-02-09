@@ -11,7 +11,7 @@ const employeesApiSlice = apiSlice.injectEndpoints({
 		getEmployees: builder.query<{ data: IEmployee[] }, string | null>({
 			query: departmentId => ({
 				url: `${API.employees}`,
-				params: new URLSearchParams(departmentId || undefined),
+				params: new URLSearchParams(departmentId ? { departmentId } : undefined),
 			}),
 			providesTags: (_result, _error, arg) => [{ type: 'Employees', id: arg || 'all' }],
 			onQueryStarted: async (_arg, api) => {
