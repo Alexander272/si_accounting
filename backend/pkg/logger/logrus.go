@@ -10,7 +10,8 @@ func Init(out io.Writer, env string) {
 	if env == "dev" {
 		logrus.SetLevel(logrus.TraceLevel)
 		logrus.SetFormatter(&logrus.TextFormatter{
-			FullTimestamp: true,
+			FullTimestamp:   true,
+			TimestampFormat: "02-01-2006 15:04:05",
 		})
 	}
 

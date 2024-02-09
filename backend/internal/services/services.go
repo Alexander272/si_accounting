@@ -22,6 +22,8 @@ type Services struct {
 	Menu
 	Session
 	Permission
+
+	Notification
 }
 
 type Deps struct {
@@ -51,6 +53,8 @@ func NewServices(deps Deps) *Services {
 	session := NewSessionService(deps.Keycloak, role)
 	permission := NewPermissionService("configs/privacy.conf", menu)
 
+	notification := NewNotificationService()
+
 	return &Services{
 		Instrument:   instrument,
 		Verification: verification,
@@ -66,5 +70,7 @@ func NewServices(deps Deps) *Services {
 		Menu:         menu,
 		Session:      session,
 		Permission:   permission,
+
+		Notification: notification,
 	}
 }

@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type (
 	Config struct {
-		Environment string `yaml:"environment" env:"APP_ENV" env-default:"dev"`
-		Redis       RedisConfig
-		Postgres    PostgresConfig
-		Auth        AuthConfig
-		Keycloak    KeycloakConfig
-		Http        HttpConfig
-		Limiter     LimiterConfig
-		Bot         BotConfig
+		Environment  string `yaml:"environment" env:"APP_ENV" env-default:"dev"`
+		Redis        RedisConfig
+		Postgres     PostgresConfig
+		Auth         AuthConfig
+		Keycloak     KeycloakConfig
+		Http         HttpConfig
+		Limiter      LimiterConfig
+		Notification NotificationConfig
+		Bot          BotConfig
 	}
 
 	HttpConfig struct {
@@ -66,6 +68,12 @@ type (
 		RPS   int           `yaml:"rps" env:"RPS" env-default:"10"`
 		Burst int           `yaml:"burst" env:"BURST" env-default:"20"`
 		TTL   time.Duration `yaml:"ttl" env:"TTL" env-default:"10m"`
+	}
+
+	NotificationConfig struct {
+		StartTime int                       `yaml:"start_time" env-default:"12"` // 12 hours (noon)
+		Interval  time.Duration             `yaml:"interval" env-default:"24h"`
+		Times     []models.NotificationTime `yaml:"times"`
 	}
 
 	BotConfig struct {

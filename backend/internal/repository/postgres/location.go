@@ -65,6 +65,8 @@ func (r *LocationRepo) GetLast(ctx context.Context, instrumentId string) (*model
 	return location, nil
 }
 
+// TODO наверное стоит записывать id работника и департамента, а текстовые поля которые есть сейчас соединить так же как и при запросе в новом поле
+
 func (r *LocationRepo) Create(ctx context.Context, l models.CreateLocationDTO) error {
 	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, person, department)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)`,

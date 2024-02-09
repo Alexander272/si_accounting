@@ -81,6 +81,10 @@ func main() {
 
 	//* HTTP Server
 
+	if err := services.Notification.Start(&conf.Notification); err != nil {
+		logger.Fatalf("failed to start sending notification. error: %s\n", err.Error())
+	}
+
 	srv := server.NewServer(conf, handlers.Init(conf))
 	go func() {
 		if err := srv.Run(); !errors.Is(err, http.ErrServerClosed) {
@@ -98,6 +102,10 @@ func main() {
 
 	ctx, shutdown := context.WithTimeout(context.Background(), timeout)
 	defer shutdown()
+
+	if err := services.Notification.Stop(); err != nil {
+		logger.Errorf("failed to stop sending notification. error: %s", err)
+	}
 
 	if err := srv.Stop(ctx); err != nil {
 		logger.Errorf("failed to stop server: %v", err)

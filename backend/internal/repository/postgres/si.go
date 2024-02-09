@@ -128,3 +128,21 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, 
 
 	return si, total.Total, nil
 }
+
+/*
+получение most_id сотрудника
+
+SELECT id, name, department_id, most_id, is_lead, CASE WHEN most_id != '' THEN most_id ELSE (
+		SELECT most_id FROM employee WHERE department_id=e.department_id AND is_lead
+	) END
+	FROM public.employee AS e;
+
+получение списка
+
+	SELECT id, name, factory_number,
+	v.date, v.next_date, m.person, m.department, m.status
+	FROM public.instruments AS i
+	LEFT JOIN LATERAL (SELECT date, next_date FROM verification_history WHERE instrument_id=i.id ORDER BY date DESC LIMIT 1) AS v ON TRUE
+	LEFT JOIN LATERAL (SELECT person, department, status FROM si_movement_history WHERE instrument_id=i.id ORDER BY date_of_issue DESC LIMIT 1) AS m ON TRUE
+	WHERE v.next_date>1706641200 AND v.next_date<1706727600 AND m.status='used'
+*/
