@@ -16,8 +16,8 @@ type Location struct {
 
 type CreateLocationDTO struct {
 	InstrumentId string `json:"instrumentId" db:"instrument_id" binding:"required"`
-	Person       string `json:"person" db:"person" binding:"required"`
-	Department   string `json:"department" db:"department" binding:"required"`
+	Person       string `json:"person" db:"person"`
+	Department   string `json:"department" db:"department"`
 	PersonId     string `json:"personId" db:"person_id"`
 	DepartmentId string `json:"departmentId" db:"department_id"`
 	// ReceiptDate     string `json:"receiptDate" db:"receipt_date"`

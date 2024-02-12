@@ -32,6 +32,9 @@ func (s *EmployeeService) GetAll(ctx context.Context, req models.GetEmployeesDTO
 	if err != nil {
 		return nil, fmt.Errorf("failed to get employees. error: %w", err)
 	}
+	if employees == nil {
+		employees = []models.Employee{}
+	}
 	return employees, nil
 }
 

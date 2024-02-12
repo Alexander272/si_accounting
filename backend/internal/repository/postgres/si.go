@@ -106,6 +106,8 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, 
 	)
 	si := []models.SI{}
 
+	// logger.Debug(query)
+
 	if err := r.db.Select(&si, query, params...); err != nil {
 		return nil, 0, fmt.Errorf("failed to execute query. error: %w", err)
 	}

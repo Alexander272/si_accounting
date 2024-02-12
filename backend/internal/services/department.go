@@ -30,6 +30,9 @@ func (s *DepartmentService) GetAll(ctx context.Context) ([]models.Department, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all departments. error: %w", err)
 	}
+	if departments == nil {
+		departments = []models.Department{}
+	}
 	return departments, nil
 }
 

@@ -50,8 +50,10 @@ func (s *VerificationService) Create(ctx context.Context, v models.CreateVerific
 		return fmt.Errorf("failed to change path documents. error: %w", err)
 	}
 
-	if err := s.instrument.ChangeStatus(ctx, models.UpdateStatus{Id: v.InstrumentId, Status: v.Status}); err != nil {
-		return err
+	if !v.IsDraftInstrument {
+		if err := s.instrument.ChangeStatus(ctx, models.UpdateStatus{Id: v.InstrumentId, Status: v.Status}); err != nil {
+			return err
+		}
 	}
 
 	return nil
