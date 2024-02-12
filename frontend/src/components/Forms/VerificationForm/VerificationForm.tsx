@@ -75,6 +75,7 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 			registerLink: data.verificationLink,
 			status: data.verificationStatus,
 			notes: data.notes,
+			isDraftInstrument: instrumentId == 'draft',
 		}
 
 		try {

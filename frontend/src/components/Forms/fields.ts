@@ -87,5 +87,5 @@ export type LocationFormType = {
 export const LocationFields: IField<KeysOfLocation>[] = [
 	{ key: 'department', label: 'Подразделение', type: 'list', rules: { required: true } },
 	{ key: 'person', label: 'Лицо держащее СИ', type: 'list', rules: { required: true } },
-	{ key: 'dateOfIssue', label: 'дата выдачи', type: 'date', rules: { required: true } },
+	{ key: 'dateOfIssue', label: 'дата выдачи или поступления', type: 'date', rules: { required: true } },
 ]
