@@ -18,8 +18,10 @@ export const ChangeLocation = () => {
 
 	const saveHandler = () => {
 		if (active) closeModal()
-		else dispatch(removeSelected(selected[0]))
-		if (selected.length == 1) closeModal()
+		else {
+			if (selected.length == 1) closeModal()
+			dispatch(removeSelected(selected[0]))
+		}
 	}
 
 	return (
@@ -29,7 +31,7 @@ export const ChangeLocation = () => {
 				{data?.data.name}
 			</Typography>
 
-			<LocationForm onSubmit={saveHandler} instrumentId={active || selected[0]}>
+			<LocationForm onSubmit={saveHandler} instrumentId={active || selected[0] || 'skip'}>
 				<Button onClick={closeModal} variant='outlined' fullWidth>
 					Отмена
 				</Button>

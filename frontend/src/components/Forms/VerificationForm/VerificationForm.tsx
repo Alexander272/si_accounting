@@ -32,7 +32,7 @@ type Props = {
 export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instrumentId = 'draft', onSubmit }) => {
 	const methods = useForm<VerificationFormType>({ defaultValues })
 
-	const { data: instrument } = useGetInstrumentByIdQuery(instrumentId)
+	const { data: instrument } = useGetInstrumentByIdQuery(instrumentId, { skip: instrumentId == 'skip' })
 
 	const { data, isFetching } = useGetLastVerificationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
 

@@ -29,7 +29,7 @@ export const NewVerification = () => {
 				{data?.data.name}
 			</Typography>
 
-			<VerificationForm instrumentId={active || selected[0]} onSubmit={saveHandler}>
+			<VerificationForm instrumentId={active || selected[0] || 'skip'} onSubmit={saveHandler}>
 				{/* <Button onClick={skipHandler} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
 					Пропустить
 				</Button> */}

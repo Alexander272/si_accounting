@@ -12,6 +12,7 @@ import { getSelectedItems } from '@/features/dataTable/dataTableSlice'
 import { VerifyIcon } from '@/components/Icons/VerifyIcon'
 import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
 import { FileDownloadIcon } from '@/components/Icons/FileDownloadIcon'
+import { EditEmployeeIcon } from '@/components/Icons/EditEmployeeIcon'
 
 export const Tools = () => {
 	const anchor = useRef<HTMLButtonElement>(null)
@@ -48,7 +49,9 @@ export const Tools = () => {
 			Добавить поверку
 		</MenuItem>,
 		<MenuItem key='departments' onClick={linkHandler('/employees')}>
-			<ListItemIcon>IC</ListItemIcon>
+			<ListItemIcon>
+				<EditEmployeeIcon fontSize={18} fill={'#757575'} />
+			</ListItemIcon>
 			Редактировать подразделения
 		</MenuItem>,
 	]

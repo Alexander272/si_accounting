@@ -29,7 +29,7 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 
 	const department = methods.watch('department')
 
-	const { data: instrument } = useGetInstrumentByIdQuery(instrumentId)
+	const { data: instrument } = useGetInstrumentByIdQuery(instrumentId, { skip: instrumentId == 'skip' })
 
 	// const { data } = useGetLastLocationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
 
@@ -71,14 +71,13 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 	const reserveHandler = () => setInReserve(prev => !prev)
 
 	const submitHandler = methods.handleSubmit(async data => {
-		console.log('location data', data)
 		const location = {
 			id: '',
 			instrumentId: instrument?.data.id || '',
 			department: data.department,
 			person: data.person,
 			dateOfIssue: data.dateOfIssue.format('DD.MM.YYYY'),
-			dateOfReceiving: '',
+			dateOfReceiving: isNew ? data.dateOfIssue.format('DD.MM.YYYY') : '',
 			status: isNew ? (inReserve ? 'reserve' : 'used') : 'moved',
 		}
 
@@ -144,7 +143,7 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 									options={op}
 									loading={loadings[f.key as 'department']}
 									getOptionLabel={option => (typeof option === 'string' ? option : option.name)}
-									freeSolo
+									// freeSolo
 									disableClearable
 									noOptionsText='Ничего не найдено'
 									disabled={inReserve}
@@ -184,7 +183,7 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 								onChange={reserveHandler}
 							/>
 						)}
-						{/* {isNew && <Typography>Новый</Typography>} */}
+
 						{renderFields()}
 					</Stack>
 				) : null}
