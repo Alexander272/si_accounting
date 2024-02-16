@@ -6,21 +6,24 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
 type RoleHandlers struct {
 	service services.Role
+	errBot  error_bot.ErrorBotApi
 }
 
-func NewRoleHandlers(service services.Role) *RoleHandlers {
+func NewRoleHandlers(service services.Role, errBot error_bot.ErrorBotApi) *RoleHandlers {
 	return &RoleHandlers{
 		service: service,
+		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Role) {
-	handlers := NewRoleHandlers(service)
+func Register(api *gin.RouterGroup, service services.Role, errBot error_bot.ErrorBotApi) {
+	handlers := NewRoleHandlers(service, errBot)
 
 	roles := api.Group("/roles")
 	{
@@ -36,7 +39,7 @@ func (h *RoleHandlers) GetAll(c *gin.Context) {
 	roles, err := h.service.GetAll(c, models.GetRolesDTO{})
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error())
+		h.errBot.Send(c, err.Error(), nil)
 		return
 	}
 
@@ -49,6 +52,7 @@ func (h *RoleHandlers) Get(c *gin.Context) {
 	role, err := h.service.Get(c, roleName)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		h.errBot.Send(c, err.Error(), roleName)
 		return
 	}
 
@@ -64,7 +68,7 @@ func (h *RoleHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -87,7 +91,7 @@ func (h *RoleHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -103,7 +107,7 @@ func (h *RoleHandlers) Delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), id)
+		h.errBot.Send(c, err.Error(), id)
 		return
 	}
 

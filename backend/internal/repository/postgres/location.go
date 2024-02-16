@@ -32,9 +32,8 @@ type Location interface {
 	Delete(context.Context, string) error
 }
 
-// TODO заменить везде даты со строк на числа
 func (r *LocationRepo) GetLast(ctx context.Context, instrumentId string) (*models.Location, error) {
-	query := fmt.Sprintf(`SELECT id, instrument_id, date_of_issue, date_of_receiving, status, person, department
+	query := fmt.Sprintf(`SELECT id, instrument_id, date_of_issue, date_of_receiving, status, person_id, department_id
 		FROM %s WHERE instrument_id=$1 ORDER BY date_of_issue LIMIT 1`,
 		SIMovementTable,
 	)
@@ -68,9 +67,11 @@ func (r *LocationRepo) GetLast(ctx context.Context, instrumentId string) (*model
 // TODO наверное стоит записывать id работника и департамента, а текстовые поля которые есть сейчас соединить так же как и при запросе в новом поле
 
 func (r *LocationRepo) Create(ctx context.Context, l models.CreateLocationDTO) error {
-	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, person, department)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		SIMovementTable,
+	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, person_id, department_id, place)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, (
+			SELECT d.name || ' ('|| e.name || ')' FROM %s AS e LEFT JOIN %s AS d ON department_id=d.id WHERE e.id=$6
+		))`,
+		SIMovementTable, EmployeeTable, DepartmentTable,
 	)
 	id := uuid.New()
 
@@ -91,7 +92,7 @@ func (r *LocationRepo) Create(ctx context.Context, l models.CreateLocationDTO) e
 		}
 	}
 
-	_, err = r.db.Exec(query, id, l.InstrumentId, issueDate.Unix(), receiptDate.Unix(), status, l.Person, l.Department)
+	_, err = r.db.Exec(query, id, l.InstrumentId, issueDate.Unix(), receiptDate.Unix(), status, l.PersonId, l.DepartmentId)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
@@ -99,8 +100,10 @@ func (r *LocationRepo) Create(ctx context.Context, l models.CreateLocationDTO) e
 }
 
 func (r *LocationRepo) Update(ctx context.Context, l models.UpdateLocationDTO) error {
-	query := fmt.Sprintf(`UPDATE %s SET date_of_issue=$1, date_of_receiving=$2, status=$3, person=$4, department=$5 WHERE id=$6`,
-		SIMovementTable,
+	query := fmt.Sprintf(`UPDATE %s SET date_of_issue=$1, date_of_receiving=$2, status=$3, person_id=$4, department_id=$5,
+		place=(SELECT d.name || ' ('|| e.name || ')' FROM %s AS e LEFT JOIN %s AS d ON department_id=d.id WHERE e.id=$4)
+		WHERE id=$6`,
+		SIMovementTable, EmployeeTable, DepartmentTable,
 	)
 
 	issueDate, err := time.Parse("02.01.2006", l.DateOfIssue)
@@ -115,7 +118,7 @@ func (r *LocationRepo) Update(ctx context.Context, l models.UpdateLocationDTO) e
 		}
 	}
 
-	_, err = r.db.Exec(query, issueDate.Unix(), receiptDate.Unix(), l.Status, l.Person, l.Department, l.Id)
+	_, err = r.db.Exec(query, issueDate.Unix(), receiptDate.Unix(), l.Status, l.PersonId, l.DepartmentId, l.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

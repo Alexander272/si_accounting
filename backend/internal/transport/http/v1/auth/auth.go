@@ -8,6 +8,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,12 +16,14 @@ type AuthHandler struct {
 	service    services.Session
 	auth       config.AuthConfig
 	cookieName string
+	errBot     error_bot.ErrorBotApi
 }
 
 type Deps struct {
 	Service    services.Session
 	Auth       config.AuthConfig
 	CookieName string
+	ErrBot     error_bot.ErrorBotApi
 }
 
 func NewAuthHandlers(deps Deps) *AuthHandler {
@@ -28,6 +31,7 @@ func NewAuthHandlers(deps Deps) *AuthHandler {
 		service:    deps.Service,
 		auth:       deps.Auth,
 		cookieName: deps.CookieName,
+		errBot:     deps.ErrBot,
 	}
 }
 
@@ -56,7 +60,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -78,7 +82,7 @@ func (h *AuthHandler) SignOut(c *gin.Context) {
 
 	if err := h.service.SignOut(c, refreshToken); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), refreshToken)
+		h.errBot.Send(c, err.Error(), refreshToken)
 		return
 	}
 
@@ -105,7 +109,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), refreshToken)
+		h.errBot.Send(c, err.Error(), refreshToken)
 		return
 	}
 

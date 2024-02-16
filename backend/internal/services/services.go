@@ -53,7 +53,7 @@ func NewServices(deps Deps) *Services {
 	session := NewSessionService(deps.Keycloak, role)
 	permission := NewPermissionService("configs/privacy.conf", menu)
 
-	notification := NewNotificationService()
+	notification := NewNotificationService(si)
 
 	return &Services{
 		Instrument:   instrument,

@@ -6,21 +6,24 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
 type MenuWithApiHandlers struct {
 	service services.MenuWithApi
+	errBot  error_bot.ErrorBotApi
 }
 
-func NewMenuWithApiHandlers(service services.MenuWithApi) *MenuWithApiHandlers {
+func NewMenuWithApiHandlers(service services.MenuWithApi, errBot error_bot.ErrorBotApi) *MenuWithApiHandlers {
 	return &MenuWithApiHandlers{
 		service: service,
+		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.MenuWithApi) {
-	handlers := NewMenuWithApiHandlers(service)
+func Register(api *gin.RouterGroup, service services.MenuWithApi, errBot error_bot.ErrorBotApi) {
+	handlers := NewMenuWithApiHandlers(service, errBot)
 
 	menu := api.Group("menu-api")
 	{
@@ -39,7 +42,7 @@ func (h *MenuWithApiHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -62,7 +65,7 @@ func (h *MenuWithApiHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -78,7 +81,7 @@ func (h *MenuWithApiHandlers) Delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), id)
+		h.errBot.Send(c, err.Error(), id)
 		return
 	}
 

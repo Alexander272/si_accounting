@@ -7,23 +7,25 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/verification/documents"
 	"github.com/gin-gonic/gin"
 )
 
 type VerificationHandlers struct {
 	service services.Verification
-	// TODO botApi
+	errBot  error_bot.ErrorBotApi
 }
 
-func NewVerificationHandlers(service services.Verification) *VerificationHandlers {
+func NewVerificationHandlers(service services.Verification, errBot error_bot.ErrorBotApi) *VerificationHandlers {
 	return &VerificationHandlers{
 		service: service,
+		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Verification, docs services.Documents) {
-	handlers := NewVerificationHandlers(service)
+func Register(api *gin.RouterGroup, service services.Verification, docs services.Documents, errBot error_bot.ErrorBotApi) {
+	handlers := NewVerificationHandlers(service, errBot)
 
 	verifications := api.Group("/verifications")
 	{
@@ -31,7 +33,7 @@ func Register(api *gin.RouterGroup, service services.Verification, docs services
 		verifications.POST("", handlers.Create)
 		verifications.PUT("/:id", handlers.Update)
 	}
-	documents.Register(verifications, docs)
+	documents.Register(verifications, docs, errBot)
 }
 
 func (h *VerificationHandlers) GetLast(c *gin.Context) {
@@ -48,29 +50,11 @@ func (h *VerificationHandlers) GetLast(c *gin.Context) {
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), id)
+		h.errBot.Send(c, err.Error(), instrumentId)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: verification})
 }
-
-// func (h *VerificationHandlers) Create(c *gin.Context) {
-// 	var dto models.CreateVerificationDTO
-// 	if err := c.Bind(&dto); err != nil {
-// 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
-// 		return
-// 	}
-
-// 	logger.Debug(dto)
-// 	logger.Debug(dto.Files[0].Filename)
-
-// 	// if err := h.service.Create(c, dto); err != nil {
-// 	// 	response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-// 	// 	// h.botApi.SendError(c, err.Error(), dto)
-// 	// 	return
-// 	// }
-// 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные о поверке успешно добавлены"})
-// }
 
 func (h *VerificationHandlers) Create(c *gin.Context) {
 	var dto models.CreateVerificationDTO
@@ -81,7 +65,7 @@ func (h *VerificationHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные о поверке успешно добавлены"})
@@ -103,7 +87,7 @@ func (h *VerificationHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о поверке успешно обновлены"})

@@ -3,9 +3,8 @@ package models
 import "github.com/lib/pq"
 
 type Role struct {
-	Id   string `json:"id" db:"id"`
-	Name string `json:"name" db:"name"`
-	//TODO menu
+	Id   string   `json:"id" db:"id"`
+	Name string   `json:"name" db:"name"`
 	Menu []string `json:"menu"`
 }
 type RoleWithMenuDTO struct {

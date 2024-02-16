@@ -6,21 +6,24 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
 type EmployeeHandlers struct {
 	service services.Employee
+	errBot  error_bot.ErrorBotApi
 }
 
-func NewEmployeeHandlers(service services.Employee) *EmployeeHandlers {
+func NewEmployeeHandlers(service services.Employee, errBot error_bot.ErrorBotApi) *EmployeeHandlers {
 	return &EmployeeHandlers{
 		service: service,
+		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Employee) {
-	handlers := NewEmployeeHandlers(service)
+func Register(api *gin.RouterGroup, service services.Employee, errBot error_bot.ErrorBotApi) {
+	handlers := NewEmployeeHandlers(service, errBot)
 
 	employees := api.Group("/employees")
 	{
@@ -43,7 +46,7 @@ func (h *EmployeeHandlers) GetAll(c *gin.Context) {
 	employees, err := h.service.GetAll(c, models.GetEmployeesDTO{Filters: filter})
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), filter)
+		h.errBot.Send(c, err.Error(), filter)
 		return
 	}
 
@@ -60,7 +63,7 @@ func (h *EmployeeHandlers) GetByDepartment(c *gin.Context) {
 	users, err := h.service.GetByDepartment(c, departmentId)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), departmentId)
+		h.errBot.Send(c, err.Error(), departmentId)
 		return
 	}
 
@@ -76,7 +79,7 @@ func (h *EmployeeHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -99,7 +102,7 @@ func (h *EmployeeHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -115,7 +118,7 @@ func (h *EmployeeHandlers) Delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), id)
+		h.errBot.Send(c, err.Error(), id)
 		return
 	}
 

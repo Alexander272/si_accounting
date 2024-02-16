@@ -7,15 +7,17 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
 type SIHandlers struct {
 	service      services.SI
+	errBot       error_bot.ErrorBotApi
 	formatFields map[string]string
 }
 
-func NewSIHandlers(service services.SI) *SIHandlers {
+func NewSIHandlers(service services.SI, errBot error_bot.ErrorBotApi) *SIHandlers {
 	format := make(map[string]string)
 
 	format["name"] = "name"
@@ -34,12 +36,13 @@ func NewSIHandlers(service services.SI) *SIHandlers {
 
 	return &SIHandlers{
 		service:      service,
+		errBot:       errBot,
 		formatFields: format,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.SI) {
-	handlers := NewSIHandlers(service)
+func Register(api *gin.RouterGroup, service services.SI, errBot error_bot.ErrorBotApi) {
+	handlers := NewSIHandlers(service, errBot)
 
 	api.GET("", handlers.GetAll)
 	api.POST("/save", handlers.Save)
@@ -96,14 +99,14 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 		}
 	}
 
-	si, total, err := h.service.GetAll(c, params)
+	si, err := h.service.GetAll(c, params)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), params)
 		return
 	}
 
-	c.JSON(http.StatusOK, response.DataResponse{Data: si, Total: total})
+	c.JSON(http.StatusOK, response.DataResponse{Data: si.SI, Total: si.Total})
 }
 
 // func (h *SIHandlers) GetIdentifiers(c *gin.Context) {
@@ -117,12 +120,9 @@ func (h *SIHandlers) Save(c *gin.Context) {
 		return
 	}
 
-	// response.NewErrorResponse(c, http.StatusInternalServerError, "test", "Произошла ошибка: "+"error: test")
-	// return
-
 	if err := h.service.Save(c, dto.Id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о си успешно сохранены"})

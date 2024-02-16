@@ -23,6 +23,16 @@ type SIFilter struct {
 	Values      []string `json:"values"`
 }
 
+type Period struct {
+	StartAt  string
+	FinishAt string
+}
+
+type SIList struct {
+	Total int  `json:"total" db:"total"`
+	SI    []SI `json:"si"`
+}
+
 type SI struct {
 	Id                        string `json:"id" db:"id"`
 	Name                      string `json:"name" db:"name"`
@@ -39,4 +49,16 @@ type SI struct {
 	NextDate                  string `json:"nextVerificationDate" db:"next_date"`
 	Place                     string `json:"place" db:"place"`
 	Status                    string `json:"status" db:"status"`
+	Total                     int    `json:"-" db:"total_count"`
+}
+
+type SIFromNotification struct {
+	Id            string `db:"id"`
+	Name          string `db:"name"`
+	FactoryNumber string `db:"factory_number"`
+	Date          string `db:"date"`
+	NextDate      string `db:"next_date"`
+	Person        string `db:"person"`
+	Department    string `db:"department"`
+	MostId        string `db:"most_id"`
 }

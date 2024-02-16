@@ -6,21 +6,24 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
 type MenuItemHandlers struct {
 	service services.MenuItem
+	errBot  error_bot.ErrorBotApi
 }
 
-func NewMenuItemHandlers(service services.MenuItem) *MenuItemHandlers {
+func NewMenuItemHandlers(service services.MenuItem, errBot error_bot.ErrorBotApi) *MenuItemHandlers {
 	return &MenuItemHandlers{
 		service: service,
+		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.MenuItem) {
-	handlers := NewMenuItemHandlers(service)
+func Register(api *gin.RouterGroup, service services.MenuItem, errBot error_bot.ErrorBotApi) {
+	handlers := NewMenuItemHandlers(service, errBot)
 
 	menu := api.Group("/menu-items")
 	{
@@ -39,7 +42,7 @@ func (h *MenuItemHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -62,7 +65,7 @@ func (h *MenuItemHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -78,7 +81,7 @@ func (h *MenuItemHandlers) Delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), id)
+		h.errBot.Send(c, err.Error(), id)
 		return
 	}
 

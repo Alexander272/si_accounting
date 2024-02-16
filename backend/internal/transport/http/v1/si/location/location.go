@@ -7,23 +7,25 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type LocationHandlers struct {
 	service services.Location
-	// TODO botApi
+	errBot  error_bot.ErrorBotApi
 }
 
-func NewLocationHandlers(service services.Location) *LocationHandlers {
+func NewLocationHandlers(service services.Location, errBot error_bot.ErrorBotApi) *LocationHandlers {
 	return &LocationHandlers{
 		service: service,
+		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Location) {
-	handlers := NewLocationHandlers(service)
+func Register(api *gin.RouterGroup, service services.Location, errBot error_bot.ErrorBotApi) {
+	handlers := NewLocationHandlers(service, errBot)
 
 	locations := api.Group("/locations")
 	{
@@ -49,7 +51,7 @@ func (h *LocationHandlers) GetLast(c *gin.Context) {
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), id)
+		h.errBot.Send(c, err.Error(), instrumentId)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: location})
@@ -64,7 +66,7 @@ func (h *LocationHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные о месте нахождения успешно добавлены"})
@@ -86,13 +88,13 @@ func (h *LocationHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
 }
 
-// TODO проверить эти две функции не получается с ботом проблемы жуткие
+// TODO проверить эти две функции не получается тк с ботом проблемы жуткие
 func (h *LocationHandlers) Receiving(c *gin.Context) {
 	logger.Debug("receiving ", c.Query("instruments"))
 
@@ -131,6 +133,7 @@ func (h *LocationHandlers) Delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		h.errBot.Send(c, err.Error(), id)
 		return
 	}
 	c.JSON(http.StatusNoContent, response.IdResponse{})

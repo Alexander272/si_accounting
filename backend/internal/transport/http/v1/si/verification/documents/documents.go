@@ -6,22 +6,24 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
 type DocumentsHandlers struct {
 	service services.Documents
-	// TODO botApi
+	errBot  error_bot.ErrorBotApi
 }
 
-func NewDocumentsHandlers(service services.Documents) *DocumentsHandlers {
+func NewDocumentsHandlers(service services.Documents, errBot error_bot.ErrorBotApi) *DocumentsHandlers {
 	return &DocumentsHandlers{
 		service: service,
+		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Documents) {
-	handlers := NewDocumentsHandlers(service)
+func Register(api *gin.RouterGroup, service services.Documents, errBot error_bot.ErrorBotApi) {
+	handlers := NewDocumentsHandlers(service, errBot)
 
 	documents := api.Group("/documents")
 	{
@@ -47,9 +49,11 @@ func (h *DocumentsHandlers) getList(c *gin.Context) {
 		return
 	}
 
-	docs, err := h.service.Get(c, models.GetDocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId})
+	dto := models.GetDocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId}
+	docs, err := h.service.Get(c, dto)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: docs})
@@ -96,9 +100,10 @@ func (h *DocumentsHandlers) upload(c *gin.Context) {
 	}
 	// c.SaveUploadedFile()
 
-	if err := h.service.Upload(c, models.DocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId, Files: files}); err != nil {
+	dto := models.DocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId, Files: files}
+	if err := h.service.Upload(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Файлы загружены"})
@@ -131,6 +136,7 @@ func (h *DocumentsHandlers) delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, req); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		h.errBot.Send(c, err.Error(), req)
 		return
 	}
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Файл удален"})

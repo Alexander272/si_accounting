@@ -19,6 +19,7 @@ type (
 		Limiter      LimiterConfig
 		Notification NotificationConfig
 		Bot          BotConfig
+		ErrorBot     ErrorBotConfig
 	}
 
 	HttpConfig struct {
@@ -74,6 +75,11 @@ type (
 		StartTime int                       `yaml:"start_time" env-default:"12"` // 12 hours (noon)
 		Interval  time.Duration             `yaml:"interval" env-default:"24h"`
 		Times     []models.NotificationTime `yaml:"times"`
+	}
+
+	ErrorBotConfig struct {
+		Url     string `yaml:"err_bot_url" env:"ERR_BOT_URL"`
+		ApiPath string `yaml:"err_api_path" env:"ERR_API_PATH"`
 	}
 
 	BotConfig struct {

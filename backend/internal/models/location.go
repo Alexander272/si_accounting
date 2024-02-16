@@ -16,10 +16,10 @@ type Location struct {
 
 type CreateLocationDTO struct {
 	InstrumentId string `json:"instrumentId" db:"instrument_id" binding:"required"`
-	Person       string `json:"person" db:"person"`
-	Department   string `json:"department" db:"department"`
-	PersonId     string `json:"personId" db:"person_id"`
-	DepartmentId string `json:"departmentId" db:"department_id"`
+	// Person       string `json:"person" db:"person"`
+	// Department   string `json:"department" db:"department"`
+	PersonId     string `json:"person" db:"person_id"`
+	DepartmentId string `json:"department" db:"department_id"`
 	// ReceiptDate     string `json:"receiptDate" db:"receipt_date"`
 	// DeliveryDate    string `json:"deliveryDate" db:"delivery_date"`
 	DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
@@ -30,8 +30,10 @@ type CreateLocationDTO struct {
 type UpdateLocationDTO struct {
 	Id           string `json:"id" db:"id" binding:"required"`
 	InstrumentId string `json:"instrumentId" db:"instrument_id" binding:"required"`
-	Person       string `json:"person" db:"person" binding:"required"`
-	Department   string `json:"department" db:"department" binding:"required"`
+	// Person       string `json:"person" db:"person" binding:"required"`
+	// Department   string `json:"department" db:"department" binding:"required"`
+	PersonId     string `json:"person" db:"person_id"`
+	DepartmentId string `json:"department" db:"department_id"`
 	// ReceiptDate     string `json:"receiptDate" db:"receipt_date"`
 	// DeliveryDate    string `json:"deliveryDate" db:"delivery_date"`
 	DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`

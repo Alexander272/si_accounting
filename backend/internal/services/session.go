@@ -11,8 +11,7 @@ import (
 
 type SessionService struct {
 	keycloak *auth.KeycloakClient
-	//TODO menu or role
-	role Role
+	role     Role
 }
 
 func NewSessionService(keycloak *auth.KeycloakClient, role Role) *SessionService {

@@ -14,9 +14,10 @@ type NotificationService struct {
 	cron            gocron.Scheduler
 	iterationNumber int
 	dates           []time.Time
+	si              SI
 }
 
-func NewNotificationService() *NotificationService {
+func NewNotificationService(si SI) *NotificationService {
 	cron, err := gocron.NewScheduler()
 	if err != nil {
 		logger.Fatalf("failed to create new scheduler. error: %s", err.Error())
@@ -24,6 +25,7 @@ func NewNotificationService() *NotificationService {
 
 	return &NotificationService{
 		cron:            cron,
+		si:              si,
 		iterationNumber: 0,
 		// dates:           make([]time.Time, 5),
 	}
@@ -81,42 +83,55 @@ func (s *NotificationService) Stop() error {
 
 func (s *NotificationService) Send(times []models.NotificationTime) {
 	index := s.iterationNumber % len(times)
-	logger.Debug("job started ", index)
+	logger.Info("job started ", index)
 
 	notificationTime := times[index]
 
+	now := time.Now()
+
 	switch notificationTime.Type {
 	case "sub":
-		now := time.Now()
 		// возможно часы надо все-таки обнулить (как бы ошибок не было из-за часов)
 		monthEnd := time.Date(now.Year(), now.Month()+1, 0, now.Hour(), 0, 0, 0, now.Location())
 		date := monthEnd.Add(-notificationTime.Sub)
 		s.dates[index] = date
 
-		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	case "add":
-		start := time.Now()
+		start := now
 		if index > 0 && s.dates[index-1].Year() > 1 {
 			start = s.dates[index-1]
 		}
 		date := start.Add(notificationTime.Add)
 		s.dates[index] = date
 
-		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	case "date":
-		now := time.Now()
 		date := time.Date(now.Year(), now.Month(), 0, 0, 0, 0, 0, now.Location()).Add(notificationTime.Date)
 		s.dates[index] = date
 
-		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	}
 
 	if !s.dates[index].Before(time.Now()) {
 		return
 	}
 
-	logger.Debug("before")
+	logger.Info("before")
 	s.iterationNumber = index + 1
+
+	// startAt := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
+	// finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
+
+	// period := models.Period{
+	// 	StartAt:  startAt.Format("02.01.2006"),
+	// 	FinishAt: finishAt.Format("02.01.2006"),
+	// }
+
+	// si, err := s.si.GetForNotification(context.Background(), period)
+	// if err != nil {
+	// 	logger.Error("notification error: %s", err.Error())
+	// }
 
 	// надо еще как-то получать список оборудования которое нужно отправить и список людей которым его надо разослать
 	//TODO send notification

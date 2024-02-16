@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/auth"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
@@ -53,6 +54,7 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 
 	// TODO что осталось сделать:
 	// - отправлять уведомления о необходимости сдачи инструментов (должно быть несколько уведомлений друг за другом через определенные промежутки времени или в конкретные даты. лучше сделать так чтобы можно было задать любое кол-во с определенным временем)
+	// - отправлять уведомления о выдаче инструмента
 	// - [сделать возможность уведомления через почту или мост [или и то, и то]]
 	// + добавить возможность для редактора добавлять и изменять пользователей и подразделения
 	// - [сделать для бота возможность подтверждения получения инструментов прямо в нем (не переходя в сервис)]
@@ -62,7 +64,10 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	// - сделать фильтры по умолчанию для ролей (или для конкретных пользователей) |>
 	// - добавить страницы с историями (возможно модальные окна)
 	// - сделать страницу с настройками прав доступа (для админа)
-	// - [сделать возможность скрывать колонки в таблице]
+	// - сделать создание графиков поверки
+	// - надо бы еще сделать уведомления о просроченной поверке инструментов
+	// - [сделать возможность скрывать или менять порядок колонок в таблице]
+	// - [сохранять настройки вывода (сколько строк выводится на страницу, какие столбцы и прочее подобное)]
 	// - [сделать возможность нескольких одновременных сортировок]
 	// - [перенести проверку токена из keycloak в программу]
 	// - [сделать расшифровку токена локально, а не в keycloak]
@@ -74,23 +79,25 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 		также сам фильтр лучше прописать в бд. так будет проще менять в случае чего
 	*/
 
-	auth.Register(v1, auth.Deps{Service: h.services.Session, Auth: h.conf.Auth, CookieName: h.cookieName})
+	errBot := error_bot.NewErrorBotApi(h.conf.ErrorBot.Url, h.conf.ErrorBot.ApiPath)
+
+	auth.Register(v1, auth.Deps{Service: h.services.Session, Auth: h.conf.Auth, CookieName: h.cookieName, ErrBot: errBot})
 
 	secure := v1.Group("", h.middleware.VerifyToken, h.middleware.CheckPermissions)
 
 	siGroup := secure.Group("/si")
-	si.Register(siGroup, h.services.SI)
-	instrument.Register(siGroup, h.services.Instrument)
-	verification.Register(siGroup, h.services.Verification, h.services.Documents)
-	location.Register(siGroup, h.services.Location)
+	si.Register(siGroup, h.services.SI, errBot)
+	instrument.Register(siGroup, h.services.Instrument, errBot)
+	verification.Register(siGroup, h.services.Verification, h.services.Documents, errBot)
+	location.Register(siGroup, h.services.Location, errBot)
 
-	departments.Register(secure, h.services.Department)
-	employees.Register(secure, h.services.Employee)
+	departments.Register(secure, h.services.Department, errBot)
+	employees.Register(secure, h.services.Employee, errBot)
 
-	roles.Register(secure, h.services.Role)
-	menu.Register(secure, h.services.Menu)
-	menu_item.Register(secure, h.services.MenuItem)
-	menu_with_api.Register(secure, h.services.MenuWithApi)
+	roles.Register(secure, h.services.Role, errBot)
+	menu.Register(secure, h.services.Menu, errBot)
+	menu_item.Register(secure, h.services.MenuItem, errBot)
+	menu_with_api.Register(secure, h.services.MenuWithApi, errBot)
 }
 
 // func (h *Handler) notImplemented(c *gin.Context) {

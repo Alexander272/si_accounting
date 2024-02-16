@@ -26,16 +26,25 @@ func NewSIService(repo repository.SI, instrument Instrument, verification Verifi
 }
 
 type SI interface {
-	GetAll(context.Context, models.SIParams) ([]models.SI, int, error)
+	GetAll(context.Context, models.SIParams) (*models.SIList, error)
+	GetForNotification(context.Context, models.Period) ([]models.Notification, error)
 	Save(ctx context.Context, id string) error
 }
 
-func (s *SIService) GetAll(ctx context.Context, req models.SIParams) ([]models.SI, int, error) {
-	si, total, err := s.repo.GetAll(ctx, req)
+func (s *SIService) GetAll(ctx context.Context, req models.SIParams) (*models.SIList, error) {
+	list, err := s.repo.GetAll(ctx, req)
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to get all si. error: %w", err)
+		return nil, fmt.Errorf("failed to get all si. error: %w", err)
 	}
-	return si, total, err
+	return list, err
+}
+
+func (s *SIService) GetForNotification(ctx context.Context, req models.Period) ([]models.Notification, error) {
+	list, err := s.repo.GetForNotification(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get si for notification. error: %w", err)
+	}
+	return list, nil
 }
 
 func (s *SIService) Save(ctx context.Context, id string) error {

@@ -7,22 +7,24 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
 type InstrumentHandlers struct {
 	service services.Instrument
-	// TODO botApi
+	errBot  error_bot.ErrorBotApi
 }
 
-func NewInstrumentHandlers(service services.Instrument) *InstrumentHandlers {
+func NewInstrumentHandlers(service services.Instrument, errBot error_bot.ErrorBotApi) *InstrumentHandlers {
 	return &InstrumentHandlers{
 		service: service,
+		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Instrument) {
-	handlers := NewInstrumentHandlers(service)
+func Register(api *gin.RouterGroup, service services.Instrument, errBot error_bot.ErrorBotApi) {
+	handlers := NewInstrumentHandlers(service, errBot)
 
 	instruments := api.Group("/instruments")
 	{
@@ -48,7 +50,7 @@ func (h *InstrumentHandlers) GetById(c *gin.Context) {
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), id)
+		h.errBot.Send(c, err.Error(), id)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: instrument})
@@ -63,7 +65,7 @@ func (h *InstrumentHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные об инструменте успешно добавлены"})
@@ -85,7 +87,7 @@ func (h *InstrumentHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.botApi.SendError(c, err.Error(), dto)
+		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные об инструменте успешно обновлены"})
