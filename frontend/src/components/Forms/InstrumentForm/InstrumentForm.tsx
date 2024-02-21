@@ -28,12 +28,18 @@ const defaultValues: InstrumentFormType = {
 type Props = {
 	onSubmit: () => void
 	instrumentId?: string
+	draftId?: string
 }
 
-export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit, instrumentId = 'draft' }) => {
+export const InstrumentForm: FC<PropsWithChildren<Props>> = ({
+	children,
+	onSubmit,
+	instrumentId = 'draft',
+	draftId,
+}) => {
 	const methods = useForm<InstrumentFormType>({ defaultValues })
 
-	const { data, isFetching, isError } = useGetInstrumentByIdQuery(instrumentId)
+	const { data, isFetching, isError } = useGetInstrumentByIdQuery(draftId || instrumentId)
 
 	const [create] = useCreateInstrumentMutation()
 	const [update] = useUpdateInstrumentMutation()
@@ -46,13 +52,16 @@ export const InstrumentForm: FC<PropsWithChildren<Props>> = ({ children, onSubmi
 	}, [isError, methods])
 
 	const submitHandler = methods.handleSubmit(async data => {
+		if (data.id == draftId) {
+			data.id = undefined
+		}
+
 		try {
 			if (!data.id) {
 				await create(data).unwrap()
-				console.log('submit', data)
+				// console.log('submit', data)
 			} else if (Object.keys(methods.formState.dirtyFields).length) {
 				await update(data).unwrap()
-				console.log('dirty value')
 			}
 			onSubmit()
 		} catch (error) {

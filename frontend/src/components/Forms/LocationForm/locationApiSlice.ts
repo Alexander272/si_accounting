@@ -12,6 +12,7 @@ type Location = {
 	person: string
 	dateOfIssue: string
 	dateOfReceiving: string
+	needConfirmed: boolean
 	status: string
 }
 

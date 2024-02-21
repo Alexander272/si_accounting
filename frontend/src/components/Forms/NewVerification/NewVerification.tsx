@@ -14,11 +14,11 @@ export const NewVerification = () => {
 
 	const { closeModal } = useModal()
 
-	const { data } = useGetInstrumentByIdQuery(active || selected[0], { skip: !active && !selected[0] })
+	const { data } = useGetInstrumentByIdQuery(active?.id || selected[0]?.id, { skip: !active && !selected[0] })
 
 	const saveHandler = () => {
 		if (active) closeModal()
-		else dispatch(removeSelected(selected[0]))
+		else dispatch(removeSelected(selected[0].id))
 		if (selected.length == 1) closeModal()
 	}
 
@@ -29,7 +29,7 @@ export const NewVerification = () => {
 				{data?.data.name}
 			</Typography>
 
-			<VerificationForm instrumentId={active || selected[0] || 'skip'} onSubmit={saveHandler}>
+			<VerificationForm instrumentId={active?.id || selected[0]?.id || 'skip'} onSubmit={saveHandler}>
 				{/* <Button onClick={skipHandler} variant='outlined' fullWidth sx={{ borderRadius: 3 }}>
 					Пропустить
 				</Button> */}

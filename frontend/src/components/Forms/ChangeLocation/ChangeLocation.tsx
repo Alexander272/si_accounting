@@ -12,7 +12,7 @@ export const ChangeLocation = () => {
 
 	const dispatch = useAppDispatch()
 
-	const { data } = useGetInstrumentByIdQuery(active || selected[0], { skip: !active && !selected[0] })
+	const { data } = useGetInstrumentByIdQuery(active?.id || selected[0]?.id, { skip: !active && !selected[0] })
 
 	const { closeModal } = useModal()
 
@@ -20,7 +20,7 @@ export const ChangeLocation = () => {
 		if (active) closeModal()
 		else {
 			if (selected.length == 1) closeModal()
-			dispatch(removeSelected(selected[0]))
+			dispatch(removeSelected(selected[0].id))
 		}
 	}
 
@@ -31,7 +31,11 @@ export const ChangeLocation = () => {
 				{data?.data.name}
 			</Typography>
 
-			<LocationForm onSubmit={saveHandler} instrumentId={active || selected[0] || 'skip'}>
+			<LocationForm
+				onSubmit={saveHandler}
+				instrumentId={active?.id || selected[0]?.id || 'skip'}
+				status={active?.status || selected[0]?.status}
+			>
 				<Button onClick={closeModal} variant='outlined' fullWidth>
 					Отмена
 				</Button>

@@ -1,7 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { RootState } from '@/app/store'
-import { IDataItem, ISIFilter, ISISort } from './types/data'
+import { IDataItem, ISIFilter, ISISort, ISelected } from './types/data'
 import { changeModalIsOpen } from '../modal/modalSlice'
 
 interface IDataTableSlice {
@@ -9,12 +9,15 @@ interface IDataTableSlice {
 	limit: number
 	sort?: ISISort
 	filter?: ISIFilter
-	selected: string[]
-	active?: string
+	// selected: string[]
+	// active?: string
+	selected: ISelected[]
+	active?: ISelected
 }
 
 const initialState: IDataTableSlice = {
 	page: 1,
+	//TODO заменить limit на size
 	limit: 15, // 15, 30, 50, 100 доступные лимиты. 15 строк макс который влазит без прокрутки
 	sort: {
 		field: 'nextVerificationDate',
@@ -50,16 +53,29 @@ const dataTableSlice = createSlice({
 			state.filter = action.payload
 		},
 
-		addSelected: (state, action: PayloadAction<string | string[]>) => {
-			if (typeof action.payload == 'string') state.selected.push(action.payload)
-			else state.selected.push(...action.payload)
+		// addSelected: (state, action: PayloadAction<string | string[]>) => {
+		// 	if (typeof action.payload == 'string') state.selected.push(action.payload)
+		// 	else state.selected.push(...action.payload)
+		// },
+		// removeSelected: (state, action: PayloadAction<string | undefined>) => {
+		// 	if (action.payload != undefined) state.selected = state.selected.filter(s => s != action.payload)
+		// 	else state.selected = []
+		// },
+
+		// setActive: (state, action: PayloadAction<string | undefined>) => {
+		// 	state.active = action.payload
+		// },
+
+		addSelected: (state, action: PayloadAction<ISelected | ISelected[]>) => {
+			if (Array.isArray(action.payload)) state.selected.push(...action.payload)
+			else state.selected.push(action.payload)
 		},
 		removeSelected: (state, action: PayloadAction<string | undefined>) => {
-			if (action.payload != undefined) state.selected = state.selected.filter(s => s != action.payload)
+			if (action.payload != undefined) state.selected = state.selected.filter(s => s.id != action.payload)
 			else state.selected = []
 		},
 
-		setActive: (state, action: PayloadAction<string | undefined>) => {
+		setActive: (state, action: PayloadAction<ISelected | undefined>) => {
 			state.active = action.payload
 		},
 

@@ -80,10 +80,9 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 
 		try {
 			if (!data.id || instrumentId != 'draft') {
-				console.log('submit', data)
+				// console.log('submit', data)
 				await create(verification).unwrap()
 			} else if (Object.keys(methods.formState.dirtyFields).length) {
-				console.log('dirty values')
 				await update(verification).unwrap()
 			}
 			onSubmit()

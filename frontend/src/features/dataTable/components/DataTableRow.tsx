@@ -3,7 +3,7 @@ import { TableRow } from '@mui/material'
 import dayjs from 'dayjs'
 
 import type { Coordinates } from '../hooks/useContextMenu'
-import type { IDataItem } from '../types/data'
+import type { IDataItem, ISelected, Status } from '../types/data'
 import { DataTableCell } from './DataTableCell'
 import { HeadCells } from './DataTableHead/columns'
 
@@ -19,18 +19,28 @@ type Props = {
 	data: IDataItem
 	selected: boolean
 	itemId?: string
-	onSelect: (id: string, selected: boolean) => void
-	positionHandler: (coordinates?: Coordinates, itemId?: string, isSelected?: boolean) => void
+	onSelect: (item: ISelected, selected: boolean) => void
+	positionHandler: (coordinates?: Coordinates, itemId?: string, status?: Status, isSelected?: boolean) => void
 }
 
 export const DataTableRow: FC<Props> = memo(({ data, selected, itemId, onSelect, positionHandler }) => {
+	let status: Status = 'used'
+	switch (data.place) {
+		case 'Перемещение':
+			status = 'moved'
+			break
+		case 'Резерв':
+			status = 'reserve'
+			break
+	}
+
 	const selectHandler = () => {
-		onSelect(data.id, selected)
+		onSelect({ id: data.id, status: status }, selected)
 	}
 
 	const openHandler = (event: MouseEvent<HTMLTableRowElement>) => {
 		event.preventDefault()
-		positionHandler({ mouseX: event.clientX + 2, mouseY: event.clientY - 6 }, data.id, selected)
+		positionHandler({ mouseX: event.clientX + 2, mouseY: event.clientY - 6 }, data.id, status, selected)
 	}
 
 	//TODO подумать как выделять строки (цвета когда надо сдать, просроченные, то что закреплено за текущим пользователем и тд)

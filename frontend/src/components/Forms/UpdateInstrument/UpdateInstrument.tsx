@@ -12,7 +12,7 @@ export const UpdateInstrument = () => {
 
 	return (
 		<>
-			<InstrumentForm onSubmit={closeModal} instrumentId={active}>
+			<InstrumentForm onSubmit={closeModal} instrumentId={active?.id}>
 				<Button onClick={closeModal} variant='outlined' fullWidth>
 					Отмена
 				</Button>

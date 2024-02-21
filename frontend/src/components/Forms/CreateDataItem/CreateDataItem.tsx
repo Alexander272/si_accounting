@@ -1,12 +1,14 @@
+import { useState } from 'react'
 import { Box, Button } from '@mui/material'
 
-import { InstrumentForm } from '../InstrumentForm/InstrumentForm'
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { useSaveSIMutation } from '@/features/dataTable/siApiSlice'
+import { getActiveItem, setActive } from '@/features/dataTable/dataTableSlice'
 import { Stepper } from '@/components/Stepper/Stepper'
-import { useState } from 'react'
+import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
+import { InstrumentForm } from '../InstrumentForm/InstrumentForm'
 import { VerificationForm } from '../VerificationForm/VerificationForm'
 import { LocationForm } from '../LocationForm/LocationForm'
-import { useSaveSIMutation } from '@/features/dataTable/siApiSlice'
-import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
 
 const steps = [
 	{ id: 'instrument', label: 'Информация о СИ' },
@@ -15,37 +17,42 @@ const steps = [
 ]
 
 export const CreateDataItem = () => {
-	const [active, setActive] = useState(0)
+	const [activeStep, setActiveStep] = useState(0)
+
+	const active = useAppSelector(getActiveItem)
 
 	const { data } = useGetInstrumentByIdQuery('draft')
 
 	const [save] = useSaveSIMutation()
 
+	const dispatch = useAppDispatch()
+
 	const nextHandler = async () => {
-		if (active + 1 == steps.length) {
+		if (activeStep + 1 == steps.length) {
+			dispatch(setActive())
 			await save(data?.data.id || '').unwrap()
 		}
-		setActive(prev => (prev + 1) % steps.length)
+		setActiveStep(prev => (prev + 1) % steps.length)
 	}
 	const prevHandler = () => {
-		setActive(prev => prev - 1)
+		setActiveStep(prev => prev - 1)
 	}
 
 	return (
 		<Box>
-			<Stepper steps={steps} active={active} />
+			<Stepper steps={steps} active={activeStep} />
 
-			{active == 0 && (
-				<InstrumentForm onSubmit={nextHandler}>
+			{activeStep == 0 && (
+				<InstrumentForm onSubmit={nextHandler} draftId={active?.id}>
 					<Button onClick={prevHandler} variant='outlined' fullWidth disabled>
 						Назад
 					</Button>
 					<Button variant='contained' type='submit' fullWidth>
-						{active === steps.length - 1 ? 'Сохранить' : 'Далее'}
+						{activeStep === steps.length - 1 ? 'Сохранить' : 'Далее'}
 					</Button>
 				</InstrumentForm>
 			)}
-			{active == 1 && (
+			{activeStep == 1 && (
 				<VerificationForm onSubmit={nextHandler}>
 					<Button onClick={prevHandler} variant='outlined' fullWidth>
 						Назад
@@ -55,8 +62,8 @@ export const CreateDataItem = () => {
 					</Button>
 				</VerificationForm>
 			)}
-			{active == 2 && (
-				<LocationForm onSubmit={nextHandler} isNew>
+			{activeStep == 2 && (
+				<LocationForm onSubmit={nextHandler} isNew status='reserve'>
 					<Button onClick={prevHandler} variant='outlined' fullWidth>
 						Назад
 					</Button>

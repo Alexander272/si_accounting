@@ -6,7 +6,7 @@ import { Dayjs } from 'dayjs'
 export interface IField<T> {
 	key: T
 	label: string
-	type?: 'string' | 'date' | 'year' | 'number' | 'file' | 'link' | 'list'
+	type?: 'string' | 'date' | 'year' | 'number' | 'file' | 'link' | 'list' | 'checkbox'
 	rules?: RegisterOptions
 }
 
@@ -76,15 +76,17 @@ export const VerificationFields: IField<KeysOfVerification>[] = [
 	{ key: 'verificationFile', label: 'Файл', type: 'file' },
 ]
 
-export type KeysOfLocation = 'department' | 'person' | 'dateOfIssue'
+export type KeysOfLocation = 'department' | 'person' | 'dateOfIssue' | 'needConfirmed'
 
 export type LocationFormType = {
 	department: string
 	person: string
 	dateOfIssue: Dayjs
+	needConfirmed: boolean
 } & { id?: string }
 
 export const LocationFields: IField<KeysOfLocation>[] = [
+	{ key: 'needConfirmed', label: 'Нужны уведомления', type: 'checkbox' },
 	{ key: 'department', label: 'Подразделение', type: 'list', rules: { required: true } },
 	{ key: 'person', label: 'Лицо держащее СИ', type: 'list', rules: { required: true } },
 	{ key: 'dateOfIssue', label: 'дата выдачи или поступления', type: 'date', rules: { required: true } },

@@ -1,17 +1,28 @@
 import { FC, PropsWithChildren, useEffect, useState } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Autocomplete, Box, Checkbox, FormControlLabel, LinearProgress, Stack, TextField } from '@mui/material'
+import {
+	Autocomplete,
+	Box,
+	Checkbox,
+	FormControlLabel,
+	LinearProgress,
+	Stack,
+	TextField,
+	Typography,
+} from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { toast } from 'react-toastify'
 import dayjs from 'dayjs'
 
 import type { IFetchError } from '@/app/types/error'
+import type { Status } from '@/features/dataTable/types/data'
 import { useGetDepartmentsQuery, useGetEmployeesQuery } from '@/features/employees/employeesApiSlice'
 import { LocationFields, type LocationFormType } from '../fields'
 import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
 import { useCreateLocationMutation } from './locationApiSlice'
 
 const defaultValues: LocationFormType = {
+	needConfirmed: true,
 	department: '',
 	person: '',
 	dateOfIssue: dayjs(),
@@ -21,13 +32,22 @@ type Props = {
 	onSubmit: () => void
 	instrumentId?: string
 	isNew?: boolean
+	status?: Status
 }
 
-export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit, instrumentId = 'draft', isNew }) => {
-	const methods = useForm<LocationFormType>({ defaultValues })
-	const [inReserve, setInReserve] = useState(false)
+export const LocationForm: FC<PropsWithChildren<Props>> = ({
+	children,
+	onSubmit,
+	instrumentId = 'draft',
+	isNew,
+	status,
+}) => {
+	const methods = useForm<LocationFormType>({
+		defaultValues: { ...defaultValues, needConfirmed: status != 'used' },
+	})
+	const [inReserve, setInReserve] = useState(status == 'used')
 
-	const department = methods.watch('department')
+	const departmentId = methods.watch('department')
 
 	const { data: instrument } = useGetInstrumentByIdQuery(instrumentId, { skip: instrumentId == 'skip' })
 
@@ -39,7 +59,7 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 		isFetching: isFetchingDepartments,
 	} = useGetDepartmentsQuery(null)
 
-	const departmentId = departments?.data.find(v => v.name == department)?.id
+	// const departmentId = departments?.data.find(v => v.name == department)?.id
 
 	const {
 		data: employees,
@@ -50,10 +70,10 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 	const [create] = useCreateLocationMutation()
 
 	useEffect(() => {
-		if (departments?.data.length) methods.setValue('department', departments.data[0].name)
+		if (departments?.data.length) methods.setValue('department', departments.data[0].id)
 	}, [departments, methods])
 	useEffect(() => {
-		if (employees?.data.length) methods.setValue('person', employees.data[0].name)
+		if (employees?.data.length) methods.setValue('person', employees.data[0].id)
 	}, [employees, methods])
 
 	//TODO надо определять это создание нового инструмента или нет
@@ -74,16 +94,17 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 		const location = {
 			id: '',
 			instrumentId: instrument?.data.id || '',
-			department: data.department,
-			person: data.person,
+			department: inReserve ? '' : data.department,
+			person: inReserve ? '' : data.person,
 			dateOfIssue: data.dateOfIssue.format('DD.MM.YYYY'),
-			dateOfReceiving: isNew ? data.dateOfIssue.format('DD.MM.YYYY') : '',
-			status: isNew ? (inReserve ? 'reserve' : 'used') : 'moved',
+			dateOfReceiving: isNew || !data.needConfirmed ? data.dateOfIssue.format('DD.MM.YYYY') : '',
+			needConfirmed: data.needConfirmed,
+			status: isNew || !data.needConfirmed ? (inReserve ? 'reserve' : 'used') : 'moved',
 		}
 
 		try {
 			if (!data.id) {
-				console.log('submit', data)
+				// console.log('submit', data)
 				await create(location).unwrap()
 			}
 			onSubmit()
@@ -98,8 +119,8 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 		return LocationFields.map(f => {
 			const op = options[f.key as 'department']
 
-			switch (f.type) {
-				case 'date':
+			switch (f.key) {
+				case 'dateOfIssue':
 					return (
 						<Controller
 							key={f.key}
@@ -126,7 +147,8 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 							)}
 						/>
 					)
-				case 'list':
+				case 'department':
+				case 'person':
 					return (
 						<Controller
 							key={f.key}
@@ -136,14 +158,14 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 							disabled={inReserve}
 							render={({ field, fieldState: { error } }) => (
 								<Autocomplete
-									value={op.find(d => d.name == field.value) || op[0]}
+									value={op.find(d => d.id == field.value) || ''}
 									onChange={(_event, value) => {
-										field.onChange(typeof value == 'string' ? value : value.name)
+										field.onChange(typeof value == 'string' ? value : value.id)
 									}}
 									options={op}
 									loading={loadings[f.key as 'department']}
 									getOptionLabel={option => (typeof option === 'string' ? option : option.name)}
-									// freeSolo
+									freeSolo
 									disableClearable
 									noOptionsText='Ничего не найдено'
 									disabled={inReserve}
@@ -155,6 +177,22 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 											error={Boolean(error)}
 										/>
 									)}
+								/>
+							)}
+						/>
+					)
+				case 'needConfirmed':
+					return (
+						<Controller
+							key={f.key}
+							name={f.key}
+							control={methods.control}
+							render={({ field }) => (
+								<FormControlLabel
+									control={<Checkbox checked={field.value} />}
+									label={f.label}
+									disabled={inReserve || isNew}
+									onChange={field.onChange}
 								/>
 							)}
 						/>
@@ -173,25 +211,34 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({ children, onSubmit,
 				</Box>
 			) : null}
 
-			<FormProvider {...methods}>
-				{!loadDepartments && !loadEmployees ? (
-					<Stack spacing={2} mt={3}>
-						{isNew && (
-							<FormControlLabel
-								control={<Checkbox checked={inReserve} />}
-								label='В резерве'
-								onChange={reserveHandler}
-							/>
-						)}
+			{status == 'moved' ? (
+				<Typography mt={2} fontSize={'1.1rem'}>
+					Местоположение инструмента не подтверждено
+				</Typography>
+			) : (
+				<>
+					<FormProvider {...methods}>
+						{status == 'used' ? <Typography mt={2}>Переместить инструмент в резерв?</Typography> : null}
+						{!loadDepartments && !loadEmployees && status == 'reserve' ? (
+							<Stack spacing={2} mt={3}>
+								{isNew && (
+									<FormControlLabel
+										control={<Checkbox checked={inReserve} />}
+										label='В резерве'
+										onChange={reserveHandler}
+									/>
+								)}
 
-						{renderFields()}
-					</Stack>
-				) : null}
+								{renderFields()}
+							</Stack>
+						) : null}
 
-				<Stack direction={'row'} spacing={3} mt={4}>
-					{children}
-				</Stack>
-			</FormProvider>
+						<Stack direction={'row'} spacing={3} mt={4}>
+							{children}
+						</Stack>
+					</FormProvider>
+				</>
+			)}
 		</Stack>
 	)
 }

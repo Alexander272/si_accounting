@@ -34,3 +34,9 @@ export interface ISIFilter {
 	valueStart: string
 	valueEnd: string
 }
+
+export type Status = 'reserve' | 'used' | 'moved'
+export interface ISelected {
+	id: string
+	status: Status
+}
