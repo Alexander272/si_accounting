@@ -86,9 +86,9 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, year_of_issue, 
 		inter_verification_interval, notes, i.status, v.date, v.next_date, m.place, COUNT(*) OVER() as total_count
 		FROM %s AS i
-		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC LIMIT 1) AS v ON TRUE
+		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place 
-			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC LIMIT 1) as m ON TRUE
+			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) as m ON TRUE
 		WHERE i.status='%s' %s %s LIMIT $%d OFFSET $%d`,
 		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable, constants.InstrumentStatusWork,
 		filter, order, count, count+1,
@@ -128,8 +128,8 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, e.name AS person, d.name AS department,
 		(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END) AS most_id
 		FROM %s AS i
-		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC LIMIT 1) AS v ON TRUE
-		LEFT JOIN LATERAL (SELECT person_id, department_id, status FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC LIMIT 1) AS m ON TRUE
+		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
+		LEFT JOIN LATERAL (SELECT person_id, department_id, status FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
 		LEFT JOIN %s AS e ON e.id=m.person_id
 		LEFT JOIN %s AS d ON d.id=m.department_id
 		LEFT JOIN LATERAL (SELECT most_id FROM %s WHERE department_id=m.department_id AND is_lead=true) AS l ON true

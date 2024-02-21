@@ -11,6 +11,7 @@ type Location struct {
 	// DeliveryDate    string `json:"deliveryDate" db:"delivery_date"`
 	DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
 	DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
+	NeedConfirmed   bool   `json:"needConfirmed" db:"need_confirmed"`
 	Status          string `json:"status" db:"status"`
 }
 
@@ -24,6 +25,7 @@ type CreateLocationDTO struct {
 	// DeliveryDate    string `json:"deliveryDate" db:"delivery_date"`
 	DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
 	DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
+	NeedConfirmed   bool   `json:"needConfirmed" db:"need_confirmed"`
 	Status          string `json:"status" db:"status"`
 }
 

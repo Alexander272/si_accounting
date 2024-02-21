@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -15,9 +16,10 @@ type NotificationService struct {
 	iterationNumber int
 	dates           []time.Time
 	si              SI
+	bot             Most
 }
 
-func NewNotificationService(si SI) *NotificationService {
+func NewNotificationService(si SI, bot Most) *NotificationService {
 	cron, err := gocron.NewScheduler()
 	if err != nil {
 		logger.Fatalf("failed to create new scheduler. error: %s", err.Error())
@@ -26,6 +28,7 @@ func NewNotificationService(si SI) *NotificationService {
 	return &NotificationService{
 		cron:            cron,
 		si:              si,
+		bot:             bot,
 		iterationNumber: 0,
 		// dates:           make([]time.Time, 5),
 	}
@@ -118,21 +121,31 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 	}
 
 	logger.Info("before")
+
+	startAt := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
+	finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
+
+	period := models.Period{
+		StartAt:  startAt.Format("02.01.2006"),
+		FinishAt: finishAt.Format("02.01.2006"),
+	}
+
+	si, err := s.si.GetForNotification(context.Background(), period)
+	if err != nil {
+		//TODO надо бы эту ошибку тоже в бот отправлять, чтобы я знал о ней
+		logger.Errorf("notification error: %s", err.Error())
+		return
+	}
+
+	for _, n := range si {
+		n.Message = "Необходимо сдать инструменты"
+
+		if err := s.bot.Send(context.Background(), n); err != nil {
+			//TODO надо бы эту ошибку тоже в бот отправлять, чтобы я знал о ней
+			logger.Errorf("notification error: %s", err.Error())
+			return
+		}
+	}
+
 	s.iterationNumber = index + 1
-
-	// startAt := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
-	// finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
-
-	// period := models.Period{
-	// 	StartAt:  startAt.Format("02.01.2006"),
-	// 	FinishAt: finishAt.Format("02.01.2006"),
-	// }
-
-	// si, err := s.si.GetForNotification(context.Background(), period)
-	// if err != nil {
-	// 	logger.Error("notification error: %s", err.Error())
-	// }
-
-	// надо еще как-то получать список оборудования которое нужно отправить и список людей которым его надо разослать
-	//TODO send notification
 }

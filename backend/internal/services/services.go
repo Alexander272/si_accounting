@@ -31,6 +31,7 @@ type Deps struct {
 	Keycloak        *auth.KeycloakClient
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
+	BotUrl          string
 }
 
 func NewServices(deps Deps) *Services {
@@ -53,7 +54,8 @@ func NewServices(deps Deps) *Services {
 	session := NewSessionService(deps.Keycloak, role)
 	permission := NewPermissionService("configs/privacy.conf", menu)
 
-	notification := NewNotificationService(si)
+	most := NewMostService(deps.BotUrl)
+	notification := NewNotificationService(si, most)
 
 	return &Services{
 		Instrument:   instrument,

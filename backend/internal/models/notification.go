@@ -21,10 +21,10 @@ type NotificationSubTime struct {
 }
 
 type Notification struct {
-	PostId string       `json:"postId"`
-	MostId string       `json:"mostId"`
-	Type   string       `json:"type"`
-	SI     []SelectedSI `json:"si"`
+	MostId  string       `json:"userId"`
+	Type    string       `json:"type"`
+	Message string       `json:"message"`
+	SI      []SelectedSI `json:"si"`
 }
 
 type SelectedSI struct {

@@ -52,6 +52,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 	params := models.SIParams{}
 
 	page := c.Query("page")
+	// TODO стоит переименовать count на size
 	count := c.Query("count")
 
 	limit, err := strconv.Atoi(count)
@@ -69,6 +70,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 		params.Page.Offset = (p - 1) * params.Page.Limit
 	}
 
+	//TODO стоит переименовать поля не sortBY. также можно в нем передавать несколько полей через запятую и указывать порядок, например, при сортировке по убыванию добавлять в перед названием поля минус
 	sortField := c.Query("s-field")
 	sortType := c.Query("s-type")
 
@@ -84,6 +86,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 		}
 	}
 
+	//TODO все эти поля тоже стоит как-нибудь поправить, тк это и выглядит плохо и пользоваться этим не удобно. стоит посмотреть в инете как правильно писать фильтры
 	filterField := c.Query("f-field")
 	filterFieldType := c.Query("f-fieldType")
 	filterType := c.Query("f-compareType")
