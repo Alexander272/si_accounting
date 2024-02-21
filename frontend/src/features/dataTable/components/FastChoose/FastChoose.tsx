@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react'
 import { Button, ListItemIcon, Menu, MenuItem } from '@mui/material'
+import { toast } from 'react-toastify'
 import dayjs from 'dayjs'
 
-import { CheckListIcon } from '@/components/Icons/CheckListIcon'
+import type { IFetchError } from '@/app/types/error'
+import type { ISIFilter, ISISort, ISelected } from '../../types/data'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import type { ISIFilter, ISISort } from '../../types/data'
 import {
 	addSelected,
 	getSelectedItems,
@@ -14,12 +15,11 @@ import {
 	getTableSort,
 	removeSelected,
 } from '../../dataTableSlice'
-import { useGetAllSIQuery, useLazyGetAllSIQuery } from '../../siApiSlice'
-import { toast } from 'react-toastify'
-import { IFetchError } from '@/app/types/error'
+import { CheckListIcon } from '@/components/Icons/CheckListIcon'
 import { CheckAllIcon } from '@/components/Icons/CheckAllIcon'
 import { DelayIcon } from '@/components/Icons/DelayIcon'
 import { CalendarIcon } from '@/components/Icons/CalendarIcon'
+import { useGetAllSIQuery, useLazyGetAllSIQuery } from '../../siApiSlice'
 
 export const FastChoose = () => {
 	const anchor = useRef<HTMLButtonElement | null>(null)
@@ -74,7 +74,11 @@ export const FastChoose = () => {
 	const fetching = async (filter?: ISIFilter, sort?: ISISort) => {
 		try {
 			const payload = await fetchSi({ limit: data?.total, filter, sort })
-			const identifiers = payload.data?.data.map(si => si.id) || []
+			const identifiers =
+				payload.data?.data.map(si => {
+					const status = si.place == 'Перемещение' ? 'moved' : si.place == 'Резерв' ? 'reserve' : 'used'
+					return { id: si.id, status: status } as ISelected
+				}) || []
 			dispatch(addSelected(identifiers))
 		} catch (error) {
 			const fetchError = error as IFetchError
