@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
@@ -30,55 +29,22 @@ type SI interface {
 func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SIList, error) {
 	list := &models.SIList{}
 
+	params := []interface{}{}
+	count := 1
+
 	order := " ORDER BY "
-	if req.Sort.Field != "" {
-		order += fmt.Sprintf("%s %s, ", req.Sort.Field, req.Sort.Type)
+	for _, s := range req.Sort {
+		order += fmt.Sprintf("%s %s, ", s.Field, s.Type)
 	}
 	order += "created_at, id"
 
 	filter := ""
-	params := []interface{}{}
-	count := 1
-
-	// TODO а почему тут номера параметров прописаны цифрами, если я захочу сделать возможность добавления нескольких фильтров это перестанет работать
-	switch req.Filter.CompareType {
-	case "contains":
-		filter = fmt.Sprintf("AND LOWER(%s) LIKE LOWER('%%'||$1||'%%')", req.Filter.Field)
-		params = append(params, req.Filter.Values[0])
-		count++
-	case "start":
-		filter = fmt.Sprintf("AND LOWER(%s) LIKE LOWER($1||'%%')", req.Filter.Field)
-		params = append(params, req.Filter.Values[0])
-		count++
-	case "end":
-		filter = fmt.Sprintf("AND LOWER(%s) LIKE LOWER('%%'||$1)", req.Filter.Field)
-		params = append(params, req.Filter.Values[0])
-		count++
-	case "equals":
-		if req.Filter.FieldType == "string" {
-			filter = fmt.Sprintf("AND LOWER(%s)=LOWER($1)", req.Filter.Field)
-		} else if req.Filter.FieldType == "list" {
-			// LOWER(place) ~* 'test|Отдел технического сервиса'
-			// LOWER(place) ILIKE ANY (ARRAY['test %','Отдел технического сервиса %'])
-			filter = fmt.Sprintf("AND LOWER(%s) ~* $1", req.Filter.Field)
-			req.Filter.Values[0] = strings.ReplaceAll(req.Filter.Values[0], ",", "|")
-		} else {
-			filter = fmt.Sprintf("AND %s=$1", req.Filter.Field)
+	for _, ns := range req.Filters {
+		for _, sv := range ns.Values {
+			filter += " AND " + getFilterLine(sv.CompareType, ns.Field, count)
+			params = append(params, sv.Value)
+			count++
 		}
-		params = append(params, req.Filter.Values[0])
-		count++
-	case "more":
-		filter = fmt.Sprintf("AND %s>$1", req.Filter.Field)
-		params = append(params, req.Filter.Values[0])
-		count++
-	case "less":
-		filter = fmt.Sprintf("AND %s<$1", req.Filter.Field)
-		params = append(params, req.Filter.Values[0])
-		count++
-	case "period":
-		filter = fmt.Sprintf("AND %s>$1 AND %s<$2", req.Filter.Field, req.Filter.Field)
-		params = append(params, req.Filter.Values[0], req.Filter.Values[1])
-		count += 2
 	}
 
 	params = append(params, req.Page.Limit, req.Page.Offset)
@@ -89,7 +55,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place 
 			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) as m ON TRUE
-		WHERE i.status='%s' %s %s LIMIT $%d OFFSET $%d`,
+		WHERE i.status='%s'%s%s LIMIT $%d OFFSET $%d`,
 		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable, constants.InstrumentStatusWork,
 		filter, order, count, count+1,
 	)
@@ -118,6 +84,8 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 
 	if len(list.SI) > 0 {
 		list.Total = list.SI[0].Total
+	} else {
+		list.SI = []models.SI{}
 	}
 
 	return list, nil

@@ -23,6 +23,7 @@ type Services struct {
 	Session
 	Permission
 
+	ErrorBot
 	Notification
 }
 
@@ -32,6 +33,7 @@ type Deps struct {
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
 	BotUrl          string
+	ErrorBotUrl     string
 }
 
 func NewServices(deps Deps) *Services {
@@ -54,8 +56,9 @@ func NewServices(deps Deps) *Services {
 	session := NewSessionService(deps.Keycloak, role)
 	permission := NewPermissionService("configs/privacy.conf", menu)
 
+	errorBot := NewErrorBotService(deps.ErrorBotUrl)
 	most := NewMostService(deps.BotUrl)
-	notification := NewNotificationService(si, most)
+	notification := NewNotificationService(si, most, errorBot)
 
 	return &Services{
 		Instrument:   instrument,
@@ -73,6 +76,7 @@ func NewServices(deps Deps) *Services {
 		Session:      session,
 		Permission:   permission,
 
+		ErrorBot:     errorBot,
 		Notification: notification,
 	}
 }

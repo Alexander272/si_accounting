@@ -72,6 +72,8 @@ func main() {
 		Keycloak:        keycloak,
 		AccessTokenTTL:  conf.Auth.AccessTokenTTL,
 		RefreshTokenTTL: conf.Auth.RefreshTokenTTL,
+		ErrorBotUrl:     conf.ErrorBot.Url,
+		BotUrl:          conf.Bot.Url,
 	})
 
 	// casbin := casbin.NewCasbinService(services.Role, services.User, "configs/privacy.conf")

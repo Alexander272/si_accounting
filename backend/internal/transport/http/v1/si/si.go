@@ -3,11 +3,13 @@ package si
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,10 +54,12 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 	params := models.SIParams{}
 
 	page := c.Query("page")
-	// TODO стоит переименовать count на size
-	count := c.Query("count")
+	size := c.Query("size")
 
-	limit, err := strconv.Atoi(count)
+	sortLine := c.Query("sort_by")
+	filters := c.QueryMap("filters")
+
+	limit, err := strconv.Atoi(size)
 	if err != nil {
 		params.Page.Limit = 15
 	} else {
@@ -70,36 +74,53 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 		params.Page.Offset = (p - 1) * params.Page.Limit
 	}
 
-	//TODO стоит переименовать поля не sortBY. также можно в нем передавать несколько полей через запятую и указывать порядок, например, при сортировке по убыванию добавлять в перед названием поля минус
-	sortField := c.Query("s-field")
-	sortType := c.Query("s-type")
+	if sortLine != "" {
+		sort := strings.Split(sortLine, ",")
+		for _, v := range sort {
+			field, found := strings.CutPrefix(v, "-")
+			t := "ASC"
+			if found {
+				t = "DESC"
+			}
 
-	if sortField != "" && sortType != "" {
-		t := "ASC"
-		if sortType != "ASC" {
-			t = "DESC"
-		}
-
-		params.Sort = models.SISort{
-			Field: h.formatFields[sortField],
-			Type:  t,
+			params.Sort = append(params.Sort, models.SISort{
+				Field: h.formatFields[field],
+				Type:  t,
+			})
 		}
 	}
 
-	//TODO все эти поля тоже стоит как-нибудь поправить, тк это и выглядит плохо и пользоваться этим не удобно. стоит посмотреть в инете как правильно писать фильтры
-	filterField := c.Query("f-field")
-	filterFieldType := c.Query("f-fieldType")
-	filterType := c.Query("f-compareType")
-	filterValue1 := c.Query("f-valueStart")
-	filterValue2 := c.Query("f-valueEnd")
+	// можно сделать массив с именами полей, а потом передавать для каждого поля значение фильтра, например
+	// filter[0]=nextVerificationDate&nextVerificationDate[lte]=somevalue&nextVerificationDate[qte]=somevalue&filter[1]=name&name[eq]=somevalue
+	// qte - >=; lte - <=
+	// нужен еще тип как-то передать
+	// как вариант можно передать filter[nextVerificationDate]=date, filter[name]=string
+	// только надо проверить как это все будет читаться на сервере и записываться на клиенте
 
-	if filterField != "" && filterType != "" {
-		params.Filter = models.SIFilter{
-			Field:       h.formatFields[filterField],
-			FieldType:   filterFieldType,
-			CompareType: filterType,
-			Values:      []string{filterValue1, filterValue2},
+	// можно сделать следующие варианты compareType (это избавит от необходимости знать тип поля)
+	// number: eq, qte, lte
+	// string: like, con, start, end
+	// list: in
+
+	for k, v := range filters {
+		valueMap := c.QueryMap(k)
+		logger.Debug("value ", valueMap)
+
+		values := []models.SIFilterValue{}
+		for key, value := range valueMap {
+			values = append(values, models.SIFilterValue{
+				CompareType: key,
+				Value:       value,
+			})
 		}
+
+		f := models.SIFilter{
+			Field:     h.formatFields[k],
+			FieldType: v,
+			Values:    values,
+		}
+
+		params.Filters = append(params.Filters, f)
 	}
 
 	si, err := h.service.GetAll(c, params)

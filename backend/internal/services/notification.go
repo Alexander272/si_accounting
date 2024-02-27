@@ -7,6 +7,7 @@ import (
 
 	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
+	"github.com/Alexander272/si_accounting/backend/internal/models/bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/go-co-op/gocron/v2"
 )
@@ -17,9 +18,10 @@ type NotificationService struct {
 	dates           []time.Time
 	si              SI
 	bot             Most
+	errBot          ErrorBot
 }
 
-func NewNotificationService(si SI, bot Most) *NotificationService {
+func NewNotificationService(si SI, bot Most, errBot ErrorBot) *NotificationService {
 	cron, err := gocron.NewScheduler()
 	if err != nil {
 		logger.Fatalf("failed to create new scheduler. error: %s", err.Error())
@@ -29,6 +31,7 @@ func NewNotificationService(si SI, bot Most) *NotificationService {
 		cron:            cron,
 		si:              si,
 		bot:             bot,
+		errBot:          errBot,
 		iterationNumber: 0,
 		// dates:           make([]time.Time, 5),
 	}
@@ -45,7 +48,7 @@ func (s *NotificationService) Start(conf *config.NotificationConfig) error {
 
 	now := time.Now()
 	jobStart := time.Date(now.Year(), now.Month(), now.Day(), conf.StartTime, 0, 0, 0, now.Location())
-	if now.Hour() > conf.StartTime {
+	if now.Hour() >= conf.StartTime {
 		jobStart = jobStart.Add(24 * time.Hour)
 	}
 	////  вернуть нормальное время запуска
@@ -132,17 +135,21 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 
 	si, err := s.si.GetForNotification(context.Background(), period)
 	if err != nil {
-		//TODO надо бы эту ошибку тоже в бот отправлять, чтобы я знал о ней
 		logger.Errorf("notification error: %s", err.Error())
+		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: period, Url: "notification bot"})
 		return
 	}
 
 	for _, n := range si {
+		if n.MostId == "" {
+			continue
+		}
+
 		n.Message = "Необходимо сдать инструменты"
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
-			//TODO надо бы эту ошибку тоже в бот отправлять, чтобы я знал о ней
 			logger.Errorf("notification error: %s", err.Error())
+			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})
 			return
 		}
 	}

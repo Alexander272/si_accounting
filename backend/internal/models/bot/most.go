@@ -3,6 +3,7 @@ package bot
 type Data struct {
 	Error   string
 	IP      string
+	Url     string
 	Request interface{}
 }
 
