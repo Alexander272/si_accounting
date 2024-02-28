@@ -10,6 +10,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models/bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/go-co-op/gocron/v2"
+	"github.com/goodsign/monday"
 )
 
 type NotificationService struct {
@@ -51,7 +52,7 @@ func (s *NotificationService) Start(conf *config.NotificationConfig) error {
 	if now.Hour() >= conf.StartTime {
 		jobStart = jobStart.Add(24 * time.Hour)
 	}
-	////  вернуть нормальное время запуска
+	// //  вернуть нормальное время запуска
 	// jobStart := now.Add(1 * time.Minute)
 	logger.Info("starting jobs time ", jobStart.Format("02.01.2006 15:04:05"))
 
@@ -94,11 +95,11 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 	notificationTime := times[index]
 
 	now := time.Now()
+	monthEnd := time.Date(now.Year(), now.Month()+1, 0, now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
 
 	switch notificationTime.Type {
 	case "sub":
 		// возможно часы надо все-таки обнулить (как бы ошибок не было из-за часов)
-		monthEnd := time.Date(now.Year(), now.Month()+1, 0, now.Hour(), 0, 0, 0, now.Location())
 		date := monthEnd.Add(-notificationTime.Sub)
 		s.dates[index] = date
 
@@ -123,7 +124,7 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 		return
 	}
 
-	logger.Info("before")
+	logger.Info("after")
 
 	startAt := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
 	finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
@@ -145,12 +146,17 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 			continue
 		}
 
-		n.Message = "Необходимо сдать инструменты"
+		term := monday.Format(monthEnd.Add(-notificationTime.Time), "Mon 2 Jan 2006", monday.LocaleRuRU)
+		if now.Equal(monthEnd.Add(-notificationTime.Time)) {
+			term += " (Сегодня)"
+		}
+
+		n.Message = "Необходимо сдать инструменты до `" + term + "`"
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
 			logger.Errorf("notification error: %s", err.Error())
 			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})
-			return
+
 		}
 	}
 

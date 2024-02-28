@@ -9,7 +9,6 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
-	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -98,13 +97,12 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 	// только надо проверить как это все будет читаться на сервере и записываться на клиенте
 
 	// можно сделать следующие варианты compareType (это избавит от необходимости знать тип поля)
-	// number: eq, qte, lte
+	// number or date: eq, qte, lte
 	// string: like, con, start, end
 	// list: in
 
 	for k, v := range filters {
 		valueMap := c.QueryMap(k)
-		logger.Debug("value ", valueMap)
 
 		values := []models.SIFilterValue{}
 		for key, value := range valueMap {

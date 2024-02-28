@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/goccy/go-json"
@@ -32,9 +34,18 @@ func (s *MostService) Send(ctx context.Context, data models.Notification) error 
 		return fmt.Errorf("failed to encode notification data. error: %w", err)
 	}
 
-	_, err := http.Post(s.url+apiPath, "application/json", &buf)
+	resp, err := http.Post(s.url+apiPath, "application/json", &buf)
 	if err != nil {
 		return fmt.Errorf("failed to send data to bot. error: %w", err)
+	}
+
+	if !strings.HasPrefix(resp.Status, "2") {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("client: could not read response body: %w", err)
+		}
+
+		return fmt.Errorf("request returned an error: %s", string(body))
 	}
 
 	return nil

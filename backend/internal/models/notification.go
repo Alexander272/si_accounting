@@ -6,6 +6,7 @@ type NotificationTime struct {
 	Id    string
 	Type  string `yaml:"type"`
 	Title string
+	Time  time.Duration `yaml:"time"`
 	// Date time.Time
 	// Add  time.Time
 	Date time.Duration `yaml:"date"`
