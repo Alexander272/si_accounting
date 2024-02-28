@@ -10,7 +10,7 @@ import {
 	addSelected,
 	getSelectedItems,
 	getTableFilter,
-	getTableLimit,
+	getTableSize,
 	getTablePage,
 	getTableSort,
 	removeSelected,
@@ -29,14 +29,14 @@ export const FastChoose = () => {
 
 	const selected = useAppSelector(getSelectedItems)
 	const page = useAppSelector(getTablePage)
-	const limit = useAppSelector(getTableLimit)
+	const size = useAppSelector(getTableSize)
 
 	const sort = useAppSelector(getTableSort)
 	const filter = useAppSelector(getTableFilter)
 
 	const dispatch = useAppDispatch()
 
-	const { data } = useGetAllSIQuery({ page, limit, sort, filter })
+	const { data } = useGetAllSIQuery({ page, size, sort, filter })
 
 	const toggleHandler = () => setOpen(prev => !prev)
 
@@ -51,7 +51,7 @@ export const FastChoose = () => {
 		const filter: ISIFilter = {
 			field: 'nextVerificationDate',
 			fieldType: 'date',
-			compareType: 'less',
+			compareType: 'lte',
 			valueStart: dayjs().unix().toString(),
 			valueEnd: '',
 		}
@@ -63,7 +63,7 @@ export const FastChoose = () => {
 		const filter: ISIFilter = {
 			field: 'nextVerificationDate',
 			fieldType: 'date',
-			compareType: 'period',
+			compareType: 'range',
 			valueStart: dayjs().startOf('month').unix().toString(),
 			valueEnd: dayjs().endOf('month').unix().toString(),
 		}
@@ -73,7 +73,7 @@ export const FastChoose = () => {
 
 	const fetching = async (filter?: ISIFilter, sort?: ISISort) => {
 		try {
-			const payload = await fetchSi({ limit: data?.total, filter, sort })
+			const payload = await fetchSi({ size: data?.total, filter, sort })
 			const identifiers =
 				payload.data?.data.map(si => {
 					const status = si.place == 'Перемещение' ? 'moved' : si.place == 'Резерв' ? 'reserve' : 'used'

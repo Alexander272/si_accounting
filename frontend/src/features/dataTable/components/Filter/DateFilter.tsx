@@ -3,7 +3,7 @@ import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs from 'dayjs'
 
-import { ISIFilter } from '../../types/data'
+import type { ISIFilter } from '../../types/data'
 
 export const DateFilter = () => {
 	const methods = useFormContext<ISIFilter>()
@@ -21,10 +21,10 @@ export const DateFilter = () => {
 						<InputLabel id='filter-select'>Операторы</InputLabel>
 
 						<Select {...field} error={Boolean(error)} labelId='filter-select' label='Операторы'>
-							<MenuItem value='equals'>Равна</MenuItem>
-							<MenuItem value='more'>Больше чем</MenuItem>
-							<MenuItem value='less'>Меньше чем</MenuItem>
-							<MenuItem value='period'>В диапазоне</MenuItem>
+							<MenuItem value='eq'>Равна</MenuItem>
+							<MenuItem value='gte'>Больше чем</MenuItem>
+							<MenuItem value='lte'>Меньше чем</MenuItem>
+							<MenuItem value='range'>В диапазоне</MenuItem>
 						</Select>
 					</FormControl>
 				)}
@@ -39,7 +39,7 @@ export const DateFilter = () => {
 						// {...field}
 						value={dayjs(field.value != '' ? +field.value * 1000 : null)}
 						onChange={value => field.onChange(value?.unix())}
-						label={compareType != 'period' ? 'Значение' : 'Начало'}
+						label={compareType != 'range' ? 'Значение' : 'Начало'}
 						showDaysOutsideCurrentMonth
 						fixedWeekNumber={6}
 						sx={{ mt: 2 }}
@@ -53,7 +53,7 @@ export const DateFilter = () => {
 				)}
 			/>
 
-			{compareType == 'period' && (
+			{compareType == 'range' && (
 				<Controller
 					control={methods.control}
 					name={'valueEnd'}

@@ -17,8 +17,8 @@ export const TextFilter = () => {
 						<InputLabel id='filter-select'>Операторы</InputLabel>
 
 						<Select {...field} error={Boolean(error)} labelId='filter-select' label='Операторы'>
-							<MenuItem value='contains'>Содержит</MenuItem>
-							<MenuItem value='equals'>Равен</MenuItem>
+							<MenuItem value='con'>Содержит</MenuItem>
+							<MenuItem value='like'>Равен</MenuItem>
 							<MenuItem value='start'>Начинается с</MenuItem>
 							<MenuItem value='end'>Заканчивается на</MenuItem>
 						</Select>

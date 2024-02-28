@@ -19,10 +19,10 @@ export const NumberFilter = () => {
 						<InputLabel id='filter-select'>Операторы</InputLabel>
 
 						<Select {...field} error={Boolean(error)} labelId='filter-select' label='Операторы'>
-							<MenuItem value='equals'>Равен</MenuItem>
-							<MenuItem value='more'>Больше чем</MenuItem>
-							<MenuItem value='less'>Меньше чем</MenuItem>
-							<MenuItem value='period'>В диапазоне</MenuItem>
+							<MenuItem value='eq'>Равно</MenuItem>
+							<MenuItem value='gte'>Больше чем</MenuItem>
+							<MenuItem value='lte'>Меньше чем</MenuItem>
+							<MenuItem value='range'>В диапазоне</MenuItem>
 						</Select>
 					</FormControl>
 				)}
@@ -36,14 +36,14 @@ export const NumberFilter = () => {
 					<TextField
 						{...field}
 						error={Boolean(error)}
-						label={compareType != 'period' ? 'Значение' : 'Начало'}
+						label={compareType != 'range' ? 'Значение' : 'Начало'}
 						type='number'
 						fullWidth
 						sx={{ mt: 2 }}
 					/>
 				)}
 			/>
-			{compareType == 'period' && (
+			{compareType == 'range' && (
 				<Controller
 					control={methods.control}
 					name={'valueEnd'}

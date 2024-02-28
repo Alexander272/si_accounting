@@ -1,16 +1,16 @@
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
-import { getTableLimit, setLimit } from '../dataTableSlice'
+import { getTableSize, setSize } from '../dataTableSlice'
 
 const limits = [15, 30, 50, 100]
 
 export const Limit = () => {
-	const limit = useAppSelector(getTableLimit)
+	const size = useAppSelector(getTableSize)
 
 	const dispatch = useAppDispatch()
 
-	const changeLimit = (event: SelectChangeEvent<number>) => {
-		dispatch(setLimit(+event.target.value))
+	const changeSize = (event: SelectChangeEvent<number>) => {
+		dispatch(setSize(+event.target.value))
 	}
 
 	return (
@@ -18,8 +18,8 @@ export const Limit = () => {
 			<Typography>Строк на странице:</Typography>
 
 			<Select
-				value={limit}
-				onChange={changeLimit}
+				value={size}
+				onChange={changeSize}
 				sx={{
 					boxShadow: 'none',
 					'.MuiOutlinedInput-notchedOutline': { border: 0 },

@@ -19,6 +19,7 @@ export const DataTable = () => {
 		>
 			<DataHeader />
 
+			{/* //TODO в firefox окно больше и footer некрасиво растягивается */}
 			<TableContainer sx={{ maxHeight: 640, height: '100%', flexGrow: 1 }}>
 				<Table stickyHeader size='small'>
 					<DataTableHead />

@@ -30,7 +30,7 @@ export const Filter: FC<Props> = ({ cell }) => {
 		defaultValues: {
 			field: cell.id,
 			fieldType: cell.type || 'string',
-			compareType: !cell.type ? 'contains' : 'equals',
+			compareType: !cell.type ? 'con' : 'eq',
 			valueStart: '',
 			valueEnd: '',
 		},

@@ -1,24 +1,24 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
+import type { IDataItem, ISIFilter, ISIFilterNew, ISISort, ISelected } from './types/data'
 import { RootState } from '@/app/store'
-import { IDataItem, ISIFilter, ISISort, ISelected } from './types/data'
+import { localKeys } from '@/constants/localKeys'
+import { Size } from '@/constants/defaultValues'
 import { changeModalIsOpen } from '../modal/modalSlice'
 
 interface IDataTableSlice {
 	page: number
-	limit: number
+	size: number
 	sort?: ISISort
 	filter?: ISIFilter
-	// selected: string[]
-	// active?: string
+	filterNew?: ISIFilterNew
 	selected: ISelected[]
 	active?: ISelected
 }
 
 const initialState: IDataTableSlice = {
-	page: 1,
-	//TODO заменить limit на size
-	limit: 15, // 15, 30, 50, 100 доступные лимиты. 15 строк макс который влазит без прокрутки
+	page: +(localStorage.getItem(localKeys.page) || 1),
+	size: +(localStorage.getItem(localKeys.size) || Size), // 15, 30, 50, 100 доступные лимиты. 15 строк макс который влазит без прокрутки
 	sort: {
 		field: 'nextVerificationDate',
 		type: 'ASC',
@@ -33,8 +33,8 @@ const dataTableSlice = createSlice({
 		setPage: (state, action: PayloadAction<number>) => {
 			state.page = action.payload
 		},
-		setLimit: (state, action: PayloadAction<number>) => {
-			state.limit = action.payload
+		setSize: (state, action: PayloadAction<number>) => {
+			state.size = action.payload
 		},
 
 		setSort: (state, action: PayloadAction<keyof IDataItem>) => {
@@ -52,19 +52,9 @@ const dataTableSlice = createSlice({
 		setFilters: (state, action: PayloadAction<ISIFilter | undefined>) => {
 			state.filter = action.payload
 		},
-
-		// addSelected: (state, action: PayloadAction<string | string[]>) => {
-		// 	if (typeof action.payload == 'string') state.selected.push(action.payload)
-		// 	else state.selected.push(...action.payload)
-		// },
-		// removeSelected: (state, action: PayloadAction<string | undefined>) => {
-		// 	if (action.payload != undefined) state.selected = state.selected.filter(s => s != action.payload)
-		// 	else state.selected = []
-		// },
-
-		// setActive: (state, action: PayloadAction<string | undefined>) => {
-		// 	state.active = action.payload
-		// },
+		setFilterNew: (state, action: PayloadAction<ISIFilterNew | undefined>) => {
+			state.filterNew = action.payload
+		},
 
 		addSelected: (state, action: PayloadAction<ISelected | ISelected[]>) => {
 			if (Array.isArray(action.payload)) state.selected.push(...action.payload)
@@ -88,14 +78,24 @@ const dataTableSlice = createSlice({
 })
 
 export const getTablePage = (state: RootState) => state.dataTable.page
-export const getTableLimit = (state: RootState) => state.dataTable.limit
+export const getTableSize = (state: RootState) => state.dataTable.size
 export const getTableSort = (state: RootState) => state.dataTable.sort
 export const getTableFilter = (state: RootState) => state.dataTable.filter
+export const getTableFilterNew = (state: RootState) => state.dataTable.filterNew
 export const getSelectedItems = (state: RootState) => state.dataTable.selected
 export const getActiveItem = (state: RootState) => state.dataTable.active
 
 export const dataTablePath = dataTableSlice.name
 export const dataTableReducer = dataTableSlice.reducer
 
-export const { setPage, setLimit, setSort, setFilters, addSelected, removeSelected, setActive, resetDataTableState } =
-	dataTableSlice.actions
+export const {
+	setPage,
+	setSize,
+	setSort,
+	setFilters,
+	setFilterNew,
+	addSelected,
+	removeSelected,
+	setActive,
+	resetDataTableState,
+} = dataTableSlice.actions

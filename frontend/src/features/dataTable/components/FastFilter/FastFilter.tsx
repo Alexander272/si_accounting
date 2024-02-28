@@ -50,7 +50,7 @@ export const FastFilter = () => {
 			const filter: ISIFilter = {
 				field: 'nextVerificationDate',
 				fieldType: 'date',
-				compareType: 'less',
+				compareType: 'lte',
 				valueStart: dayjs().unix().toString(),
 				valueEnd: '',
 			}
@@ -58,7 +58,7 @@ export const FastFilter = () => {
 			if (active == 'month') {
 				const date = dayjs().set('month', month)
 
-				filter.compareType = 'period'
+				filter.compareType = 'range'
 				filter.valueStart = date.startOf('month').unix().toString()
 				filter.valueEnd = date.endOf('month').unix().toString()
 			}

@@ -17,7 +17,7 @@ export interface IDataItem {
 
 export interface ISIParams {
 	page?: number
-	limit?: number
+	size?: number
 	sort?: ISISort
 	filter?: ISIFilter
 }
@@ -27,12 +27,22 @@ export interface ISISort {
 	type: 'DESC' | 'ASC'
 }
 
+export type CompareTypes = 'con' | 'start' | 'end' | 'like' | 'in' | 'eq' | 'gte' | 'lte' | 'range'
 export interface ISIFilter {
 	field: keyof IDataItem
 	fieldType: string
-	compareType: string
+	compareType: CompareTypes
 	valueStart: string
 	valueEnd: string
+}
+export interface ISIFilterNew {
+	field: keyof IDataItem
+	fieldType: string
+	values: ISIFilterValue[]
+}
+export interface ISIFilterValue {
+	compareType: CompareTypes
+	value: string
 }
 
 export type Status = 'reserve' | 'used' | 'moved'

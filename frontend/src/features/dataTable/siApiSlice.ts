@@ -1,9 +1,11 @@
+import { toast } from 'react-toastify'
+
+import type { IDataItem, ISIParams } from './types/data'
+import type { IFetchError } from '@/app/types/error'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
-import { IDataItem, ISIFilter, ISIParams, ISISort } from './types/data'
-import { IFetchError } from '@/app/types/error'
-import { toast } from 'react-toastify'
 import { SIMessages } from '@/constants/messages/siMessage'
+import { buildSiUrlParams } from './utils/buildUrlParams'
 
 const SIApiSlice = apiSlice.injectEndpoints({
 	overrideExisting: false,
@@ -12,17 +14,7 @@ const SIApiSlice = apiSlice.injectEndpoints({
 			query: params => ({
 				url: API.si.base,
 				method: 'GET',
-				params: new URLSearchParams([
-					// params.page && params.page != 0 ? ['page', params.page.toString()] : null,
-					...(params.page && params.page != 1 ? [['page', params.page.toString()]] : []),
-					...(params.limit && params.limit != 15 ? [['count', params.limit.toString()]] : []),
-					...(params.sort
-						? Object.keys(params.sort).map(k => [`s-${k}`, params.sort![k as keyof ISISort]])
-						: []),
-					...(params.filter
-						? Object.keys(params.filter).map(k => [`f-${k}`, params.filter![k as keyof ISIFilter]])
-						: []),
-				]),
+				params: buildSiUrlParams(params),
 			}),
 			providesTags: [{ type: 'SI', id: 'ALL' }],
 		}),

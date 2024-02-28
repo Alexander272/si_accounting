@@ -9,8 +9,8 @@ import {
 	addSelected,
 	getSelectedItems,
 	getTableFilter,
-	getTableLimit,
 	getTablePage,
+	getTableSize,
 	getTableSort,
 	removeSelected,
 } from '../dataTableSlice'
@@ -19,7 +19,7 @@ import { DataTableRow } from './DataTableRow'
 
 export const DataTableBody = () => {
 	const page = useAppSelector(getTablePage)
-	const limit = useAppSelector(getTableLimit)
+	const size = useAppSelector(getTableSize)
 
 	const sort = useAppSelector(getTableSort)
 	const filter = useAppSelector(getTableFilter)
@@ -30,7 +30,7 @@ export const DataTableBody = () => {
 
 	const { coordinates, isSelected, itemId, status, positionHandler } = useContextMenu()
 
-	const { data } = useGetAllSIQuery({ page, limit, sort, filter }, { pollingInterval: 5 * 60000 })
+	const { data } = useGetAllSIQuery({ page, size, sort, filter }, { pollingInterval: 5 * 60000 })
 
 	const selectHandler = useCallback(
 		(item: ISelected, selected: boolean) => {
