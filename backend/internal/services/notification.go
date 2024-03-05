@@ -57,7 +57,8 @@ func (s *NotificationService) Start(conf *config.NotificationConfig) error {
 	logger.Info("starting jobs time ", jobStart.Format("02.01.2006 15:04:05"))
 
 	job := gocron.DurationJob(conf.Interval)
-	task := gocron.NewTask(s.Send, conf.Times)
+	// task := gocron.NewTask(s.Send, conf.Times)
+	task := gocron.NewTask(s.Check, conf.Times)
 	jobStartAt := gocron.WithStartAt(gocron.WithStartDateTime(jobStart))
 
 	_, err := s.cron.NewJob(job, task, jobStartAt)
@@ -85,8 +86,115 @@ func (s *NotificationService) Stop() error {
 	return nil
 }
 
+func (s *NotificationService) Check(times []models.NotificationTime) {
+	s.CheckSendSI()
+	s.CheckNotificationTime(times)
+}
+
+func (s *NotificationService) CheckSendSI() {
+	logger.Debug("CheckSendSI")
+	//TODO есть проблема. уведомления будут отправляться каждый день пока не подтвердят, что наверное не очень хорошо
+	nots, err := s.si.GetForNotification(context.Background(), models.Period{})
+	if err != nil {
+		logger.Errorf("notification error: %s", err.Error())
+		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: nil, Url: "notification bot. get si list (checkSend)"})
+		return
+	}
+
+	for _, n := range nots {
+		if n.MostId == "" {
+			continue
+		}
+
+		n.Message = "Подтвердите получение инструментов"
+
+		if err := s.bot.Send(context.Background(), n); err != nil {
+			logger.Errorf("notification error: %s", err.Error())
+			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot. send to bot (checkSend)"})
+
+		}
+	}
+}
+
 // можно с go cron каждый день вызывать определенную функцию которая будет отправлять уведомления
 // в функции будет текущая дата сравниваться с ожидаемой (либо задана, либо вычисляется по заданному условию) и если сравнение не проходит функция дальше не идет
+
+func (s *NotificationService) CheckNotificationTime(times []models.NotificationTime) {
+	index := s.iterationNumber % len(times)
+	logger.Info("job started ", index)
+
+	notificationTime := times[index]
+
+	now := time.Now()
+	// возможно часы надо все-таки обнулить (как бы ошибок не было из-за часов)
+	monthEnd := time.Date(now.Year(), now.Month()+1, 0, now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
+
+	//? задача в cron запускается 1 раз в сутки. текущая дата сравнивается с расчетной и если текущая дата >=, то индекс переключается.
+	// поскольку следующая дата высчитывается на основе предыдущей сделан массив в который записывается все рассчитанные даты.
+
+	switch notificationTime.Type {
+	case "sub":
+		date := monthEnd.Add(-notificationTime.Sub)
+		s.dates[index] = date
+
+		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+	case "add":
+		start := now
+		if index > 0 && s.dates[index-1].Year() > 1 {
+			start = s.dates[index-1]
+		}
+		date := start.Add(notificationTime.Add)
+		s.dates[index] = date
+
+		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+	case "date":
+		date := time.Date(now.Year(), now.Month(), 0, 0, 0, 0, 0, now.Location()).Add(notificationTime.Date)
+		s.dates[index] = date
+
+		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+	}
+
+	if !s.dates[index].Before(time.Now()) {
+		return
+	}
+
+	logger.Info("after")
+
+	startAt := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
+	finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
+
+	period := models.Period{
+		StartAt:  startAt.Format("02.01.2006"),
+		FinishAt: finishAt.Format("02.01.2006"),
+	}
+
+	si, err := s.si.GetForNotification(context.Background(), period)
+	if err != nil {
+		logger.Errorf("notification error: %s", err.Error())
+		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: period, Url: "notification bot"})
+		return
+	}
+
+	for _, n := range si {
+		if n.MostId == "" {
+			continue
+		}
+
+		term := monday.Format(monthEnd.Add(-notificationTime.Time), "Mon 2 Jan 2006", monday.LocaleRuRU)
+		if now.Equal(monthEnd.Add(-notificationTime.Time)) {
+			term += " (Сегодня)"
+		}
+		n.Message = "Необходимо сдать инструменты до `" + term + "`"
+
+		if err := s.bot.Send(context.Background(), n); err != nil {
+			logger.Errorf("notification error: %s", err.Error())
+			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})
+
+		}
+	}
+
+	s.iterationNumber = index + 1
+}
 
 func (s *NotificationService) Send(times []models.NotificationTime) {
 	index := s.iterationNumber % len(times)
@@ -96,6 +204,9 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 
 	now := time.Now()
 	monthEnd := time.Date(now.Year(), now.Month()+1, 0, now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
+
+	//? задача в cron запускается 1 раз в сутки. текущая дата сравнивается с расчетной и если текущая дата >=, то индекс переключается.
+	// поскольку следующая дата высчитывается на основе предыдущей сделан массив в который записывается все рассчитанные даты.
 
 	switch notificationTime.Type {
 	case "sub":
@@ -151,6 +262,7 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 			term += " (Сегодня)"
 		}
 
+		// n.Type = "receiving"
 		n.Message = "Необходимо сдать инструменты до `" + term + "`"
 
 		if err := s.bot.Send(context.Background(), n); err != nil {

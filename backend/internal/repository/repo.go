@@ -43,6 +43,9 @@ type MenuWithApi interface {
 type Menu interface {
 	postgres.Menu
 }
+type DefaultFilter interface {
+	postgres.DefaultFilter
+}
 
 type Repository struct {
 	Instrument
@@ -57,21 +60,23 @@ type Repository struct {
 	MenuItem
 	MenuWithApi
 	Menu
+	DefaultFilter
 }
 
 func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
 	return &Repository{
-		Instrument:   postgres.NewInstrumentRepo(db),
-		Verification: postgres.NewVerificationRepo(db),
-		Documents:    postgres.NewDocumentsRepo(db),
-		Location:     postgres.NewLocationRepo(db),
-		SI:           postgres.NewSIRepo(db),
-		Department:   postgres.NewDepartmentRepo(db),
-		Employee:     postgres.NewEmployeeRepo(db),
-		Role:         postgres.NewRoleRepo(db),
-		ApiPaths:     postgres.NewApiRepo(db),
-		MenuItem:     postgres.NewMenuItemRepo(db),
-		MenuWithApi:  postgres.NewMenuWithApiRepo(db),
-		Menu:         postgres.NewMenuRepo(db),
+		Instrument:    postgres.NewInstrumentRepo(db),
+		Verification:  postgres.NewVerificationRepo(db),
+		Documents:     postgres.NewDocumentsRepo(db),
+		Location:      postgres.NewLocationRepo(db),
+		SI:            postgres.NewSIRepo(db),
+		Department:    postgres.NewDepartmentRepo(db),
+		Employee:      postgres.NewEmployeeRepo(db),
+		Role:          postgres.NewRoleRepo(db),
+		ApiPaths:      postgres.NewApiRepo(db),
+		MenuItem:      postgres.NewMenuItemRepo(db),
+		MenuWithApi:   postgres.NewMenuWithApiRepo(db),
+		Menu:          postgres.NewMenuRepo(db),
+		DefaultFilter: postgres.NewDefaultFilterRepo(db),
 	}
 }

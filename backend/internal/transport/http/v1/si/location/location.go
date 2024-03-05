@@ -94,24 +94,28 @@ func (h *LocationHandlers) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
 }
 
-// TODO проверить эти две функции не получается тк с ботом проблемы жуткие
+// TODO можно это вынести в отдельный пакет notification и там уже можно будет сделать подтверждение из почты и с защитой будет проще
 func (h *LocationHandlers) Receiving(c *gin.Context) {
-	logger.Debug("receiving ", c.Query("instruments"))
+	// если я буду делать подтверждение по почте там нельзя будет отправлять пост запрос и все нужные данные надо будет передавать в query
 
-	logger.Debug("request ", c.Request)
-
-	// TODO надо как-то определять статус, а еще есть вопрос как я буду получать id инструмента
-	var dto models.ReceivingDTO
+	var dto models.Confirmation
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
 
-	// if err := h.service.Receiving(c, dto); err != nil {
-	// 	response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-	// 	// h.botApi.SendError(c, err.Error(), dto)
-	// 	return
-	// }
+	logger.Debug("dto ", dto)
+
+	data := models.ReceivingDTO{
+		InstrumentIds: dto.Context.InstrumentIds,
+		Status:        dto.Context.Status,
+	}
+
+	if err := h.service.Receiving(c, data); err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		h.errBot.Send(c, err.Error(), dto)
+		return
+	}
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
 }
 

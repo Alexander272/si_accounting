@@ -16,10 +16,13 @@ type Services struct {
 	Department
 	Employee
 	Role
+	DefaultFilter
+
 	ApiPaths
 	MenuItem
 	MenuWithApi
 	Menu
+
 	Session
 	Permission
 
@@ -47,13 +50,20 @@ func NewServices(deps Deps) *Services {
 
 	si := NewSIService(deps.Repos.SI, instrument, verification, location)
 
+	filter := NewDefaultFilterService(deps.Repos.DefaultFilter)
+
 	role := NewRoleService(deps.Repos.Role)
 	api := NewApiPathsService(deps.Repos.ApiPaths)
 	menuItem := NewMenuItemService(deps.Repos.MenuItem)
 	menuWithApi := NewMenuWithApiService(deps.Repos.MenuWithApi)
 	menu := NewMenuService(deps.Repos.Menu, menuWithApi)
 
-	session := NewSessionService(deps.Keycloak, role)
+	// TODO можно включить для keycloak настройку что он за прокси и запустить сервер на 80 (или на другом) порту для вывода интерфейса
+	// TODO при авторизации пользователя его можно искать сразу по нескольким realm
+	session := NewSessionService(deps.Keycloak, role, filter)
+
+	// TODO для чего я делаю экземпляр ботов для каждого сервиса, когда нужно запустить один и отправлять все запросы на него. тоже самое относится и сервису email, файловому (file - minio) и возможно к некоторым другим. можно в принципе сделать один сервис бота для ошибок и рассылок (стоит рассмотреть и попробовать. можно попробовать связать шаблон и формат данных, а еще бота от имени которого будет отправляться сообщение)
+
 	permission := NewPermissionService("configs/privacy.conf", menu)
 
 	errorBot := NewErrorBotService(deps.ErrorBotUrl)
@@ -61,20 +71,23 @@ func NewServices(deps Deps) *Services {
 	notification := NewNotificationService(si, most, errorBot)
 
 	return &Services{
-		Instrument:   instrument,
-		Verification: verification,
-		Documents:    documents,
-		Location:     location,
-		SI:           si,
-		Department:   department,
-		Employee:     employee,
-		Role:         role,
-		ApiPaths:     api,
-		MenuItem:     menuItem,
-		MenuWithApi:  menuWithApi,
-		Menu:         menu,
-		Session:      session,
-		Permission:   permission,
+		Instrument:    instrument,
+		Verification:  verification,
+		Documents:     documents,
+		Location:      location,
+		SI:            si,
+		Department:    department,
+		Employee:      employee,
+		Role:          role,
+		DefaultFilter: filter,
+
+		ApiPaths:    api,
+		MenuItem:    menuItem,
+		MenuWithApi: menuWithApi,
+		Menu:        menu,
+
+		Session:    session,
+		Permission: permission,
 
 		ErrorBot:     errorBot,
 		Notification: notification,

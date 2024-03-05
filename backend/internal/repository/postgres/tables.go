@@ -8,6 +8,8 @@ const (
 	DepartmentTable   = "departments"
 	EmployeeTable     = "employee"
 
+	DefaultFilterTable = "default_filters"
+
 	RoleTable        = "roles"
 	ApiTable         = "api_paths"
 	MenuWithApiTable = "menu_items_with_api"

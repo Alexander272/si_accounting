@@ -24,6 +24,7 @@ type NotificationSubTime struct {
 type Notification struct {
 	MostId  string       `json:"userId"`
 	Type    string       `json:"type"`
+	Status  string       `json:"status"`
 	Message string       `json:"message"`
 	SI      []SelectedSI `json:"si"`
 }
@@ -33,4 +34,23 @@ type SelectedSI struct {
 	Name          string `json:"name"`
 	FactoryNumber string `json:"factoryNumber"`
 	Person        string `json:"person"`
+}
+
+type Confirmation struct {
+	UserID      string              `json:"user_id"`
+	UserName    string              `json:"user_name"`
+	ChannelID   string              `json:"channel_id"`
+	ChannelName string              `json:"channel_name"`
+	TeamID      string              `json:"team_id"`
+	TeamDomain  string              `json:"team_domain"`
+	PostID      string              `json:"post_id"`
+	TriggerID   string              `json:"trigger_id"`
+	Type        string              `json:"type"`
+	DataSource  string              `json:"data_source"`
+	Context     ConfirmationContext `json:"context" binding:"required"`
+}
+type ConfirmationContext struct {
+	InstrumentIds []string `json:"instrumentIds"`
+	Status        string   `json:"status"`
+	Type          string   `json:"type"`
 }

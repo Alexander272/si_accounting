@@ -33,7 +33,7 @@ func NewSIHandlers(service services.SI, errBot error_bot.ErrorBotApi) *SIHandler
 	format["notes"] = "notes"
 	format["verificationDate"] = "date"
 	format["nextVerificationDate"] = "next_date"
-	format["place"] = "place"
+	format["place"] = "department_id"
 
 	return &SIHandlers{
 		service:      service,
@@ -47,6 +47,7 @@ func Register(api *gin.RouterGroup, service services.SI, errBot error_bot.ErrorB
 
 	api.GET("", handlers.GetAll)
 	api.POST("/save", handlers.Save)
+	// api.GET("/notification", handlers.GetForNotification)
 }
 
 func (h *SIHandlers) GetAll(c *gin.Context) {
@@ -149,3 +150,15 @@ func (h *SIHandlers) Save(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о си успешно сохранены"})
 }
+
+// func (h *SIHandlers) GetForNotification(c *gin.Context) {
+// 	start := c.Query("start")
+// 	end := c.Query("end")
+
+// 	list, err := h.service.GetForNotification(c, models.Period{StartAt: start, FinishAt: end})
+// 	if err != nil {
+// 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, response.DataResponse{Data: list})
+// }

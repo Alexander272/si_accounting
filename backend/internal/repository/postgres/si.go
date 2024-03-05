@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
@@ -42,6 +43,9 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 	for _, ns := range req.Filters {
 		for _, sv := range ns.Values {
 			filter += " AND " + getFilterLine(sv.CompareType, ns.Field, count)
+			if sv.CompareType == "in" {
+				sv.Value = strings.ReplaceAll(sv.Value, ",", "|")
+			}
 			params = append(params, sv.Value)
 			count++
 		}
@@ -53,7 +57,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 		inter_verification_interval, notes, i.status, v.date, v.next_date, m.place, COUNT(*) OVER() as total_count
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
-		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place 
+		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place, department_id 
 			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) as m ON TRUE
 		WHERE i.status='%s'%s%s LIMIT $%d OFFSET $%d`,
 		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable, constants.InstrumentStatusWork,
@@ -92,30 +96,45 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 }
 
 func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (nots []models.Notification, err error) {
+	periodCond := ""
+	status := constants.LocationStatusMoved
+	notType := "receiving"
+	if req.StartAt != "" {
+		status = constants.LocationStatusUsed
+		periodCond = "AND next_date>=$2 AND next_date<=$3"
+		notType = ""
+	}
+	var params []interface{}
+
 	var data []models.SIFromNotification
-	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, e.name AS person, d.name AS department,
-		(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END) AS most_id
+	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, COALESCE(e.name, '') AS person, COALESCE(d.name, '') AS department,
+		COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT person_id, department_id, status FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
 		LEFT JOIN %s AS e ON e.id=m.person_id
 		LEFT JOIN %s AS d ON d.id=m.department_id
 		LEFT JOIN LATERAL (SELECT most_id FROM %s WHERE department_id=m.department_id AND is_lead=true) AS l ON true
-		WHERE m.status='%s' AND next_date>=$1 AND next_date<=$2
+		WHERE m.status=$1 %s
 		ORDER BY most_id, next_date`,
-		InstrumentTable, VerificationTable, SIMovementTable, EmployeeTable, DepartmentTable, EmployeeTable, constants.LocationStatusUsed,
+		InstrumentTable, VerificationTable, SIMovementTable, EmployeeTable, DepartmentTable, EmployeeTable, periodCond,
 	)
 
-	startAt, err := time.Parse("02.01.2006", req.StartAt)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse start date. error: %w", err)
-	}
-	finishAt, err := time.Parse("02.01.2006", req.FinishAt)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse finish date. error: %w", err)
+	params = append(params, status)
+	if req.StartAt != "" {
+		startAt, err := time.Parse("02.01.2006", req.StartAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse start date. error: %w", err)
+		}
+		finishAt, err := time.Parse("02.01.2006", req.FinishAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse finish date. error: %w", err)
+		}
+
+		params = append(params, startAt.Unix(), finishAt.Unix())
 	}
 
-	if err := r.db.Select(&data, query, startAt.Unix(), finishAt.Unix()); err != nil {
+	if err := r.db.Select(&data, query, params...); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
@@ -127,9 +146,17 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 			Person:        sn.Person,
 		}
 
+		notStatus := constants.LocationStatusUsed
+		if sn.Person == "" && sn.Department == "" && sn.MostId == "" {
+			sn.MostId = constants.ReserveUserId
+			notStatus = constants.LocationStatusReserve
+		}
+
 		if i == 0 || nots[len(nots)-1].MostId != sn.MostId {
 			nots = append(nots, models.Notification{
 				MostId: sn.MostId,
+				Type:   notType,
+				Status: notStatus,
 				SI:     []models.SelectedSI{si},
 			})
 		} else {

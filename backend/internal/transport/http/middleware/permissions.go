@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
@@ -10,6 +12,11 @@ import (
 )
 
 func (m *Middleware) CheckPermissions(c *gin.Context) {
+	if strings.Contains(excludedPaths, fmt.Sprintf("%s %s", c.Request.Method, c.Request.URL.String())) {
+		c.Next()
+		return
+	}
+
 	u, exists := c.Get(m.CtxUser)
 	if !exists {
 		response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "сессия не найдена")

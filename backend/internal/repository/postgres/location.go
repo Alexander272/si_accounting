@@ -12,6 +12,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type LocationRepo struct {
@@ -134,14 +135,15 @@ func (r *LocationRepo) Update(ctx context.Context, l models.UpdateLocationDTO) e
 
 // // По идее это все входит в update -> надо как-то переписать update чтобы записывались только переданные данные даже если они пустые
 func (r *LocationRepo) Receiving(ctx context.Context, data models.ReceivingDTO) error {
-	query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE instrument_id=$3 AND date_of_receiving=0`, SIMovementTable)
+	// query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE instrument_id=$3 AND date_of_receiving=0`, SIMovementTable)
+	query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE ARRAY[instrument_id] <@ $3 AND date_of_receiving=0`, SIMovementTable)
 
-	receiptDate, err := time.Parse("02.01.2006", data.DateOfReceiving)
-	if err != nil {
-		return fmt.Errorf("failed to parse receipt date. error: %w", err)
-	}
+	// receiptDate, err := time.Parse("02.01.2006", data.DateOfReceiving)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to parse receipt date. error: %w", err)
+	// }
 
-	_, err = r.db.Exec(query, data.Status, receiptDate.Unix(), data.InstrumentId)
+	_, err := r.db.Exec(query, data.Status, time.Now().Unix(), pq.Array(data.InstrumentIds))
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Alexander272/si_accounting/backend/internal/config"
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/repository"
 	"github.com/Alexander272/si_accounting/backend/internal/server"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
@@ -64,6 +65,8 @@ func main() {
 		AdminName: conf.Keycloak.Root,
 		AdminPass: conf.Keycloak.RootPass,
 	})
+
+	constants.SetReserveUserId(conf.Bot.ReserveUserId)
 
 	//* Services, Repos & API Handlers
 	repos := repository.NewRepository(db, redis)

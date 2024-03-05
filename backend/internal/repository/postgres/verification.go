@@ -64,6 +64,19 @@ func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*m
 	return verification, nil
 }
 
+func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (verifications []models.Verification, err error) {
+	query := fmt.Sprintf(`SELECT id, instrument_id, register_link, status, date, next_date, notes FROM %s
+	 	WHERE instrument_id=$1 ORDER BY created_at, id`,
+		VerificationTable,
+	)
+	// TODO мне еще нужны файлы (документы)
+
+	if err := r.db.Select(&verifications, query, instrumentId); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return verifications, nil
+}
+
 func (r *VerificationRepo) Create(ctx context.Context, v models.CreateVerificationDTO) (string, error) {
 	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date, next_date, file_link, register_link, status, notes)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,

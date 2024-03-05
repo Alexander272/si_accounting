@@ -12,12 +12,14 @@ import (
 type SessionService struct {
 	keycloak *auth.KeycloakClient
 	role     Role
+	filter   DefaultFilter
 }
 
-func NewSessionService(keycloak *auth.KeycloakClient, role Role) *SessionService {
+func NewSessionService(keycloak *auth.KeycloakClient, role Role, filter DefaultFilter) *SessionService {
 	return &SessionService{
 		keycloak: keycloak,
 		role:     role,
+		filter:   filter,
 	}
 }
 
@@ -77,9 +79,16 @@ func (s *SessionService) Refresh(ctx context.Context, refreshToken string) (*mod
 		return nil, err
 	}
 
+	// get default filters
+	filters, err := s.filter.Get(ctx, user.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	user.AccessToken = res.AccessToken
 	user.RefreshToken = res.RefreshToken
 	user.Menu = role.Menu
+	user.Filters = filters
 
 	return user, nil
 }

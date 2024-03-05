@@ -1,6 +1,8 @@
 package postgres
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func getFilterLine(compare string, fieldName string, count int) string {
 	switch compare {
@@ -16,7 +18,7 @@ func getFilterLine(compare string, fieldName string, count int) string {
 	case "in":
 		// LOWER(place) ~* 'test|Отдел технического сервиса'
 		// LOWER(place) ILIKE ANY (ARRAY['test %','Отдел технического сервиса %'])
-		return fmt.Sprintf("LOWER(%s) ~* $%d", fieldName, count)
+		return fmt.Sprintf("LOWER(%s::text) ~* $%d", fieldName, count)
 
 	case "eq":
 		return fmt.Sprintf("%s = $%d", fieldName, count)

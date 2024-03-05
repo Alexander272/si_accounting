@@ -54,9 +54,9 @@ type PartUpdateLocationDTO struct {
 }
 
 type ReceivingDTO struct {
-	InstrumentId    string `json:"instrumentId" db:"instrument_id"`
-	Status          string `json:"status" db:"status"`
-	DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
+	InstrumentIds []string `json:"instrumentId" db:"instrument_id"`
+	Status        string   `json:"status" db:"status"` // либо отправляется в резерв, либо к сотруднику
+	// DateOfReceiving string   `json:"dateOfReceiving" db:"date_of_receiving"`
 }
 
 type ReceivingFromBotDTO struct {

@@ -83,7 +83,8 @@ type (
 	}
 
 	BotConfig struct {
-		Url string `yaml:"bot_url" env:"BOT_URL"`
+		ReserveUserId string `yaml:"reserve_user_id" env:"RESERVE_USER_ID"`
+		Url           string `yaml:"bot_url" env:"BOT_URL"`
 	}
 )
 
