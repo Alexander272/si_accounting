@@ -5,6 +5,7 @@ type Location struct {
 	InstrumentId string `json:"instrumentId" db:"instrument_id"`
 	Person       string `json:"person" db:"person"`
 	Department   string `json:"department" db:"department"`
+	Place        string `json:"place" db:"place"`
 	PersonId     string `json:"personId" db:"person_id"`
 	DepartmentId string `json:"departmentId" db:"department_id"`
 	// ReceiptDate     string `json:"receiptDate" db:"receipt_date"`

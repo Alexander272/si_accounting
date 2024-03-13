@@ -16,7 +16,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const CookieName = "si_accounting_session"
+// const CookieName = "si_accounting_session"
+const CookieName = "sealur_internal_session"
 
 type Handler struct {
 	// permissions casbin.Casbin

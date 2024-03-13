@@ -8,7 +8,7 @@ type Document struct {
 	Id             string `json:"id" db:"id"`
 	Label          string `json:"label" db:"label"`
 	Size           int64  `json:"size" db:"size"`
-	Path           string `json:"-" db:"path"`
+	Path           string `json:"path" db:"path"`
 	DocumentType   string `json:"type" db:"type"`
 	VerificationId string `json:"verificationId" db:"verification_id"`
 	InstrumentId   string `json:"-" db:"instrument_id"`

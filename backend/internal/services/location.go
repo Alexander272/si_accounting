@@ -23,6 +23,7 @@ func NewLocationService(repo repository.Location, employee Employee) *LocationSe
 
 type Location interface {
 	GetLast(context.Context, string) (*models.Location, error)
+	GetByInstrumentId(context.Context, string) ([]models.Location, error)
 	Create(context.Context, models.CreateLocationDTO) error
 	Update(context.Context, models.UpdateLocationDTO) error
 	Receiving(context.Context, models.ReceivingDTO) error
@@ -38,6 +39,14 @@ func (s *LocationService) GetLast(ctx context.Context, instrumentId string) (*mo
 		return nil, fmt.Errorf("failed to get last si location. error: %w", err)
 	}
 	return location, nil
+}
+
+func (s *LocationService) GetByInstrumentId(ctx context.Context, instrumentId string) ([]models.Location, error) {
+	locations, err := s.repo.GetByInstrumentId(ctx, instrumentId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get locations by instrument id. error: %w", err)
+	}
+	return locations, nil
 }
 
 func (s *LocationService) Create(ctx context.Context, location models.CreateLocationDTO) error {

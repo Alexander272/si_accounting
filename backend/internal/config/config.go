@@ -52,7 +52,7 @@ type (
 		LimitAuthTTL    time.Duration `yaml:"limit_auth_ttl" env-default:"30m"`
 		CountAttempt    int32         `yaml:"count_attempt" env-default:"5"`
 		Secure          bool          `yaml:"secure" env-default:"false"`
-		Domain          string        `yaml:"domain"`
+		Domain          string        `yaml:"domain" env-default:"sealur.ru"`
 		Key             string        `env:"JWT"`
 	}
 

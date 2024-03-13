@@ -10,6 +10,7 @@ import (
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
+	"github.com/Alexander272/si_accounting/backend/internal/repository/postgres/pq_models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -27,6 +28,7 @@ func NewLocationRepo(db *sqlx.DB) *LocationRepo {
 
 type Location interface {
 	GetLast(context.Context, string) (*models.Location, error)
+	GetByInstrumentId(context.Context, string) ([]models.Location, error)
 	Create(context.Context, models.CreateLocationDTO) error
 	Update(context.Context, models.UpdateLocationDTO) error
 	Receiving(context.Context, models.ReceivingDTO) error
@@ -51,7 +53,7 @@ func (r *LocationRepo) GetLast(ctx context.Context, instrumentId string) (*model
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse issue date. error: %w", err)
 	}
-	location.DateOfIssue = time.Unix(issueDate, 0).Format("02.01.2006")
+	location.DateOfIssue = time.Unix(issueDate, 0).Format(constants.DateFormat)
 
 	receiptDate, err := strconv.ParseInt(location.DateOfReceiving, 10, 64)
 	if err != nil {
@@ -59,11 +61,76 @@ func (r *LocationRepo) GetLast(ctx context.Context, instrumentId string) (*model
 	}
 	location.DateOfReceiving = ""
 	if receiptDate > 0 {
-		location.DateOfReceiving = time.Unix(receiptDate, 0).Format("02.01.2006")
+		location.DateOfReceiving = time.Unix(receiptDate, 0).Format(constants.DateFormat)
 	}
 
 	return location, nil
 }
+
+func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (locations []models.Location, err error) {
+	var data []pq_models.LocationData
+	query := fmt.Sprintf(`SELECT id, instrument_id, status, date_of_receiving, date_of_issue, place, 
+		COALESCE(person_id::text, '') AS person_id, COALESCE(department_id::text, '') AS department_id, need_confirmed
+		FROM %s WHERE instrument_id=$1 ORDER BY date_of_issue DESC, created_at DESC, id`,
+		SIMovementTable,
+	)
+
+	if err := r.db.Select(&data, query, instrumentId); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+
+	for _, loc := range data {
+		receiptDate := ""
+		if loc.DateOfReceiving > 0 {
+			receiptDate = time.Unix(loc.DateOfReceiving, 0).Format(constants.DateFormat)
+		}
+
+		locations = append(locations, models.Location{
+			Id:              loc.Id,
+			InstrumentId:    loc.Id,
+			Place:           loc.Place,
+			PersonId:        loc.PersonId,
+			DepartmentId:    loc.DepartmentId,
+			DateOfIssue:     time.Unix(loc.DateOfIssue, 0).Format(constants.DateFormat),
+			DateOfReceiving: receiptDate,
+			Status:          loc.Status,
+			NeedConfirmed:   loc.NeedConfirmed,
+		})
+	}
+
+	return locations, nil
+}
+
+// func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (locations []models.Location, err error) {
+// 	query := fmt.Sprintf(`SELECT id, instrument_id, status, date_of_receiving, date_of_issue, person, department,
+// 		COALESCE(person_id::text, '') AS person_id, COALESCE(department_id::text, '') AS department_id, need_confirmed
+// 		FROM %s WHERE instrument_id=$1 ORDER BY date_of_issue DESC, created_at DESC, id`,
+// 		SIMovementTable,
+// 	)
+
+// 	if err := r.db.Select(&locations, query, instrumentId); err != nil {
+// 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+// 	}
+
+// 	for i, loc := range locations {
+// 		issueDate, err := strconv.ParseInt(loc.DateOfIssue, 10, 64)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("failed to parse issue date. error: %w", err)
+// 		}
+// 		locations[i].DateOfIssue = time.Unix(issueDate, 0).Format(constants.DateFormat)
+
+// 		receiptDate, err := strconv.ParseInt(loc.DateOfReceiving, 10, 64)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("failed to parse receipt date. error: %w", err)
+// 		}
+// 		locations[i].DateOfReceiving = ""
+// 		if receiptDate > 0 {
+// 			locations[i].DateOfReceiving = time.Unix(receiptDate, 0).Format(constants.DateFormat)
+// 		}
+// 	}
+
+// 	return locations, nil
+// }
 
 func (r *LocationRepo) Create(ctx context.Context, l models.CreateLocationDTO) error {
 	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, person_id, department_id, place)
@@ -79,13 +146,13 @@ func (r *LocationRepo) Create(ctx context.Context, l models.CreateLocationDTO) e
 		status = constants.LocationStatusUsed
 	}
 
-	issueDate, err := time.Parse("02.01.2006", l.DateOfIssue)
+	issueDate, err := time.Parse(constants.DateFormat, l.DateOfIssue)
 	if err != nil {
 		return fmt.Errorf("failed to parse issue date. error: %w", err)
 	}
 	receiptDate := time.Unix(0, 0)
 	if l.DateOfReceiving != "" {
-		receiptDate, err = time.Parse("02.01.2006", l.DateOfReceiving)
+		receiptDate, err = time.Parse(constants.DateFormat, l.DateOfReceiving)
 		if err != nil {
 			return fmt.Errorf("failed to parse receipt date. error: %w", err)
 		}
@@ -114,13 +181,13 @@ func (r *LocationRepo) Update(ctx context.Context, l models.UpdateLocationDTO) e
 		SIMovementTable, EmployeeTable, DepartmentTable,
 	)
 
-	issueDate, err := time.Parse("02.01.2006", l.DateOfIssue)
+	issueDate, err := time.Parse(constants.DateFormat, l.DateOfIssue)
 	if err != nil {
 		return fmt.Errorf("failed to parse issue date. error: %w", err)
 	}
 	receiptDate := time.Unix(0, 0)
 	if l.DateOfReceiving != "" {
-		receiptDate, err = time.Parse("02.01.2006", l.DateOfReceiving)
+		receiptDate, err = time.Parse(constants.DateFormat, l.DateOfReceiving)
 		if err != nil {
 			return fmt.Errorf("failed to parse receipt date. error: %w", err)
 		}
@@ -138,7 +205,7 @@ func (r *LocationRepo) Receiving(ctx context.Context, data models.ReceivingDTO) 
 	// query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE instrument_id=$3 AND date_of_receiving=0`, SIMovementTable)
 	query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE ARRAY[instrument_id] <@ $3 AND date_of_receiving=0`, SIMovementTable)
 
-	// receiptDate, err := time.Parse("02.01.2006", data.DateOfReceiving)
+	// receiptDate, err := time.Parse(constants.DateFormat, data.DateOfReceiving)
 	// if err != nil {
 	// 	return fmt.Errorf("failed to parse receipt date. error: %w", err)
 	// }

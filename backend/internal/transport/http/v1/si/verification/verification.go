@@ -30,6 +30,7 @@ func Register(api *gin.RouterGroup, service services.Verification, docs services
 	verifications := api.Group("/verifications")
 	{
 		verifications.GET("/:instrumentId", handlers.GetLast)
+		verifications.GET("/all/:instrumentId", handlers.GetByInstrumentId)
 		verifications.POST("", handlers.Create)
 		verifications.PUT("/:id", handlers.Update)
 	}
@@ -54,6 +55,22 @@ func (h *VerificationHandlers) GetLast(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: verification})
+}
+
+func (h *VerificationHandlers) GetByInstrumentId(c *gin.Context) {
+	instrumentId := c.Param("instrumentId")
+	if instrumentId == "" {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "id не задан")
+		return
+	}
+
+	verifications, err := h.service.GetByInstrumentId(c, instrumentId)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		h.errBot.Send(c, err.Error(), instrumentId)
+		return
+	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: verifications})
 }
 
 func (h *VerificationHandlers) Create(c *gin.Context) {

@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
+	"github.com/Alexander272/si_accounting/backend/internal/repository/postgres/pq_models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -25,6 +27,7 @@ func NewVerificationRepo(db *sqlx.DB) *VerificationRepo {
 
 type Verification interface {
 	GetLast(context.Context, string) (*models.Verification, error)
+	GetByInstrumentId(context.Context, string) ([]models.VerificationDataDTO, error)
 	Create(context.Context, models.CreateVerificationDTO) (string, error)
 	Update(context.Context, models.UpdateVerificationDTO) error
 }
@@ -51,29 +54,69 @@ func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*m
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse date. error: %w", err)
 	}
-	verification.Date = time.Unix(date, 0).Format("02.01.2006")
+	verification.Date = time.Unix(date, 0).Format(constants.DateFormat)
 
 	nextDate, err := strconv.ParseInt(verification.NextDate, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse date. error: %w", err)
 	}
 	if nextDate > 0 {
-		verification.NextDate = time.Unix(nextDate, 0).Format("02.01.2006")
+		verification.NextDate = time.Unix(nextDate, 0).Format(constants.DateFormat)
 	}
 
 	return verification, nil
 }
 
-func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (verifications []models.Verification, err error) {
-	query := fmt.Sprintf(`SELECT id, instrument_id, register_link, status, date, next_date, notes FROM %s
-	 	WHERE instrument_id=$1 ORDER BY created_at, id`,
-		VerificationTable,
-	)
-	// TODO мне еще нужны файлы (документы)
+// func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (verifications []models.Verification, err error) {
+// 	query := fmt.Sprintf(`SELECT id, instrument_id, register_link, status, date, next_date, notes FROM %s
+// 	 	WHERE instrument_id=$1 ORDER BY created_at, id`,
+// 		VerificationTable,
+// 	)
+// 	// TODO мне еще нужны файлы (документы)
 
-	if err := r.db.Select(&verifications, query, instrumentId); err != nil {
+// 	if err := r.db.Select(&verifications, query, instrumentId); err != nil {
+// 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+// 	}
+// 	return verifications, nil
+// }
+
+func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (verifications []models.VerificationDataDTO, err error) {
+	var data []pq_models.VerificationFullData
+	query := fmt.Sprintf(`SELECT v.id, v.instrument_id, file_link, register_link, status, date, next_date, notes, v.created_at,
+		d.label, d.size, d.path, d.type FROM %s AS v INNER JOIN %s AS d ON verification_id=v.id
+		WHERE v.instrument_id=$1 ORDER BY created_at, id;`,
+		VerificationTable, DocumentsTable,
+	)
+
+	if err := r.db.Select(&data, query, instrumentId); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
+
+	for i, d := range data {
+		doc := models.Document{
+			Label:        d.Label,
+			Size:         d.Size,
+			Path:         d.Path,
+			DocumentType: d.DocumentType,
+		}
+
+		if i == 0 || verifications[len(verifications)-1].Id != d.Id {
+			verifications = append(verifications, models.VerificationDataDTO{
+				Id:           d.Id,
+				InstrumentId: d.InstrumentId,
+				Date:         time.Unix(d.Date, 0).Format(constants.DateFormat),
+				NextDate:     time.Unix(d.NextDate, 0).Format(constants.DateFormat),
+				FileLink:     d.FileLink,
+				RegisterLink: d.RegisterLink,
+				Status:       d.Status,
+				Notes:        d.Notes,
+				Documents:    []models.Document{doc},
+			})
+		} else {
+			verifications[len(verifications)-1].Documents = append(verifications[len(verifications)-1].Documents, doc)
+		}
+	}
+
 	return verifications, nil
 }
 
@@ -84,13 +127,13 @@ func (r *VerificationRepo) Create(ctx context.Context, v models.CreateVerificati
 	)
 	id := uuid.New()
 
-	date, err := time.Parse("02.01.2006", v.Date)
+	date, err := time.Parse(constants.DateFormat, v.Date)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse date. error: %w", err)
 	}
 	nextDate := time.Unix(0, 0)
 	if v.NextDate != "" {
-		nextDate, err = time.Parse("02.01.2006", v.NextDate)
+		nextDate, err = time.Parse(constants.DateFormat, v.NextDate)
 		if err != nil {
 			return "", fmt.Errorf("failed to parse date. error: %w", err)
 		}
@@ -108,13 +151,13 @@ func (r *VerificationRepo) Update(ctx context.Context, v models.UpdateVerificati
 		VerificationTable,
 	)
 
-	date, err := time.Parse("02.01.2006", v.Date)
+	date, err := time.Parse(constants.DateFormat, v.Date)
 	if err != nil {
 		return fmt.Errorf("failed to parse date. error: %w", err)
 	}
 	nextDate := time.Unix(0, 0)
 	if v.NextDate != "" {
-		nextDate, err = time.Parse("02.01.2006", v.NextDate)
+		nextDate, err = time.Parse(constants.DateFormat, v.NextDate)
 		if err != nil {
 			return fmt.Errorf("failed to parse date. error: %w", err)
 		}

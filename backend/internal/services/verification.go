@@ -25,6 +25,7 @@ func NewVerificationService(repo repository.Verification, documents Documents, i
 
 type Verification interface {
 	GetLast(context.Context, string) (*models.Verification, error)
+	GetByInstrumentId(context.Context, string) ([]models.VerificationDataDTO, error)
 	Create(context.Context, models.CreateVerificationDTO) error
 	Update(context.Context, models.UpdateVerificationDTO) error
 }
@@ -38,6 +39,14 @@ func (s *VerificationService) GetLast(ctx context.Context, instrumentId string) 
 		return nil, fmt.Errorf("failed to get last verification. error: %w", err)
 	}
 	return verification, nil
+}
+
+func (s *VerificationService) GetByInstrumentId(ctx context.Context, instrumentId string) ([]models.VerificationDataDTO, error) {
+	verifications, err := s.repo.GetByInstrumentId(ctx, instrumentId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get verifications by instrument id. error: %w", err)
+	}
+	return verifications, nil
 }
 
 func (s *VerificationService) Create(ctx context.Context, v models.CreateVerificationDTO) error {

@@ -75,14 +75,14 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse date. error: %w", err)
 		}
-		list.SI[i].Date = time.Unix(date, 0).Format("02.01.2006")
+		list.SI[i].Date = time.Unix(date, 0).Format(constants.DateFormat)
 
 		nextDate, err := strconv.ParseInt(s.NextDate, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse date. error: %w", err)
 		}
 		if nextDate > 0 {
-			list.SI[i].NextDate = time.Unix(nextDate, 0).Format("02.01.2006")
+			list.SI[i].NextDate = time.Unix(nextDate, 0).Format(constants.DateFormat)
 		}
 	}
 
@@ -122,11 +122,11 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 
 	params = append(params, status)
 	if req.StartAt != "" {
-		startAt, err := time.Parse("02.01.2006", req.StartAt)
+		startAt, err := time.Parse(constants.DateFormat, req.StartAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse start date. error: %w", err)
 		}
-		finishAt, err := time.Parse("02.01.2006", req.FinishAt)
+		finishAt, err := time.Parse(constants.DateFormat, req.FinishAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse finish date. error: %w", err)
 		}
