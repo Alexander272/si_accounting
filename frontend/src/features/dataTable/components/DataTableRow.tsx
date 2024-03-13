@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 
 import type { Coordinates } from '../hooks/useContextMenu'
 import type { IDataItem, ISelected, Status } from '../types/data'
+import { dayjsFormatVariant } from '@/constants/dateFormat'
 import { DataTableCell } from './DataTableCell'
 import { HeadCells } from './DataTableHead/columns'
 
@@ -48,10 +49,10 @@ export const DataTableRow: FC<Props> = memo(({ data, selected, itemId, onSelect,
 	const getRowColor = () => {
 		if (itemId == data.id) return RowColors['active']
 
-		const overdue = dayjs().isAfter(dayjs(data.nextVerificationDate, 'DD.MM.YYYY'))
+		const overdue = dayjs().isAfter(dayjs(data.nextVerificationDate, dayjsFormatVariant))
 		if (overdue) return RowColors['overdue']
 
-		const deadline = dayjs().add(15, 'd').isAfter(dayjs(data.nextVerificationDate, 'DD.MM.YYYY'))
+		const deadline = dayjs().add(15, 'd').isAfter(dayjs(data.nextVerificationDate, dayjsFormatVariant))
 		if (deadline) return RowColors['deadline']
 
 		if (data.place == 'Перемещение') return RowColors['moved']

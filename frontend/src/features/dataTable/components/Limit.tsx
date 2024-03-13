@@ -1,16 +1,27 @@
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
-import { getTableSize, setSize } from '../dataTableSlice'
+import { getTablePage, getTableSize, setPage, setSize } from '../dataTableSlice'
+import { FC } from 'react'
 
 const limits = [15, 30, 50, 100]
 
-export const Limit = () => {
+type Props = {
+	total: number
+}
+
+export const Limit: FC<Props> = ({ total }) => {
 	const size = useAppSelector(getTableSize)
+	const page = useAppSelector(getTablePage)
 
 	const dispatch = useAppDispatch()
 
 	const changeSize = (event: SelectChangeEvent<number>) => {
-		dispatch(setSize(+event.target.value))
+		const newSize = +event.target.value
+
+		const maxPage = Math.ceil(total / newSize)
+		if (page > maxPage) dispatch(setPage(maxPage))
+
+		dispatch(setSize(newSize))
 	}
 
 	return (

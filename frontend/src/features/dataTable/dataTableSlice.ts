@@ -5,6 +5,7 @@ import { RootState } from '@/app/store'
 import { localKeys } from '@/constants/localKeys'
 import { Size } from '@/constants/defaultValues'
 import { changeModalIsOpen } from '../modal/modalSlice'
+import { setUser } from '../user/userSlice'
 
 interface IDataTableSlice {
 	page: number
@@ -72,9 +73,17 @@ const dataTableSlice = createSlice({
 		resetDataTableState: () => initialState,
 	},
 	extraReducers: builder =>
-		builder.addCase(changeModalIsOpen, (state, action) => {
-			if (!action.payload) state.active = undefined
-		}),
+		builder
+			.addCase(changeModalIsOpen, (state, action) => {
+				if (!action.payload) state.active = undefined
+			})
+			.addCase(setUser, (state, action) => {
+				//TODO учесть что могут быть сохраненные фильтры
+				if (action.payload.filters && action.payload.filters.length) {
+					// TODO в будущем фильтры будут массивом
+					state.filter = action.payload.filters[0]
+				}
+			}),
 })
 
 export const getTablePage = (state: RootState) => state.dataTable.page

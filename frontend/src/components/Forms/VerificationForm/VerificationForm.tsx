@@ -5,15 +5,16 @@ import { Controller, FormProvider, useForm } from 'react-hook-form'
 import dayjs, { Dayjs } from 'dayjs'
 import { toast } from 'react-toastify'
 
-import { VerificationFields, type VerificationFormType } from '../fields'
-import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
+import type { IFetchError } from '@/app/types/error'
+import { Upload } from '@/features/files/components/Upload/Upload'
+import { dayjsFormatVariant } from '@/constants/dateFormat'
 import {
 	useCreateVerificationMutation,
 	useGetLastVerificationQuery,
 	useUpdateVerificationMutation,
 } from './verificationApiSlice'
-import type { IFetchError } from '@/app/types/error'
-import { Upload } from '@/features/files/components/Upload/Upload'
+import { VerificationFields, type VerificationFormType } from '../fields'
+import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
 
 const defaultValues: VerificationFormType = {
 	verificationDate: dayjs(),
@@ -41,8 +42,8 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 
 	useEffect(() => {
 		if (data) {
-			let date = dayjs(data.data.date, 'DD.MM.YYYY')
-			let nextDate = dayjs(data.data.nextDate, 'DD.MM.YYYY')
+			let date = dayjs(data.data.date, dayjsFormatVariant)
+			let nextDate = dayjs(data.data.nextDate, dayjsFormatVariant)
 			if (instrumentId != 'draft') {
 				date = nextDate
 				if (instrument) nextDate = date.add(+instrument.data.interVerificationInterval, 'M').subtract(1, 'd')
@@ -69,8 +70,8 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 		const verification = {
 			id: data.id,
 			instrumentId: instrument?.data.id || '',
-			date: data.verificationDate.format('DD.MM.YYYY'),
-			nextDate: data.nextVerificationDate.format('DD.MM.YYYY'),
+			date: data.verificationDate.format(dayjsFormatVariant),
+			nextDate: data.nextVerificationDate.format(dayjsFormatVariant),
 			fileLink: data.verificationFile,
 			registerLink: data.verificationLink,
 			status: data.verificationStatus,

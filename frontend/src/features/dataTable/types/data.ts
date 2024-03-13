@@ -1,4 +1,4 @@
-export interface IDataItem {
+export type IDataItem = {
 	id: string
 	name: string
 	type: string

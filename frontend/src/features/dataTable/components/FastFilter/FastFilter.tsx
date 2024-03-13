@@ -45,8 +45,25 @@ export const FastFilter = () => {
 	const dispatch = useAppDispatch()
 
 	useEffect(() => {
-		if (!active) dispatch(setFilters())
-		else {
+		// TODO эта строчка сбрасывает фильтры по умолчанию
+		// if (!active) dispatch(setFilters())
+		// else {
+		// 	const filter: ISIFilter = {
+		// 		field: 'nextVerificationDate',
+		// 		fieldType: 'date',
+		// 		compareType: 'lte',
+		// 		valueStart: dayjs().unix().toString(),
+		// 		valueEnd: '',
+		// 	}
+		// 	if (active == 'month') {
+		// 		const date = dayjs().set('month', month)
+		// 		filter.compareType = 'range'
+		// 		filter.valueStart = date.startOf('month').unix().toString()
+		// 		filter.valueEnd = date.endOf('month').unix().toString()
+		// 	}
+		// 	dispatch(setFilters(filter))
+		// }
+		if (active) {
 			const filter: ISIFilter = {
 				field: 'nextVerificationDate',
 				fieldType: 'date',
@@ -54,15 +71,12 @@ export const FastFilter = () => {
 				valueStart: dayjs().unix().toString(),
 				valueEnd: '',
 			}
-
 			if (active == 'month') {
 				const date = dayjs().set('month', month)
-
 				filter.compareType = 'range'
 				filter.valueStart = date.startOf('month').unix().toString()
 				filter.valueEnd = date.endOf('month').unix().toString()
 			}
-
 			dispatch(setFilters(filter))
 		}
 	}, [active, month, dispatch])
@@ -72,8 +86,9 @@ export const FastFilter = () => {
 	const activeHandler = (event: MouseEvent<HTMLButtonElement>) => {
 		const name = (event.target as HTMLButtonElement).name as 'overdue' | 'month'
 
-		if (active == name) setActive(undefined)
-		else setActive(name)
+		// if (active == name) setActive(undefined)
+		// else setActive(name)
+		if (active != name) setActive(name)
 	}
 
 	const clearHandler = () => {

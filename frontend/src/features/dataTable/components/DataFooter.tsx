@@ -24,7 +24,7 @@ export const DataFooter = () => {
 
 			{data?.data.length ? (
 				<>
-					<Limit />
+					<Limit total={data.total || 1} />
 					<Typography sx={{ ml: 2 }}>
 						{(page - 1) * size || 1}-{(page - 1) * size + (data?.data.length || 0)} из {data?.total}
 					</Typography>

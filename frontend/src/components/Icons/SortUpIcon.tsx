@@ -1,14 +1,9 @@
 import { FC } from 'react'
-import { SvgIcon } from '@mui/material'
+import { SvgIcon, SxProps, Theme } from '@mui/material'
 
-type Props = {
-	fontSize?: number | string
-	color?: string
-}
-
-export const SortUpIcon: FC<Props> = ({ fontSize, color }) => {
+export const SortUpIcon: FC<SxProps<Theme>> = style => {
 	return (
-		<SvgIcon sx={{ fontSize: fontSize, fill: color }}>
+		<SvgIcon sx={style}>
 			<svg
 				shapeRendering='geometricPrecision'
 				textRendering='geometricPrecision'

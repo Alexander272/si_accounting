@@ -8,4 +8,6 @@ export const ModalTitles = {
 	EDIT_EMPLOYEE: 'Редактировать сотрудника',
 	CREATE_DEPARTMENT: 'Добавить подразделение',
 	EDIT_DEPARTMENT: 'Редактировать подразделение',
+
+	MOVEMENT_HISTORY: 'История перемещений',
 }

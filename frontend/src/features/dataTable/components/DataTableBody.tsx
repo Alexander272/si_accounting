@@ -42,6 +42,30 @@ export const DataTableBody = () => {
 
 	return (
 		<TableBody>
+			{/* <FixedSizeGrid
+				rowCount={size}
+				columnCount={Object.keys(data?.data[0] || {}).length}
+				rowHeight={37}
+				height={640}
+			>
+				{({ columnIndex, rowIndex, style }) => (
+					<div style={style}>
+						row {rowIndex}, column {columnIndex}
+					</div>
+				)}
+			</FixedSizeGrid> */}
+			{/* <FixedSizeList
+				outerElementType='table'
+				innerElementType='tbody'
+				itemCount={size}
+				itemSize={37}
+				width={'100%'}
+				height={555}
+				overscanCount={5}
+			>
+				{({ index, style }) => <tr style={style}>Item {index}</tr>}
+			</FixedSizeList> */}
+
 			{data?.data.map(d => {
 				// const selected = selectedItems.includes(d.id)
 				const selected = selectedItems.some(s => s.id == d.id)

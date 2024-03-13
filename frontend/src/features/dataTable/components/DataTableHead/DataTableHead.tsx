@@ -53,14 +53,14 @@ export const DataTableHead = () => {
 									{tableSort?.field !== c.id || tableSort?.type == 'ASC' ? (
 										<SortUpIcon
 											fontSize={16}
-											color={tableSort?.field === c.id ? 'black' : '#adadad'}
+											fill={tableSort?.field === c.id ? 'black' : '#adadad'}
 										/>
 									) : null}
 
 									{tableSort?.field === c.id && tableSort?.type == 'DESC' ? (
 										<SortDownIcon
 											fontSize={16}
-											color={tableSort?.field === c.id ? 'black' : '#adadad'}
+											fill={tableSort?.field === c.id ? 'black' : '#adadad'}
 										/>
 									) : null}
 								</IconButton>

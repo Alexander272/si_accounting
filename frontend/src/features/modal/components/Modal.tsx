@@ -10,6 +10,7 @@ import { UpdateInstrument } from '@/components/Forms/UpdateInstrument/UpdateInst
 import { ChangeLocation } from '@/components/Forms/ChangeLocation/ChangeLocation'
 import { EmployeeForm } from '@/features/employees/components/EmployeeForm'
 import { DepartmentForm } from '@/features/employees/components/DepartmentForm'
+import { LocationHistory } from '@/features/location/LocationHistory'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
 
@@ -29,6 +30,7 @@ export const Modal = () => {
 
 	const { closeModal } = useModal()
 
+	// TODO как-то все плохо сделано, надо поправить
 	return (
 		<Dialog open={open} onClose={closeModal} fullWidth maxWidth='md' TransitionComponent={Transition}>
 			<Stack direction={'row'} width={'100%'} justifyContent={'space-between'} alignItems={'center'}>
@@ -42,6 +44,8 @@ export const Modal = () => {
 					{selector == 'CreateEmployee' && ModalTitles.CREATE_EMPLOYEE}
 					{selector == 'EditDepartment' && ModalTitles.EDIT_DEPARTMENT}
 					{selector == 'CreateDepartment' && ModalTitles.CREATE_DEPARTMENT}
+
+					{selector == 'ViewLocationHistory' && ModalTitles.MOVEMENT_HISTORY}
 				</DialogTitle>
 
 				<IconButton onClick={closeModal} sx={{ lineHeight: '16px', mr: 2 }}>
@@ -56,6 +60,8 @@ export const Modal = () => {
 
 				{selector == 'EditEmployee' || selector == 'CreateEmployee' ? <EmployeeForm /> : null}
 				{selector == 'EditDepartment' || selector == 'CreateDepartment' ? <DepartmentForm /> : null}
+
+				{selector == 'ViewLocationHistory' && <LocationHistory />}
 			</DialogContent>
 		</Dialog>
 	)

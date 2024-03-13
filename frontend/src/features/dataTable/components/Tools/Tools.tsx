@@ -54,6 +54,12 @@ export const Tools = () => {
 			</ListItemIcon>
 			Редактировать подразделения
 		</MenuItem>,
+		<MenuItem key='graph' disabled>
+			<ListItemIcon>
+				<FileDownloadIcon fontSize={20} fill={'#757575'} />
+			</ListItemIcon>
+			Создать график поверки
+		</MenuItem>,
 	]
 
 	return (
@@ -107,12 +113,6 @@ export const Tools = () => {
 			>
 				{useCheckPermission(PermRules.SI.Write) ? menuItems : null}
 
-				<MenuItem disabled>
-					<ListItemIcon>
-						<FileDownloadIcon fontSize={20} fill={'#757575'} />
-					</ListItemIcon>
-					Создать график поверки
-				</MenuItem>
 				{/* //TODO возможно надо будет выгружать в excel таблицу которая выводится на экран */}
 			</Menu>
 		</>

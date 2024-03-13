@@ -13,6 +13,7 @@ export const API = {
 		},
 		location: {
 			base: 'si/locations',
+			all: 'si/locations/all',
 		},
 		base: 'si',
 		save: 'si/save',

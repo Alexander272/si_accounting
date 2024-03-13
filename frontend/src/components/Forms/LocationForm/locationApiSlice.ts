@@ -10,12 +10,16 @@ type Location = {
 	instrumentId: string
 	department: string
 	person: string
+	place?: string
+	departmentId?: string
+	personId?: string
 	dateOfIssue: string
 	dateOfReceiving: string
 	needConfirmed: boolean
 	status: string
 }
 
+//TODO по идее api в формах совсем не место и надо убрать это отсюда
 const locationApiSlice = apiSlice.injectEndpoints({
 	overrideExisting: false,
 	endpoints: builder => ({
@@ -61,13 +65,29 @@ const locationApiSlice = apiSlice.injectEndpoints({
 		// 	},
 		// }),
 
+		getLocationsByInstrumentId: builder.query<{ data: Location[] }, string>({
+			query: instrumentId => `${API.si.location.all}/${instrumentId}`,
+			providesTags: [{ type: 'Location', id: 'all' }],
+			onQueryStarted: (_arg, api) => {
+				try {
+					api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
+
 		createLocation: builder.mutation<string, Location>({
 			query: data => ({
 				url: API.si.location.base,
 				method: 'POST',
 				body: data,
 			}),
-			invalidatesTags: [{ type: 'SI', id: 'ALL' }],
+			invalidatesTags: [
+				{ type: 'SI', id: 'ALL' },
+				{ type: 'Location', id: 'all' },
+			],
 		}),
 
 		updateLocation: builder.mutation<string, Location>({
@@ -76,13 +96,17 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				method: 'PUT',
 				body: data,
 			}),
-			invalidatesTags: [{ type: 'Location', id: 'LAST' }],
+			invalidatesTags: [
+				{ type: 'Location', id: 'LAST' },
+				{ type: 'Location', id: 'all' },
+			],
 		}),
 	}),
 })
 
 export const {
 	useGetLastLocationQuery,
+	useGetLocationsByInstrumentIdQuery,
 	// useGetDepartmentsQuery,
 	// useGetEmployeesQuery,
 	useCreateLocationMutation,

@@ -39,7 +39,7 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 		}
 	}
 
-	const menuItems = [
+	const menuItemsWriter = [
 		<MenuItem key='create' onClick={contextHandler('CreateDataItem')}>
 			<ListItemIcon>
 				<CopyIcon fontSize={18} fill={'#757575'} />
@@ -73,13 +73,15 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 			anchorReference='anchorPosition'
 			anchorPosition={coordinates ? { top: coordinates.mouseY, left: coordinates.mouseX } : undefined}
 		>
-			{useCheckPermission(PermRules.SI.Write) ? menuItems : null}
+			{useCheckPermission(PermRules.SI.Write) ? menuItemsWriter : null}
+
+			{/* //TODO должны быть пункты для возврата и приема инструмента */}
 
 			<MenuItem disabled>
 				<ListItemIcon>IC</ListItemIcon>История поверок
 			</MenuItem>
 
-			<MenuItem disabled>
+			<MenuItem onClick={contextHandler('ViewLocationHistory')}>
 				<ListItemIcon>IC</ListItemIcon>История перемещений
 			</MenuItem>
 		</Menu>

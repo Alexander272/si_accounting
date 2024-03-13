@@ -18,6 +18,12 @@ type Props = {
 	fieldId: keyof IDataItem
 }
 
+// const Reserve = {
+// 	id: 'null',
+// 	name: 'Резерв',
+// 	leaderId: '',
+// }
+
 export const Filter: FC<Props> = ({ cell }) => {
 	const filter = useAppSelector(getTableFilter)
 
@@ -30,15 +36,16 @@ export const Filter: FC<Props> = ({ cell }) => {
 		defaultValues: {
 			field: cell.id,
 			fieldType: cell.type || 'string',
-			compareType: !cell.type ? 'con' : 'eq',
-			valueStart: '',
-			valueEnd: '',
+			compareType: filter?.compareType || !cell.type ? 'con' : 'eq',
+			valueStart: filter?.valueStart || '',
+			valueEnd: filter?.valueEnd || '',
 		},
 	})
 
 	const { data: departments } = useGetDepartmentsQuery(null)
 
 	const options = {
+		// place: [Reserve, ...(departments?.data || [])],
 		place: departments?.data || [],
 	}
 
@@ -55,7 +62,7 @@ export const Filter: FC<Props> = ({ cell }) => {
 	}
 
 	const submitHandler = methods.handleSubmit(data => {
-		dispatch(setFilters(data))
+		dispatch(setFilters(data.valueStart != '' ? data : undefined))
 		toggleHandler()
 	})
 

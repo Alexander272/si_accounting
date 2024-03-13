@@ -16,6 +16,7 @@ import dayjs from 'dayjs'
 
 import type { IFetchError } from '@/app/types/error'
 import type { Status } from '@/features/dataTable/types/data'
+import { dayjsFormatVariant } from '@/constants/dateFormat'
 import { useGetDepartmentsQuery, useGetEmployeesQuery } from '@/features/employees/employeesApiSlice'
 import { LocationFields, type LocationFormType } from '../fields'
 import { useGetInstrumentByIdQuery } from '../InstrumentForm/instrumentApiSlice'
@@ -96,8 +97,8 @@ export const LocationForm: FC<PropsWithChildren<Props>> = ({
 			instrumentId: instrument?.data.id || '',
 			department: inReserve ? '' : data.department,
 			person: inReserve ? '' : data.person,
-			dateOfIssue: data.dateOfIssue.format('DD.MM.YYYY'),
-			dateOfReceiving: isNew || !data.needConfirmed ? data.dateOfIssue.format('DD.MM.YYYY') : '',
+			dateOfIssue: data.dateOfIssue.format(dayjsFormatVariant),
+			dateOfReceiving: isNew || !data.needConfirmed ? data.dateOfIssue.format(dayjsFormatVariant) : '',
 			needConfirmed: data.needConfirmed,
 			status: isNew || !data.needConfirmed ? (inReserve ? 'reserve' : 'used') : 'moved',
 		}

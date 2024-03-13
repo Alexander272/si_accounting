@@ -18,15 +18,18 @@ export const ListFilter: FC<Props> = ({ list }) => {
 
 	useEffect(() => {
 		const tmp = selected.join(',')
-		if (tmp != values) methods.setValue('valueStart', tmp)
+		if (tmp != values) {
+			methods.setValue('valueStart', tmp)
+			methods.setValue('compareType', 'in')
+		}
 	}, [selected, methods, values])
 
-	const selectField = (label: string) => (_event: SyntheticEvent<Element, Event>, checked: boolean) => {
+	const selectField = (id: string) => (_event: SyntheticEvent<Element, Event>, checked: boolean) => {
 		let tmp = [...selected]
 		if (checked) {
-			tmp.push(label)
+			tmp.push(id)
 		} else {
-			tmp = tmp.filter(s => s != label)
+			tmp = tmp.filter(s => s != id)
 		}
 		setSelected(tmp)
 	}
@@ -37,8 +40,8 @@ export const ListFilter: FC<Props> = ({ list }) => {
 				<FormControlLabel
 					key={l.id}
 					label={l.name}
-					control={<Checkbox checked={selected.includes(l.name)} />}
-					onChange={selectField(l.name)}
+					control={<Checkbox checked={selected.includes(l.id)} />}
+					onChange={selectField(l.id)}
 					sx={{
 						transition: 'all 0.3s ease-in-out',
 						borderRadius: 3,
