@@ -46,7 +46,15 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 		[dispatch]
 	)
 
+	// if (true)
+	// 	return (
+	// 		<Stack flexGrow={1} height={100}>
+	// 			<Typography>Поиск...</Typography>
+	// 		</Stack>
+	// 	)
+	// if (isFetching) return <></>
 	if (!data) return null
+
 	return (
 		<FixedSizeList
 			overscanCount={12}
@@ -56,6 +64,11 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 			itemData={data}
 			width={HeadCells.reduce((ac, cur) => ac + cur.width, 10)}
 		>
+			{/* {true && (
+				<Stack position={'absolute'} sx={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+					<Typography>Поиск...</Typography>
+				</Stack>
+			)} */}
 			{({ index, style }) => (
 				<Row
 					data={data?.data[index]}

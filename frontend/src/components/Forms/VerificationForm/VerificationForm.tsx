@@ -184,7 +184,13 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 							name={f.key}
 							rules={f.rules}
 							render={({ field, fieldState: { error } }) => (
-								<TextField label={f.label} error={Boolean(error)} {...field} />
+								<TextField
+									label={f.label}
+									multiline={f.multiline}
+									minRows={f.minRows}
+									error={Boolean(error)}
+									{...field}
+								/>
 							)}
 						/>
 					)

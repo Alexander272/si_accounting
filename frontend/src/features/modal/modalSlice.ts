@@ -13,6 +13,7 @@ export type ModalSelectors =
 	| 'EditDepartment'
 	| 'Confirm'
 	| 'ViewLocationHistory'
+	| 'ViewVerificationHistory'
 
 interface IModalState {
 	open: boolean

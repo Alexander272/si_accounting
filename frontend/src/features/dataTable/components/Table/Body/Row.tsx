@@ -27,6 +27,9 @@ type Props = {
 }
 
 export const Row: FC<Props> = memo(({ style, data, selected, itemId, onSelect, positionHandler }) => {
+	// TODO по какой-то причине data бывает undefined
+	if (!data) return
+
 	let status: Status = 'used'
 	switch (data.place) {
 		case 'Перемещение':

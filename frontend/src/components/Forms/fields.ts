@@ -8,6 +8,8 @@ export interface IField<T> {
 	label: string
 	type?: 'string' | 'date' | 'year' | 'number' | 'file' | 'link' | 'list' | 'checkbox'
 	rules?: RegisterOptions
+	multiline?: boolean
+	minRows?: number
 }
 
 export type KeysOfInstrument =
@@ -41,7 +43,7 @@ export const InstrumentFields: IField<KeysOfInstrument>[] = [
 		type: 'number',
 		rules: { required: true, min: 1 },
 	},
-	{ key: 'notes', label: ColumnNames.NOTES },
+	{ key: 'notes', label: ColumnNames.NOTES, multiline: true, minRows: 3 },
 ]
 
 export type KeysOfVerification =
@@ -71,8 +73,8 @@ export const VerificationFields: IField<KeysOfVerification>[] = [
 	{ key: 'verificationDate', label: ColumnNames.VERIFICATION_DATE, type: 'date', rules: { required: true } },
 	{ key: 'nextVerificationDate', label: ColumnNames.NEXT_VERIFICATION_DATE, type: 'date' },
 	{ key: 'verificationStatus', label: 'Результат поверки', type: 'list', rules: { required: true } },
-	{ key: 'notes', label: 'Примечание' },
 	{ key: 'verificationLink', label: 'Ссылка на поверку', type: 'link' },
+	{ key: 'notes', label: 'Примечание', multiline: true, minRows: 4 },
 	{ key: 'verificationFile', label: 'Файл', type: 'file' },
 ]
 

@@ -1,3 +1,6 @@
+import { toast } from 'react-toastify'
+
+import type { IBaseFetchError } from '@/app/types/error'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
 import { IDocument } from '@/features/files/types/file'
@@ -24,6 +27,27 @@ const verificationApiSlice = apiSlice.injectEndpoints({
 				{ type: 'Verification', id: 'LAST' },
 				{ type: 'SI', id: 'DRAFT' },
 			],
+			onQueryStarted: (_arg, api) => {
+				try {
+					api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
+
+		getVerificationByInstrumentId: builder.query<{ data: Verification[] }, string>({
+			query: instrumentId => `${API.si.verification.all}/${instrumentId}`,
+			providesTags: [{ type: 'Verification', id: 'all' }],
+			onQueryStarted: (_arg, api) => {
+				try {
+					api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
 		}),
 
 		createVerification: builder.mutation<string, Verification>({
@@ -60,5 +84,9 @@ const verificationApiSlice = apiSlice.injectEndpoints({
 	}),
 })
 
-export const { useGetLastVerificationQuery, useCreateVerificationMutation, useUpdateVerificationMutation } =
-	verificationApiSlice
+export const {
+	useGetLastVerificationQuery,
+	useGetVerificationByInstrumentIdQuery,
+	useCreateVerificationMutation,
+	useUpdateVerificationMutation,
+} = verificationApiSlice

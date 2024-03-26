@@ -11,6 +11,7 @@ import { ChangeLocation } from '@/components/Forms/ChangeLocation/ChangeLocation
 import { EmployeeForm } from '@/features/employees/components/EmployeeForm'
 import { DepartmentForm } from '@/features/employees/components/DepartmentForm'
 import { LocationHistory } from '@/features/location/LocationHistory'
+import { VerificationHistory } from '@/features/verification/VerificationHistory'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
 
@@ -31,8 +32,15 @@ export const Modal = () => {
 	const { closeModal } = useModal()
 
 	// TODO как-то все плохо сделано, надо поправить
+	// к тому же делать одно модальное окно на все было не удачной идеей
 	return (
-		<Dialog open={open} onClose={closeModal} fullWidth maxWidth='md' TransitionComponent={Transition}>
+		<Dialog
+			open={open}
+			onClose={closeModal}
+			fullWidth
+			maxWidth={selector == 'ViewVerificationHistory' ? 'lg' : 'md'}
+			TransitionComponent={Transition}
+		>
 			<Stack direction={'row'} width={'100%'} justifyContent={'space-between'} alignItems={'center'}>
 				<DialogTitle color={'primary'}>
 					{selector == 'CreateDataItem' && ModalTitles.ADD_ITEM}
@@ -46,6 +54,7 @@ export const Modal = () => {
 					{selector == 'CreateDepartment' && ModalTitles.CREATE_DEPARTMENT}
 
 					{selector == 'ViewLocationHistory' && ModalTitles.MOVEMENT_HISTORY}
+					{selector == 'ViewVerificationHistory' && ModalTitles.VERIFICATION_HISTORY}
 				</DialogTitle>
 
 				<IconButton onClick={closeModal} sx={{ lineHeight: '16px', mr: 2 }}>
@@ -62,6 +71,7 @@ export const Modal = () => {
 				{selector == 'EditDepartment' || selector == 'CreateDepartment' ? <DepartmentForm /> : null}
 
 				{selector == 'ViewLocationHistory' && <LocationHistory />}
+				{selector == 'ViewVerificationHistory' && <VerificationHistory />}
 			</DialogContent>
 		</Dialog>
 	)

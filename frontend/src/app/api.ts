@@ -10,10 +10,14 @@ export const API = {
 		},
 		verification: {
 			base: 'si/verifications',
+			all: 'si/verifications/all',
 		},
 		location: {
 			base: 'si/locations',
 			all: 'si/locations/all',
+		},
+		documents: {
+			base: 'si/verifications/documents',
 		},
 		base: 'si',
 		save: 'si/save',

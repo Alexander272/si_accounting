@@ -13,6 +13,8 @@ import { EditIcon } from '@/components/Icons/EditIcon'
 import { VerifyIcon } from '@/components/Icons/VerifyIcon'
 import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
 import { CopyIcon } from '@/components/Icons/CopyIcon'
+import { LocHistoryIcon } from '@/components/Icons/LocHistoryIcon'
+import { VerHistoryIcon } from '@/components/Icons/VerHistoryIcon'
 
 type Props = {
 	coordinates?: Coordinates
@@ -77,12 +79,18 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 
 			{/* //TODO должны быть пункты для возврата и приема инструмента */}
 
-			<MenuItem disabled>
-				<ListItemIcon>IC</ListItemIcon>История поверок
+			<MenuItem onClick={contextHandler('ViewVerificationHistory')}>
+				<ListItemIcon>
+					<VerHistoryIcon fontSize={20} fill={'#363636'} />
+				</ListItemIcon>
+				История поверок
 			</MenuItem>
 
 			<MenuItem onClick={contextHandler('ViewLocationHistory')}>
-				<ListItemIcon>IC</ListItemIcon>История перемещений
+				<ListItemIcon>
+					<LocHistoryIcon fontSize={22} fill={'#363636'} />
+				</ListItemIcon>
+				История перемещений
 			</MenuItem>
 		</Menu>
 	)

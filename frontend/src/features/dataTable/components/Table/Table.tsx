@@ -22,7 +22,7 @@ export const Table: FC<Props> = ({ loading }) => {
 			<Header />
 
 			{loading && (
-				<Box width={'100%'} marginY={'-2px'} height={4}>
+				<Box width={'100%'} zIndex={5} marginY={'-2px'} height={4}>
 					<LinearProgress />
 				</Box>
 			)}

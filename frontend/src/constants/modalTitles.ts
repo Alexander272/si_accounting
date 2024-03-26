@@ -10,4 +10,5 @@ export const ModalTitles = {
 	EDIT_DEPARTMENT: 'Редактировать подразделение',
 
 	MOVEMENT_HISTORY: 'История перемещений',
+	VERIFICATION_HISTORY: 'История поверок',
 }

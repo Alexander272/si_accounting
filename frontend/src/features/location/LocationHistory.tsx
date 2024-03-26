@@ -20,10 +20,10 @@ export const LocationHistory = () => {
 			<Table>
 				<TableHead>
 					<TableRow>
-						<TableCell>Дата выдачи</TableCell>
-						<TableCell>Дата получения</TableCell>
-						<TableCell>Место нахождение</TableCell>
-						<TableCell>
+						<TableCell align='center'>Дата выдачи</TableCell>
+						<TableCell align='center'>Дата получения</TableCell>
+						<TableCell align='center'>Место нахождение</TableCell>
+						<TableCell align='center'>
 							Подтверждение
 							<br />
 							запрашивалось?
@@ -33,12 +33,14 @@ export const LocationHistory = () => {
 				<TableBody>
 					{data?.data.map(d => (
 						<TableRow key={d.id}>
-							<TableCell>{d.dateOfIssue}</TableCell>
-							<TableCell>{d.dateOfReceiving}</TableCell>
+							<TableCell align='center'>{d.dateOfIssue}</TableCell>
+							<TableCell align='center'>{d.dateOfReceiving}</TableCell>
 							{/* <TableCell>{d.department ? `${d.department} (${d.person})` : ''}</TableCell> */}
 							{/* <TableCell>{d.status}</TableCell> */}
-							<TableCell>{d.status == 'reserve' && !d.place ? 'Резерв' : d.place}</TableCell>
-							<TableCell>{`${d.needConfirmed}`}</TableCell>
+							<TableCell align='center'>
+								{d.status == 'reserve' && !d.place ? 'Резерв' : d.place}
+							</TableCell>
+							<TableCell align='center'>{d.needConfirmed ? 'Да' : 'Нет'}</TableCell>
 						</TableRow>
 					))}
 				</TableBody>

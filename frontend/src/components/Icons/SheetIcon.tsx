@@ -1,13 +1,9 @@
 import { FC } from 'react'
-import { SvgIcon } from '@mui/material'
+import { SvgIcon, SxProps, Theme } from '@mui/material'
 
-type Props = {
-	fontSize?: number | string
-	color?: string
-}
-export const SheetIcon: FC<Props> = ({ fontSize, color }) => {
+export const SheetIcon: FC<SxProps<Theme>> = style => {
 	return (
-		<SvgIcon sx={{ fontSize, fill: color }}>
+		<SvgIcon sx={style}>
 			<svg
 				xmlns='http://www.w3.org/2000/svg'
 				shapeRendering='geometricPrecision'
