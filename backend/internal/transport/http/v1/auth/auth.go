@@ -104,7 +104,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 
 	user, err := h.service.Refresh(c, refreshToken)
 	if err != nil {
-		if strings.Contains(err.Error(), models.ErrSessionEmpty.Error()) {
+		if strings.Contains(err.Error(), "invalid_grant") {
 			response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "Сессия не найдена")
 			return
 		}

@@ -67,7 +67,7 @@ func (r *LocationRepo) GetLast(ctx context.Context, instrumentId string) (*model
 	return location, nil
 }
 
-func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (locations []models.Location, err error) {
+func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) ([]models.Location, error) {
 	var data []pq_models.LocationData
 	query := fmt.Sprintf(`SELECT id, instrument_id, status, date_of_receiving, date_of_issue, place, 
 		COALESCE(person_id::text, '') AS person_id, COALESCE(department_id::text, '') AS department_id, need_confirmed
@@ -78,6 +78,8 @@ func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId strin
 	if err := r.db.Select(&data, query, instrumentId); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
+
+	locations := []models.Location{}
 
 	for _, loc := range data {
 		receiptDate := ""

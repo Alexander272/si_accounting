@@ -80,11 +80,11 @@ func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*m
 // 	return verifications, nil
 // }
 
-func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (verifications []models.VerificationDataDTO, err error) {
+func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) ([]models.VerificationDataDTO, error) {
 	var data []pq_models.VerificationFullData
-	query := fmt.Sprintf(`SELECT v.id, v.instrument_id, file_link, register_link, status, date, next_date, notes, v.created_at,
-		d.label, d.size, d.path, d.type FROM %s AS v INNER JOIN %s AS d ON verification_id=v.id
-		WHERE v.instrument_id=$1 ORDER BY created_at, id;`,
+	query := fmt.Sprintf(`SELECT v.id, v.instrument_id, file_link, register_link, status, date, next_date, notes,
+		COALESCE(d.id::text, '') AS doc_id, COALESCE(d.label, '') AS label, COALESCE(d.size,0) AS size, COALESCE(d.path,'') AS path, COALESCE(d.type,'') AS type
+		FROM %s AS v LEFT JOIN %s AS d ON verification_id=v.id WHERE v.instrument_id=$1 ORDER BY date DESC, v.created_at DESC, id`,
 		VerificationTable, DocumentsTable,
 	)
 
@@ -92,8 +92,15 @@ func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId s
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
+	verifications := []models.VerificationDataDTO{}
+
 	for i, d := range data {
+		emptyDoc := false
+		if d.DocId == "" {
+			emptyDoc = true
+		}
 		doc := models.Document{
+			Id:           d.DocId,
 			Label:        d.Label,
 			Size:         d.Size,
 			Path:         d.Path,
@@ -101,6 +108,11 @@ func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId s
 		}
 
 		if i == 0 || verifications[len(verifications)-1].Id != d.Id {
+			docs := []models.Document{}
+			if !emptyDoc {
+				docs = append(docs, doc)
+			}
+
 			verifications = append(verifications, models.VerificationDataDTO{
 				Id:           d.Id,
 				InstrumentId: d.InstrumentId,
@@ -110,9 +122,9 @@ func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId s
 				RegisterLink: d.RegisterLink,
 				Status:       d.Status,
 				Notes:        d.Notes,
-				Documents:    []models.Document{doc},
+				Documents:    docs,
 			})
-		} else {
+		} else if !emptyDoc {
 			verifications[len(verifications)-1].Documents = append(verifications[len(verifications)-1].Documents, doc)
 		}
 	}

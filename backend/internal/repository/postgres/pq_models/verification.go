@@ -9,6 +9,7 @@ type VerificationFullData struct {
 	RegisterLink string `db:"register_link"`
 	Status       string `db:"status"`
 	Notes        string `db:"notes"`
+	DocId        string `db:"doc_id"`
 	Label        string `db:"label"`
 	Size         int64  `db:"size"`
 	Path         string `db:"path"`

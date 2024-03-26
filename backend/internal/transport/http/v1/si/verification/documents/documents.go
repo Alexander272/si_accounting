@@ -1,12 +1,15 @@
 package documents
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,6 +32,7 @@ func Register(api *gin.RouterGroup, service services.Documents, errBot error_bot
 	{
 		documents.GET("list", handlers.getList)
 		documents.POST("", handlers.upload)
+		documents.GET("", handlers.download)
 		documents.DELETE("/:id", handlers.delete)
 	}
 }
@@ -57,6 +61,32 @@ func (h *DocumentsHandlers) getList(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: docs})
+}
+
+func (h *DocumentsHandlers) download(c *gin.Context) {
+	filePath := c.Query("path")
+
+	logger.Debug(filePath)
+
+	// file, err := os.ReadFile(filePath)
+	// if err != nil {
+	// 	response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Файл не найден")
+	// 	h.errBot.Send(c, err.Error(), filePath)
+	// 	return
+	// }
+
+	fileStat, err := os.Stat(filePath)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Файл не найден")
+		h.errBot.Send(c, err.Error(), filePath)
+		return
+	}
+
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Length", fmt.Sprintf("%d", fileStat.Size()))
+	c.Header("Content-Disposition", "attachment; filename="+fileStat.Name())
+	c.File(filePath)
 }
 
 func (h *DocumentsHandlers) upload(c *gin.Context) {
