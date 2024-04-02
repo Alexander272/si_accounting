@@ -36,29 +36,6 @@ const filesApiSlice = apiSlice.injectEndpoints({
 			providesTags: [{ type: 'Verification', id: 'documents' }],
 		}),
 		downloadFile: builder.query<null, IDocument>({
-			// query: req => ({
-			// 	url: `${API.si.documents.base}`,
-			// 	method: 'GET',
-			// 	params: new URLSearchParams({ path: req.path }),
-			// }),
-			// onQueryStarted: async (_arg, api) => {
-			// 	try {
-			// 		const res = await api.queryFulfilled
-			// 		console.log(api.requestId)
-			// 		console.log(res)
-
-			// 		// const blob = new Blob([res.data], { type: res.data.type })
-			// 		// const link = document.createElement('a')
-			// 		// link.href = URL.createObjectURL(blob)
-			// 		// link.download = fileName
-			// 		// document.body.appendChild(link)
-			// 		// link.click()
-			// 		// document.body.removeChild(link)
-			// 	} catch (error) {
-			// 		const fetchError = (error as IBaseFetchError).error
-			// 		toast.error(fetchError.data.message, { autoClose: false })
-			// 	}
-			// },
 			queryFn: async (doc, _api, _, baseQuery) => {
 				const result = await baseQuery({
 					url: API.si.documents.base,

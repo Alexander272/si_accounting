@@ -6,9 +6,9 @@ import type { Status } from '../../types/data'
 import { useAppDispatch } from '@/hooks/redux'
 import { PermRules } from '@/constants/permissions'
 import { useModal } from '@/features/modal/hooks/useModal'
+import { useCheckPermission } from '@/features/auth/hooks/check'
 import { ModalSelectors } from '@/features/modal/modalSlice'
 import { setActive } from '@/features/dataTable/dataTableSlice'
-import { useCheckPermission } from '@/features/auth/hooks/check'
 import { EditIcon } from '@/components/Icons/EditIcon'
 import { VerifyIcon } from '@/components/Icons/VerifyIcon'
 import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
@@ -48,7 +48,7 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 			</ListItemIcon>
 			Создать на основании
 		</MenuItem>,
-		<MenuItem key='edit' onClick={contextHandler('EditInstrument')}>
+		<MenuItem key='edit' onClick={contextHandler('EditDataItem')}>
 			<ListItemIcon>
 				<EditIcon fontSize={16} fill={'#757575'} />
 			</ListItemIcon>
@@ -60,12 +60,18 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 			</ListItemIcon>
 			Добавить поверку
 		</MenuItem>,
-		<MenuItem key='location' disabled={status == 'moved'} onClick={contextHandler('ChangeLocation')}>
+		<MenuItem key='location' disabled={status == 'moved'} onClick={contextHandler('NewLocation')}>
 			<ListItemIcon>
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>
 			Добавить перемещение
 		</MenuItem>,
+		// <MenuItem key='testEdit' onClick={contextHandler('Test')}>
+		// 	<ListItemIcon>
+		// 		<EditIcon fontSize={16} fill={'#757575'} />
+		// 	</ListItemIcon>
+		// 	Тестирование
+		// </MenuItem>,
 	]
 
 	return (

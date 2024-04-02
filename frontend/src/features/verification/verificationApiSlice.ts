@@ -1,27 +1,14 @@
 import { toast } from 'react-toastify'
 
 import type { IBaseFetchError } from '@/app/types/error'
+import type { IVerification } from './types/verification'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
-import { IDocument } from '@/features/files/types/file'
-
-type Verification = {
-	id?: string
-	instrumentId: string
-	date: string
-	nextDate: string
-	fileLink: string
-	registerLink: string
-	status: string
-	notes: string
-	// files?: File[]
-	documents?: IDocument[]
-}
 
 const verificationApiSlice = apiSlice.injectEndpoints({
 	overrideExisting: false,
 	endpoints: builder => ({
-		getLastVerification: builder.query<{ data: Verification }, string>({
+		getLastVerification: builder.query<{ data: IVerification }, string>({
 			query: instrumentId => `${API.si.verification.base}/${instrumentId}`,
 			providesTags: [
 				{ type: 'Verification', id: 'LAST' },
@@ -37,9 +24,9 @@ const verificationApiSlice = apiSlice.injectEndpoints({
 			},
 		}),
 
-		getVerificationByInstrumentId: builder.query<{ data: Verification[] }, string>({
+		getVerificationByInstrumentId: builder.query<{ data: IVerification[] }, string>({
 			query: instrumentId => `${API.si.verification.all}/${instrumentId}`,
-			providesTags: [{ type: 'Verification', id: 'all' }],
+			providesTags: [{ type: 'Verification', id: 'ALL' }],
 			onQueryStarted: (_arg, api) => {
 				try {
 					api.queryFulfilled
@@ -50,7 +37,7 @@ const verificationApiSlice = apiSlice.injectEndpoints({
 			},
 		}),
 
-		createVerification: builder.mutation<string, Verification>({
+		createVerification: builder.mutation<string, IVerification>({
 			query: data => ({
 				url: API.si.verification.base,
 				method: 'POST',
@@ -62,7 +49,7 @@ const verificationApiSlice = apiSlice.injectEndpoints({
 			],
 		}),
 
-		updateVerification: builder.mutation<string, Verification>({
+		updateVerification: builder.mutation<string, IVerification>({
 			query: data => ({
 				url: `${API.si.verification.base}/${data.id}`,
 				method: 'PUT',

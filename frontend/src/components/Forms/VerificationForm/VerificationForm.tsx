@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 
 import type { IFetchError } from '@/app/types/error'
 import { Upload } from '@/features/files/components/Upload/Upload'
-import { dayjsFormatVariant } from '@/constants/dateFormat'
+import { DayjsFormat } from '@/constants/dateFormat'
 import {
 	useCreateVerificationMutation,
 	useGetLastVerificationQuery,
@@ -42,8 +42,8 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 
 	useEffect(() => {
 		if (data) {
-			let date = dayjs(data.data.date, dayjsFormatVariant)
-			let nextDate = dayjs(data.data.nextDate, dayjsFormatVariant)
+			let date = dayjs(data.data.date, DayjsFormat)
+			let nextDate = dayjs(data.data.nextDate, DayjsFormat)
 			if (instrumentId != 'draft') {
 				date = nextDate
 				if (instrument) nextDate = date.add(+instrument.data.interVerificationInterval, 'M').subtract(1, 'd')
@@ -70,8 +70,8 @@ export const VerificationForm: FC<PropsWithChildren<Props>> = ({ children, instr
 		const verification = {
 			id: data.id,
 			instrumentId: instrument?.data.id || '',
-			date: data.verificationDate.format(dayjsFormatVariant),
-			nextDate: data.nextVerificationDate.format(dayjsFormatVariant),
+			date: data.verificationDate.format(DayjsFormat),
+			nextDate: data.nextVerificationDate.format(DayjsFormat),
 			fileLink: data.verificationFile,
 			registerLink: data.verificationLink,
 			status: data.verificationStatus,

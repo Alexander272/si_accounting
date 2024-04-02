@@ -52,7 +52,7 @@ export const Cell: FC<Props> = ({ label, width, first, align = 'center' }) => {
 				},
 			}}
 		>
-			<Tooltip open={visible} title={label} arrow>
+			<Tooltip open={visible} title={label} arrow disableInteractive>
 				<Typography
 					ref={cellValue}
 					align={align}

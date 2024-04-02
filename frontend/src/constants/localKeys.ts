@@ -4,3 +4,5 @@ export const localKeys = {
 	sort: 'si_accounting/sort',
 	filter: 'si_accounting/filter',
 }
+
+export const DraftKey = 'draft'

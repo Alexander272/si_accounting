@@ -73,7 +73,7 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 				<Row
 					data={data?.data[index]}
 					style={style}
-					selected={selectedItems.some(s => s.id == data?.data[index].id)}
+					selected={selectedItems.some(s => s.id == data?.data[index]?.id)}
 					itemId={itemId}
 					onSelect={selectHandler}
 					positionHandler={positionHandler}

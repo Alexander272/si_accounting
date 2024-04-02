@@ -1,26 +1,35 @@
-import { FC, PropsWithChildren, useRef, useState } from 'react'
+import { FC, MouseEvent, PropsWithChildren, useRef, useState } from 'react'
 import { Box, Button, Popover, Stack } from '@mui/material'
 
 type Props = {
 	onClick: () => void
+	fullWidth?: boolean
+	buttonComponent?: JSX.Element
 }
 
-export const Confirm: FC<PropsWithChildren<Props>> = ({ children, onClick }) => {
+export const Confirm: FC<PropsWithChildren<Props>> = ({ children, fullWidth, onClick, buttonComponent }) => {
 	const [open, setOpen] = useState(false)
 	const anchor = useRef<HTMLButtonElement>(null)
 
-	const toggleHandler = () => setOpen(prev => !prev)
+	const toggleHandler = (event: MouseEvent) => {
+		event.stopPropagation()
+		setOpen(prev => !prev)
+	}
 
-	const confirmHandler = () => {
-		toggleHandler()
+	const confirmHandler = (event: MouseEvent) => {
+		toggleHandler(event)
 		onClick()
 	}
 
 	return (
-		<>
-			<Button ref={anchor} onClick={toggleHandler} variant='contained' color='error' fullWidth>
-				Удалить
-			</Button>
+		<Box ref={anchor} onClick={toggleHandler} sx={{ width: fullWidth ? '100%' : 'inherit' }}>
+			{buttonComponent ? (
+				buttonComponent
+			) : (
+				<Button variant='contained' color='error' fullWidth>
+					Удалить
+				</Button>
+			)}
 
 			<Popover
 				open={open}
@@ -49,6 +58,6 @@ export const Confirm: FC<PropsWithChildren<Props>> = ({ children, onClick }) => 
 					</Stack>
 				</Stack>
 			</Popover>
-		</>
+		</Box>
 	)
 }

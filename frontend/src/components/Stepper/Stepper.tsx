@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { Stepper as BaseStepper, Step, StepLabel } from '@mui/material'
+import { Stepper as BaseStepper, Step, StepButton, StepLabel, SxProps, Theme } from '@mui/material'
 import { CustomConnector } from './stepper.style'
 import { CustomStepIcon } from './Icon'
 
@@ -12,14 +12,28 @@ type Step = {
 type Props = {
 	active?: number
 	steps: Step[]
+	onClick?: (index: number) => void
+	sx?: SxProps<Theme>
 }
 
-export const Stepper: FC<Props> = ({ active, steps }) => {
+export const Stepper: FC<Props> = ({ active, steps, onClick, sx }) => {
+	const selectHandler = (index: number) => () => {
+		onClick && onClick(index)
+	}
+
 	return (
-		<BaseStepper alternativeLabel activeStep={active} connector={<CustomConnector />}>
-			{steps.map(step => (
+		<BaseStepper
+			alternativeLabel
+			nonLinear={Boolean(onClick)}
+			activeStep={active}
+			connector={<CustomConnector />}
+			sx={sx}
+		>
+			{steps.map((step, i) => (
 				<Step key={step.id} completed={step.completed}>
-					<StepLabel StepIconComponent={CustomStepIcon}>{step.label}</StepLabel>
+					<StepButton onClick={selectHandler(i)} sx={{ borderRadius: 4, margin: 0, padding: 0 }}>
+						<StepLabel StepIconComponent={CustomStepIcon}>{step.label}</StepLabel>
+					</StepButton>
 				</Step>
 			))}
 		</BaseStepper>

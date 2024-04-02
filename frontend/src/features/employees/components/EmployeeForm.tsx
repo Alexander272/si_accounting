@@ -171,7 +171,7 @@ export const EmployeeForm = () => {
 					Сохранить
 				</Button>
 				{employee && (
-					<Confirm onClick={deleteHandler}>
+					<Confirm onClick={deleteHandler} fullWidth>
 						<Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
 							<WarningIcon fill={palette.error.main} />
 							<Typography fontSize={'1.1rem'} fontWeight={'bold'} align='center'>

@@ -1,1 +1,1 @@
-export const dayjsFormatVariant = 'DD.MM.YYYY'
+export const DayjsFormat = 'DD.MM.YYYY'

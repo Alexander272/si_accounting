@@ -1,9 +1,11 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
+import dayjs from 'dayjs'
 
 import { useAppSelector } from '@/hooks/redux'
-import { useGetLocationsByInstrumentIdQuery } from '@/components/Forms/LocationForm/locationApiSlice'
-import { getActiveItem } from '../dataTable/dataTableSlice'
-import { useGetInstrumentByIdQuery } from '@/components/Forms/InstrumentForm/instrumentApiSlice'
+import { DayjsFormat } from '@/constants/dateFormat'
+import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
+import { getActiveItem } from '../../dataTable/dataTableSlice'
+import { useGetLocationsByInstrumentIdQuery } from '../locationApiSlice'
 
 export const LocationHistory = () => {
 	const active = useAppSelector(getActiveItem)
@@ -33,8 +35,10 @@ export const LocationHistory = () => {
 				<TableBody>
 					{data?.data.map(d => (
 						<TableRow key={d.id}>
-							<TableCell align='center'>{d.dateOfIssue}</TableCell>
-							<TableCell align='center'>{d.dateOfReceiving}</TableCell>
+							<TableCell align='center'>{dayjs(d.dateOfIssue * 1000).format(DayjsFormat)}</TableCell>
+							<TableCell align='center'>
+								{d.dateOfReceiving != 0 ? dayjs(d.dateOfReceiving * 1000).format(DayjsFormat) : '-'}
+							</TableCell>
 							{/* <TableCell>{d.department ? `${d.department} (${d.person})` : ''}</TableCell> */}
 							{/* <TableCell>{d.status}</TableCell> */}
 							<TableCell align='center'>

@@ -4,14 +4,14 @@ import type { TransitionProps } from '@mui/material/transitions'
 
 import { useAppSelector } from '@/hooks/redux'
 import { ModalTitles } from '@/constants/modalTitles'
-import { CreateDataItem } from '@/components/Forms/CreateDataItem/CreateDataItem'
-import { NewVerification } from '@/components/Forms/NewVerification/NewVerification'
-import { UpdateInstrument } from '@/components/Forms/UpdateInstrument/UpdateInstrument'
-import { ChangeLocation } from '@/components/Forms/ChangeLocation/ChangeLocation'
+import { CreateSi } from '@/features/si/components/CreateSi'
+import { UpdateSi } from '@/features/si/components/UpdateSi'
+import { CreateVerification } from '@/features/verification/components/CreateVerification'
+import { CreateLocation } from '@/features/location/components/CreateLocation'
 import { EmployeeForm } from '@/features/employees/components/EmployeeForm'
 import { DepartmentForm } from '@/features/employees/components/DepartmentForm'
-import { LocationHistory } from '@/features/location/LocationHistory'
-import { VerificationHistory } from '@/features/verification/VerificationHistory'
+import { LocationHistory } from '@/features/location/components/LocationHistory'
+import { VerificationHistory } from '@/features/verification/components/VerificationHistory'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
 
@@ -44,9 +44,9 @@ export const Modal = () => {
 			<Stack direction={'row'} width={'100%'} justifyContent={'space-between'} alignItems={'center'}>
 				<DialogTitle color={'primary'}>
 					{selector == 'CreateDataItem' && ModalTitles.ADD_ITEM}
+					{selector == 'EditDataItem' && ModalTitles.EDIT_ITEM}
 					{selector == 'NewVerification' && ModalTitles.NEW_VERIFICATION}
-					{selector == 'EditInstrument' && ModalTitles.EDIT_ITEM}
-					{selector == 'ChangeLocation' && ModalTitles.NEW_MOVEMENT}
+					{selector == 'NewLocation' && ModalTitles.NEW_MOVEMENT}
 
 					{selector == 'EditEmployee' && ModalTitles.EDIT_EMPLOYEE}
 					{selector == 'CreateEmployee' && ModalTitles.CREATE_EMPLOYEE}
@@ -55,6 +55,8 @@ export const Modal = () => {
 
 					{selector == 'ViewLocationHistory' && ModalTitles.MOVEMENT_HISTORY}
 					{selector == 'ViewVerificationHistory' && ModalTitles.VERIFICATION_HISTORY}
+
+					{selector == 'Test' && ModalTitles.EDIT_ITEM}
 				</DialogTitle>
 
 				<IconButton onClick={closeModal} sx={{ lineHeight: '16px', mr: 2 }}>
@@ -62,16 +64,18 @@ export const Modal = () => {
 				</IconButton>
 			</Stack>
 			<DialogContent sx={{ pt: 0 }}>
-				{selector == 'CreateDataItem' && <CreateDataItem />}
-				{selector == 'NewVerification' && <NewVerification />}
-				{selector == 'EditInstrument' && <UpdateInstrument />}
-				{selector == 'ChangeLocation' && <ChangeLocation />}
+				{selector == 'CreateDataItem' && <CreateSi />}
+				{selector == 'EditDataItem' && <UpdateSi />}
+				{selector == 'NewVerification' && <CreateVerification />}
+				{selector == 'NewLocation' && <CreateLocation />}
 
 				{selector == 'EditEmployee' || selector == 'CreateEmployee' ? <EmployeeForm /> : null}
 				{selector == 'EditDepartment' || selector == 'CreateDepartment' ? <DepartmentForm /> : null}
 
 				{selector == 'ViewLocationHistory' && <LocationHistory />}
 				{selector == 'ViewVerificationHistory' && <VerificationHistory />}
+
+				{selector == 'Test' && <CreateLocation />}
 			</DialogContent>
 		</Dialog>
 	)

@@ -36,7 +36,7 @@ export const Tools = () => {
 	}
 
 	const menuItems = [
-		<MenuItem key='location' onClick={modalHandler('ChangeLocation')}>
+		<MenuItem key='location' onClick={modalHandler('NewLocation')}>
 			<ListItemIcon>
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>

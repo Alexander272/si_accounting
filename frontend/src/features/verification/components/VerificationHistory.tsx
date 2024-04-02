@@ -9,17 +9,19 @@ import {
 	TableRow,
 	Typography,
 } from '@mui/material'
+import dayjs from 'dayjs'
 
+import type { IDocument } from '../../files/types/file'
 import { useAppSelector } from '@/hooks/redux'
-import { useGetInstrumentByIdQuery } from '@/components/Forms/InstrumentForm/instrumentApiSlice'
-import { useGetVerificationByInstrumentIdQuery } from '@/components/Forms/VerificationForm/verificationApiSlice'
+import { DayjsFormat } from '@/constants/dateFormat'
+import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
 import { DocIcon } from '@/components/Icons/DocIcon'
 import { PdfIcon } from '@/components/Icons/PdfIcon'
 import { ImageIcon } from '@/components/Icons/ImageIcon'
 import { SheetIcon } from '@/components/Icons/SheetIcon'
-import { getActiveItem } from '../dataTable/dataTableSlice'
-import { useLazyDownloadFileQuery } from '../files/filesApiSlice'
-import { IDocument } from '../files/types/file'
+import { getActiveItem } from '../../dataTable/dataTableSlice'
+import { useLazyDownloadFileQuery } from '../../files/filesApiSlice'
+import { useGetVerificationByInstrumentIdQuery } from '../verificationApiSlice'
 
 const FileTypes = {
 	doc: <DocIcon ml={0.8} />,
@@ -84,8 +86,8 @@ export const VerificationHistory = () => {
 				<TableBody>
 					{data?.data.map(d => (
 						<TableRow key={d.id}>
-							<TableCell align='center'>{d.date}</TableCell>
-							<TableCell align='center'>{d.nextDate}</TableCell>
+							<TableCell align='center'>{dayjs(d.date * 1000).format(DayjsFormat)}</TableCell>
+							<TableCell align='center'>{dayjs(d.nextDate * 1000).format(DayjsFormat)}</TableCell>
 							<TableCell align='center'>{d.registerLink}</TableCell>
 							<TableCell align='center'>{Statuses[d.status as 'work']}</TableCell>
 							<TableCell>

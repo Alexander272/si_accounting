@@ -44,6 +44,10 @@ export const theme = createTheme({
 			},
 		},
 		MuiTooltip: {
+			defaultProps: {
+				disableInteractive: true,
+				arrow: true,
+			},
 			styleOverrides: {
 				tooltip: {
 					fontSize: '0.9rem',

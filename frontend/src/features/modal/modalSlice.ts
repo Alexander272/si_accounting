@@ -4,9 +4,9 @@ import { RootState } from '@/app/store'
 
 export type ModalSelectors =
 	| 'CreateDataItem'
+	| 'EditDataItem'
 	| 'NewVerification'
-	| 'EditInstrument'
-	| 'ChangeLocation'
+	| 'NewLocation'
 	| 'CreateEmployee'
 	| 'EditEmployee'
 	| 'CreateDepartment'
@@ -14,6 +14,7 @@ export type ModalSelectors =
 	| 'Confirm'
 	| 'ViewLocationHistory'
 	| 'ViewVerificationHistory'
+	| 'Test'
 
 interface IModalState {
 	open: boolean
