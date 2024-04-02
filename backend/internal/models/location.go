@@ -10,8 +10,10 @@ type Location struct {
 	DepartmentId string `json:"departmentId" db:"department_id"`
 	// ReceiptDate     string `json:"receiptDate" db:"receipt_date"`
 	// DeliveryDate    string `json:"deliveryDate" db:"delivery_date"`
-	DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
-	DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
+	// DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
+	// DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
+	DateOfIssue     int64  `json:"dateOfIssue" db:"date_of_issue"`
+	DateOfReceiving int64  `json:"dateOfReceiving" db:"date_of_receiving"`
 	NeedConfirmed   bool   `json:"needConfirmed" db:"need_confirmed"`
 	Status          string `json:"status" db:"status"`
 }
@@ -24,8 +26,10 @@ type CreateLocationDTO struct {
 	DepartmentId string `json:"department" db:"department_id"`
 	// ReceiptDate     string `json:"receiptDate" db:"receipt_date"`
 	// DeliveryDate    string `json:"deliveryDate" db:"delivery_date"`
-	DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
-	DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
+	// DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
+	// DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
+	DateOfIssue     int64  `json:"dateOfIssue" db:"date_of_issue"`
+	DateOfReceiving int64  `json:"dateOfReceiving" db:"date_of_receiving"`
 	NeedConfirmed   bool   `json:"needConfirmed" db:"need_confirmed"`
 	Status          string `json:"status" db:"status"`
 }
@@ -39,8 +43,10 @@ type UpdateLocationDTO struct {
 	DepartmentId string `json:"department" db:"department_id"`
 	// ReceiptDate     string `json:"receiptDate" db:"receipt_date"`
 	// DeliveryDate    string `json:"deliveryDate" db:"delivery_date"`
-	DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
-	DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
+	// DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
+	// DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
+	DateOfIssue     int64  `json:"dateOfIssue" db:"date_of_issue"`
+	DateOfReceiving int64  `json:"dateOfReceiving" db:"date_of_receiving"`
 	Status          string `json:"status" db:"status"`
 }
 

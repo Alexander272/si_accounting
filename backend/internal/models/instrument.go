@@ -12,6 +12,7 @@ type Instrument struct {
 	YearOfIssue               string `json:"yearOfIssue" db:"year_of_issue"`
 	InterVerificationInterval string `json:"interVerificationInterval" db:"inter_verification_interval"`
 	Notes                     string `json:"notes" db:"notes"`
+	Status                    string `json:"status" db:"status"`
 }
 
 type CreateInstrumentDTO struct {

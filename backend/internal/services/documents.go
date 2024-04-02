@@ -35,6 +35,7 @@ type Documents interface {
 	Upload(context.Context, models.DocumentsDTO) error
 	ChangePath(context.Context, models.PathParts) error
 	Delete(context.Context, models.DeleteDocumentsDTO) error
+	DeleteByInstrumentId(context.Context, string) error
 }
 
 func (s *DocumentsService) Get(ctx context.Context, req models.GetDocumentsDTO) ([]models.Document, error) {
@@ -158,6 +159,15 @@ func (s *DocumentsService) Delete(ctx context.Context, req models.DeleteDocument
 
 	if err := s.repo.DeleteById(ctx, req.Id); err != nil {
 		return fmt.Errorf("failed to delete document by id. error: %w", err)
+	}
+	return nil
+}
+
+func (s *DocumentsService) DeleteByInstrumentId(ctx context.Context, instrumentId string) error {
+	dst := path.Join(s.path, instrumentId)
+
+	if err := os.RemoveAll(dst); err != nil && !strings.Contains(err.Error(), "no such file") {
+		return fmt.Errorf("failed to delete folder with files. error: %w", err)
 	}
 	return nil
 }

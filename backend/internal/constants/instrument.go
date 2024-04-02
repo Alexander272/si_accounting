@@ -4,6 +4,7 @@ const (
 	InstrumentStatusWork   string = "work"
 	InstrumentStatusRepair string = "repair"
 	InstrumentStatusDec    string = "decommissioning"
+	InstrumentDeleted      string = "deleted"
 	InstrumentDraft        string = "draft"
 )
 

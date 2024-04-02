@@ -32,7 +32,7 @@ func Register(api *gin.RouterGroup, service services.Instrument, errBot error_bo
 		instruments.GET("/:id", handlers.GetById)
 		instruments.POST("", handlers.Create)
 		instruments.PUT("/:id", handlers.Update)
-		// instruments.DELETE("/:id")
+		instruments.DELETE("/:id", handlers.Delete)
 	}
 }
 
@@ -91,4 +91,19 @@ func (h *InstrumentHandlers) Update(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные об инструменте успешно обновлены"})
+}
+
+func (h *InstrumentHandlers) Delete(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "id не задан")
+		return
+	}
+
+	if err := h.service.Delete(c, id); err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		h.errBot.Send(c, err.Error(), id)
+		return
+	}
+	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные об инструменте успешно удалены"})
 }

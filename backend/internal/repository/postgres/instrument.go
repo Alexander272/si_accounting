@@ -27,13 +27,14 @@ type Instrument interface {
 	Create(context.Context, models.CreateInstrumentDTO) error
 	Update(context.Context, models.UpdateInstrumentDTO) error
 	ChangeStatus(context.Context, models.UpdateStatus) error
+	Delete(context.Context, string) error
 }
 
 // func (r *InstrumentRepo) GetAll(ctx context.Context, )
 
 func (r *InstrumentRepo) GetById(ctx context.Context, id string) (*models.Instrument, error) {
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer,
-		year_of_issue, inter_verification_interval, notes FROM %s WHERE CASE WHEN $1='' OR $1='draft' THEN status=$2 ELSE id::text=$1 END LIMIT 1`,
+		year_of_issue, inter_verification_interval, notes, status FROM %s WHERE CASE WHEN $1='' OR $1='draft' THEN status=$2 ELSE id::text=$1 END LIMIT 1`,
 		InstrumentTable,
 	)
 	instrument := &models.Instrument{}
@@ -83,6 +84,17 @@ func (r *InstrumentRepo) ChangeStatus(ctx context.Context, status models.UpdateS
 	query := fmt.Sprintf(`UPDATE %s SET status=$1 WHERE id=$2`, InstrumentTable)
 
 	_, err := r.db.Exec(query, status.Status, status.Id)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return nil
+}
+
+func (r *InstrumentRepo) Delete(ctx context.Context, id string) error {
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id=$1`, InstrumentTable)
+	// query := fmt.Sprintf(`UPDATE %s SET status='deleted' WHERE id=$1`, InstrumentTable)
+
+	_, err := r.db.Exec(query, id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

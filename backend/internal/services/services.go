@@ -43,8 +43,8 @@ func NewServices(deps Deps) *Services {
 	department := NewDepartmentService(deps.Repos.Department)
 	employee := NewEmployeeService(deps.Repos.Employee)
 
-	instrument := NewInstrumentService(deps.Repos.Instrument)
 	documents := NewDocumentsService(deps.Repos.Documents)
+	instrument := NewInstrumentService(deps.Repos.Instrument, documents)
 	verification := NewVerificationService(deps.Repos.Verification, documents, instrument)
 	location := NewLocationService(deps.Repos.Location, employee)
 
