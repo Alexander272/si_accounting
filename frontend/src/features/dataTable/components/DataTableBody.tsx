@@ -30,7 +30,10 @@ export const DataTableBody = () => {
 
 	const { coordinates, isSelected, itemId, status, positionHandler } = useContextMenu()
 
-	const { data } = useGetAllSIQuery({ page, size, sort, filter }, { pollingInterval: 5 * 60000 })
+	const { data } = useGetAllSIQuery(
+		{ page, size, sort, filter: filter ? [filter] : [] },
+		{ pollingInterval: 5 * 60000 }
+	)
 
 	const selectHandler = useCallback(
 		(item: ISelected, selected: boolean) => {

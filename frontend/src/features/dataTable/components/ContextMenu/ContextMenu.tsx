@@ -41,7 +41,7 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 		}
 	}
 
-	const menuItemsWriter = [
+	const SiMenuItemsWriter = [
 		<MenuItem key='create' onClick={contextHandler('CreateDataItem')}>
 			<ListItemIcon>
 				<CopyIcon fontSize={18} fill={'#757575'} />
@@ -73,6 +73,15 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 		// 	Тестирование
 		// </MenuItem>,
 	]
+	//TODO сделать новую форму для этого
+	const LocMenuItems = [
+		<MenuItem key='location' disabled={status == 'moved'} onClick={contextHandler('SendToReserve')}>
+			<ListItemIcon>
+				<ExchangeIcon fontSize={18} fill={'#757575'} />
+			</ListItemIcon>
+			Вернуть инструмент
+		</MenuItem>,
+	]
 
 	return (
 		<Menu
@@ -81,7 +90,8 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 			anchorReference='anchorPosition'
 			anchorPosition={coordinates ? { top: coordinates.mouseY, left: coordinates.mouseX } : undefined}
 		>
-			{useCheckPermission(PermRules.SI.Write) ? menuItemsWriter : null}
+			{useCheckPermission(PermRules.SI.Write) ? SiMenuItemsWriter : null}
+			{useCheckPermission(PermRules.Location.Write) ? LocMenuItems : null}
 
 			{/* //TODO должны быть пункты для возврата и приема инструмента */}
 

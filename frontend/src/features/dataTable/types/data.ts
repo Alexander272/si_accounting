@@ -19,7 +19,7 @@ export interface ISIParams {
 	page?: number
 	size?: number
 	sort?: ISISort
-	filter?: ISIFilter
+	filter?: ISIFilter[]
 }
 
 export interface ISISort {

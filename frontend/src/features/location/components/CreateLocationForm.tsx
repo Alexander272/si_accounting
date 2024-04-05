@@ -17,7 +17,7 @@ const defaultValues: ILocationForm = {
 	isToReserve: false,
 	department: '',
 	person: '',
-	dateOfIssue: dayjs().unix(),
+	dateOfIssue: dayjs().startOf('d').unix(),
 }
 
 type Props = {
@@ -45,8 +45,6 @@ export const CreateLocationForm: FC<Props> = ({
 }) => {
 	const [create, { isLoading }] = useCreateLocationMutation()
 
-	//TODO я забыл отображать индикатор загрузки | i forgot show loading indicator
-
 	const submitHandler = async (form: ILocationForm) => {
 		console.log('create location', form)
 
@@ -56,7 +54,6 @@ export const CreateLocationForm: FC<Props> = ({
 			dateOfIssue: form.dateOfIssue,
 			needConfirmed: form.needConfirmed,
 			instrumentId: instrument.id || '',
-			//TODO задать верный статус и дату
 			// status: data?.status || '',
 			status: !form.needConfirmed ? (form.isToReserve ? 'reserve' : 'used') : 'moved',
 			// dateOfReceiving: data?.dateOfReceiving || 0,

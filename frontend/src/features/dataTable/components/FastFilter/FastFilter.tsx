@@ -68,7 +68,7 @@ export const FastFilter = () => {
 				field: 'nextVerificationDate',
 				fieldType: 'date',
 				compareType: 'lte',
-				valueStart: dayjs().unix().toString(),
+				valueStart: dayjs().startOf('d').unix().toString(),
 				valueEnd: '',
 			}
 			if (active == 'month') {

@@ -14,7 +14,7 @@ export const DataFooter = () => {
 
 	const selected = useAppSelector(getSelectedItems)
 
-	const { data } = useGetAllSIQuery({ page, size, sort, filter })
+	const { data } = useGetAllSIQuery({ page, size, sort, filter: filter ? [filter] : [] })
 
 	return (
 		<Stack direction={'row'} alignItems={'center'} mt={2} mx={3}>

@@ -2,24 +2,25 @@ import { FC, useEffect } from 'react'
 import { Autocomplete, TextField } from '@mui/material'
 import { Controller, RegisterOptions, useFormContext } from 'react-hook-form'
 
+import type { ILocationForm } from './NewLocationForm/type'
 import { useGetEmployeesQuery } from '@/features/employees/employeesApiSlice'
 
 type Props = {
 	label: string
-	name: string
+	name: 'person'
 	rules?: RegisterOptions
 	disabled?: boolean
 }
 
 export const EmployeeList: FC<Props> = ({ label, name, rules, disabled }) => {
-	const { control, watch, setValue } = useFormContext()
+	const { control, watch, setValue } = useFormContext<ILocationForm>()
 
 	const departmentId = watch('department')
-	const { data, isFetching } = useGetEmployeesQuery(departmentId || null)
+	const { data, isFetching } = useGetEmployeesQuery(departmentId || null, { skip: !departmentId })
 
 	useEffect(() => {
-		if (data?.data.length) setValue('person', data.data[0].id)
-	}, [data, setValue])
+		if (data?.data.length) setValue(name, data.data[0].id)
+	}, [name, data, setValue])
 
 	return (
 		<Controller
@@ -41,6 +42,7 @@ export const EmployeeList: FC<Props> = ({ label, name, rules, disabled }) => {
 					noOptionsText='Ничего не найдено'
 					loadingText='Загрузка...'
 					disabled={disabled}
+					fullWidth
 					renderInput={params => (
 						<TextField {...params} label={label} autoComplete='off' error={Boolean(error)} />
 					)}

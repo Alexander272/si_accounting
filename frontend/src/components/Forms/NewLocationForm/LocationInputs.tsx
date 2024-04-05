@@ -26,7 +26,7 @@ export const LocationInputs: FC<Props> = ({ hidden, disabled }) => {
 	const { control } = useFormContext<ILocationForm>()
 
 	return (
-		<Stack spacing={2}>
+		<Stack spacing={2} alignItems={'flex-start'}>
 			{!(hidden && hidden['isToReserve']) ? (
 				<Controller
 					name='isToReserve'
@@ -75,7 +75,7 @@ export const LocationInputs: FC<Props> = ({ hidden, disabled }) => {
 						<DatePicker
 							{...field}
 							value={dayjs(field.value * 1000)}
-							onChange={value => field.onChange(value?.unix())}
+							onChange={value => field.onChange(value?.startOf('d').unix())}
 							label={Titles.DateOfIssue}
 							disabled={disabled}
 							showDaysOutsideCurrentMonth
@@ -84,6 +84,7 @@ export const LocationInputs: FC<Props> = ({ hidden, disabled }) => {
 							slotProps={{
 								textField: {
 									error: Boolean(error),
+									fullWidth: true,
 								},
 							}}
 						/>

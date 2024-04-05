@@ -8,6 +8,7 @@ import { CreateSi } from '@/features/si/components/CreateSi'
 import { UpdateSi } from '@/features/si/components/UpdateSi'
 import { CreateVerification } from '@/features/verification/components/CreateVerification'
 import { CreateLocation } from '@/features/location/components/CreateLocation'
+import { SendToReserve } from '@/features/location/components/SendToReserve'
 import { EmployeeForm } from '@/features/employees/components/EmployeeForm'
 import { DepartmentForm } from '@/features/employees/components/DepartmentForm'
 import { LocationHistory } from '@/features/location/components/LocationHistory'
@@ -47,6 +48,7 @@ export const Modal = () => {
 					{selector == 'EditDataItem' && ModalTitles.EDIT_ITEM}
 					{selector == 'NewVerification' && ModalTitles.NEW_VERIFICATION}
 					{selector == 'NewLocation' && ModalTitles.NEW_MOVEMENT}
+					{selector == 'SendToReserve' && ModalTitles.SEND_TO_RESERVE}
 
 					{selector == 'EditEmployee' && ModalTitles.EDIT_EMPLOYEE}
 					{selector == 'CreateEmployee' && ModalTitles.CREATE_EMPLOYEE}
@@ -68,6 +70,7 @@ export const Modal = () => {
 				{selector == 'EditDataItem' && <UpdateSi />}
 				{selector == 'NewVerification' && <CreateVerification />}
 				{selector == 'NewLocation' && <CreateLocation />}
+				{selector == 'SendToReserve' && <SendToReserve />}
 
 				{selector == 'EditEmployee' || selector == 'CreateEmployee' ? <EmployeeForm /> : null}
 				{selector == 'EditDepartment' || selector == 'CreateDepartment' ? <DepartmentForm /> : null}

@@ -1,4 +1,5 @@
 import { FC, memo, useCallback } from 'react'
+import { Stack } from '@mui/material'
 import { FixedSizeList } from 'react-window'
 
 import { RowHeight, Size } from '@/constants/defaultValues'
@@ -16,6 +17,8 @@ import {
 import { Coordinates } from '@/features/dataTable/hooks/useContextMenu'
 import { useGetAllSIQuery } from '@/features/dataTable/siApiSlice'
 import { ISelected, Status } from '@/features/dataTable/types/data'
+import { Fallback } from '@/components/Fallback/Fallback'
+import DataTableNoRowsOverlay from '../../NoRowsOverlay/components/DataTableNoRowsOverlay'
 import { HeadCells } from '../Head/columns'
 
 type Props = {
@@ -36,7 +39,10 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 
 	// const { itemId, positionHandler } = useContextMenu()
 
-	const { data } = useGetAllSIQuery({ page, size, sort, filter }, { pollingInterval: 5 * 60000 })
+	const { data, isFetching } = useGetAllSIQuery(
+		{ page, size, sort, filter: filter ? [filter] : [] },
+		{ pollingInterval: 5 * 60000 }
+	)
 
 	const selectHandler = useCallback(
 		(item: ISelected, selected: boolean) => {
@@ -46,40 +52,46 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 		[dispatch]
 	)
 
-	// if (true)
-	// 	return (
-	// 		<Stack flexGrow={1} height={100}>
-	// 			<Typography>Поиск...</Typography>
-	// 		</Stack>
-	// 	)
-	// if (isFetching) return <></>
 	if (!data) return null
 
 	return (
-		<FixedSizeList
-			overscanCount={12}
-			height={RowHeight * Size}
-			itemCount={size || Size}
-			itemSize={RowHeight}
-			itemData={data}
-			width={HeadCells.reduce((ac, cur) => ac + cur.width, 10)}
-		>
-			{/* {true && (
-				<Stack position={'absolute'} sx={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-					<Typography>Поиск...</Typography>
-				</Stack>
-			)} */}
-			{({ index, style }) => (
-				<Row
-					data={data?.data[index]}
-					style={style}
-					selected={selectedItems.some(s => s.id == data?.data[index]?.id)}
-					itemId={itemId}
-					onSelect={selectHandler}
-					positionHandler={positionHandler}
+		<Stack position={'relative'}>
+			{!data.total && <DataTableNoRowsOverlay />}
+
+			{isFetching && (
+				<Fallback
+					position={'absolute'}
+					top={'50%'}
+					left={'50%'}
+					transform={'translate(-50%, -50%)'}
+					height={160}
+					width={160}
+					borderRadius={3}
+					zIndex={15}
+					backgroundColor={'#fafafa'}
 				/>
-				// TODO при изменении selectedItems вся таблица отрисовывается заново
 			)}
-		</FixedSizeList>
+
+			<FixedSizeList
+				overscanCount={12}
+				height={RowHeight * Size}
+				itemCount={size || Size}
+				itemSize={RowHeight}
+				itemData={data}
+				width={HeadCells.reduce((ac, cur) => ac + cur.width, 10)}
+			>
+				{({ index, style }) => (
+					<Row
+						data={data?.data[index]}
+						style={style}
+						selected={selectedItems.some(s => s.id == data?.data[index]?.id)}
+						itemId={itemId}
+						onSelect={selectHandler}
+						positionHandler={positionHandler}
+					/>
+					// TODO при изменении selectedItems вся таблица отрисовывается заново
+				)}
+			</FixedSizeList>
+		</Stack>
 	)
 })

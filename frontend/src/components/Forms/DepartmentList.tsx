@@ -2,23 +2,25 @@ import { FC, useEffect } from 'react'
 import { Autocomplete, TextField } from '@mui/material'
 import { Controller, RegisterOptions, useFormContext } from 'react-hook-form'
 
+import type { ILocationForm } from './NewLocationForm/type'
 import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
 
 type Props = {
 	label: string
-	name: string
+	name: 'department'
 	rules?: RegisterOptions
 	disabled?: boolean
 }
 
 export const DepartmentList: FC<Props> = ({ label, name, rules, disabled }) => {
-	const { control, setValue } = useFormContext()
+	const { control, setValue } = useFormContext<ILocationForm>()
 
 	const { data, isFetching } = useGetDepartmentsQuery(null)
 
 	useEffect(() => {
-		if (data?.data.length) setValue('department', data.data[0].id)
-	}, [data, setValue])
+		//TODO на проде почему-то не отрабатывает setValue
+		if (data?.data.length) setValue(name, data.data[0].id)
+	}, [name, data, setValue])
 
 	return (
 		<Controller
@@ -40,6 +42,7 @@ export const DepartmentList: FC<Props> = ({ label, name, rules, disabled }) => {
 					loadingText='Загрузка...'
 					noOptionsText='Ничего не найдено'
 					disabled={disabled}
+					fullWidth
 					renderInput={params => (
 						<TextField {...params} label={label} autoComplete='off' error={Boolean(error)} />
 					)}

@@ -34,8 +34,6 @@ type Props = {
 export const UpdateInstrumentForm: FC<Props> = ({ data, loading, submitLabel, cancelLabel, onSubmit, onCancel }) => {
 	const [update, { isLoading }] = useUpdateInstrumentMutation()
 
-	//TODO я забыл отображать индикатор загрузки | i forgot show loading indicator
-
 	const submitHandler = async (data: IInstrumentForm, isShouldUpdate?: boolean) => {
 		if (!isShouldUpdate) {
 			onSubmit && onSubmit()

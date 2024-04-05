@@ -22,7 +22,7 @@ export const VerificationInputs: FC<Props> = ({ instrumentId, verificationId, st
 
 	const applyStep = (date: Dayjs) => {
 		const next = date.add(stepMonth, 'M').subtract(1, 'd')
-		setValue('nextDate', next.unix())
+		setValue('nextDate', next.startOf('d').unix())
 	}
 
 	return (
@@ -36,7 +36,7 @@ export const VerificationInputs: FC<Props> = ({ instrumentId, verificationId, st
 						{...field}
 						value={dayjs(field.value * 1000)}
 						onChange={value => {
-							field.onChange(value?.unix())
+							field.onChange(value?.startOf('d').unix())
 							value && applyStep(value)
 						}}
 						label={Titles.VerificationDate}
@@ -60,7 +60,7 @@ export const VerificationInputs: FC<Props> = ({ instrumentId, verificationId, st
 						<DatePicker
 							{...field}
 							value={dayjs(field.value * 1000)}
-							onChange={value => field.onChange(value?.unix())}
+							onChange={value => field.onChange(value?.startOf('d').unix())}
 							label={Titles.NextVerificationDate}
 							showDaysOutsideCurrentMonth
 							fixedWeekNumber={6}

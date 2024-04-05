@@ -13,8 +13,8 @@ import { VerificationForm } from '@/components/Forms/NewVerificationForm/Verific
 import { useUpdateVerificationMutation } from '../verificationApiSlice'
 
 const defaultValues: IVerificationForm = {
-	date: dayjs().unix(),
-	nextDate: dayjs().unix(),
+	date: dayjs().startOf('d').unix(),
+	nextDate: dayjs().startOf('d').unix(),
 	registerLink: '',
 	status: 'work',
 	notes: '',

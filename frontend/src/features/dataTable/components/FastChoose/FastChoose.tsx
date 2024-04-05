@@ -36,7 +36,7 @@ export const FastChoose = () => {
 
 	const dispatch = useAppDispatch()
 
-	const { data } = useGetAllSIQuery({ page, size, sort, filter })
+	const { data } = useGetAllSIQuery({ page, size, sort, filter: filter ? [filter] : [] })
 
 	const toggleHandler = () => setOpen(prev => !prev)
 
@@ -44,23 +44,23 @@ export const FastChoose = () => {
 		if (selected.length) {
 			dispatch(removeSelected())
 			toggleHandler()
-		} else fetching(filter, sort)
+		} else fetching(filter ? [filter] : [], sort)
 	}
 
 	const selectOverdueHandler = async () => {
-		const filter: ISIFilter = {
+		const newFilter: ISIFilter = {
 			field: 'nextVerificationDate',
 			fieldType: 'date',
 			compareType: 'lte',
-			valueStart: dayjs().unix().toString(),
+			valueStart: dayjs().startOf('d').unix().toString(),
 			valueEnd: '',
 		}
 
-		fetching(filter)
+		fetching(filter ? [filter, newFilter] : [newFilter])
 	}
 
 	const selectMonthHandler = async () => {
-		const filter: ISIFilter = {
+		const newFilter: ISIFilter = {
 			field: 'nextVerificationDate',
 			fieldType: 'date',
 			compareType: 'range',
@@ -68,17 +68,18 @@ export const FastChoose = () => {
 			valueEnd: dayjs().endOf('month').unix().toString(),
 		}
 
-		fetching(filter)
+		fetching(filter ? [filter, newFilter] : [newFilter])
 	}
 
-	const fetching = async (filter?: ISIFilter, sort?: ISISort) => {
+	const fetching = async (filter?: ISIFilter[], sort?: ISISort) => {
 		try {
-			const payload = await fetchSi({ size: data?.total, filter, sort })
+			const payload = await fetchSi({ size: data?.total, filter, sort }).unwrap()
 			const identifiers =
-				payload.data?.data.map(si => {
+				payload?.data.map(si => {
 					const status = si.place == 'Перемещение' ? 'moved' : si.place == 'Резерв' ? 'reserve' : 'used'
 					return { id: si.id, status: status } as ISelected
 				}) || []
+			dispatch(removeSelected())
 			dispatch(addSelected(identifiers))
 		} catch (error) {
 			const fetchError = error as IFetchError

@@ -5,6 +5,7 @@ import type { IUser } from '@/features/user/types/user'
 import type { ISignIn } from './types/auth'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
+import { resetUser } from '../user/userSlice'
 
 const authApiSlice = apiSlice.injectEndpoints({
 	overrideExisting: false,
@@ -33,8 +34,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			onQueryStarted: async (_arg, api) => {
 				try {
 					await api.queryFulfilled
-					// TODO reset user
-					// api.dispatch()
+					api.dispatch(resetUser)
 				} catch (error) {
 					const fetchError = (error as IBaseFetchError).error
 					toast.error(fetchError.data.message, { autoClose: false })

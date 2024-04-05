@@ -43,6 +43,7 @@ export const CreateSi = () => {
 
 		try {
 			await deleteDraft(data?.data).unwrap()
+			closeModal()
 		} catch (error) {
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })

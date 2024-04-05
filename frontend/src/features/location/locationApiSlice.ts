@@ -48,6 +48,17 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				{ type: 'SI', id: 'ALL' },
 			],
 		}),
+		createSeveralLocation: builder.mutation<{ message: string }, Location[]>({
+			query: data => ({
+				url: `${API.si.location.base}/several`,
+				method: 'POST',
+				body: { locations: data },
+			}),
+			invalidatesTags: [
+				{ type: 'Location', id: 'ALL' },
+				{ type: 'SI', id: 'ALL' },
+			],
+		}),
 
 		updateLocation: builder.mutation<string, Location>({
 			query: data => ({
@@ -78,6 +89,7 @@ export const {
 	useGetLastLocationQuery,
 	useGetLocationsByInstrumentIdQuery,
 	useCreateLocationMutation,
+	useCreateSeveralLocationMutation,
 	useUpdateLocationMutation,
 	useDeleteLocationMutation,
 } = locationApiSlice

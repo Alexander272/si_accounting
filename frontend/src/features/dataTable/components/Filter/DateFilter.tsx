@@ -38,7 +38,7 @@ export const DateFilter = () => {
 					<DatePicker
 						// {...field}
 						value={dayjs(field.value != '' ? +field.value * 1000 : null)}
-						onChange={value => field.onChange(value?.unix())}
+						onChange={value => field.onChange(value?.startOf('d').unix())}
 						label={compareType != 'range' ? 'Значение' : 'Начало'}
 						showDaysOutsideCurrentMonth
 						fixedWeekNumber={6}

@@ -35,7 +35,7 @@ export const Tools = () => {
 		navigate(link)
 	}
 
-	const menuItems = [
+	const SIMenuItems = [
 		<MenuItem key='location' onClick={modalHandler('NewLocation')}>
 			<ListItemIcon>
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
@@ -59,6 +59,14 @@ export const Tools = () => {
 				<FileDownloadIcon fontSize={20} fill={'#757575'} />
 			</ListItemIcon>
 			Создать график поверки
+		</MenuItem>,
+	]
+	const LocMenuItems = [
+		<MenuItem key='location' onClick={modalHandler('SendToReserve')}>
+			<ListItemIcon>
+				<ExchangeIcon fontSize={18} fill={'#757575'} />
+			</ListItemIcon>
+			Вернуть инструменты
 		</MenuItem>,
 	]
 
@@ -111,7 +119,8 @@ export const Tools = () => {
 					},
 				}}
 			>
-				{useCheckPermission(PermRules.SI.Write) ? menuItems : null}
+				{useCheckPermission(PermRules.SI.Write) ? SIMenuItems : null}
+				{useCheckPermission(PermRules.Location.Write) ? LocMenuItems : null}
 
 				{/* //TODO возможно надо будет выгружать в excel таблицу которая выводится на экран */}
 			</Menu>

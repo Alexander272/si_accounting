@@ -66,6 +66,7 @@ export const Filter: FC<Props> = ({ cell }) => {
 		toggleHandler()
 	})
 
+	//TODO надо переделать фильтры и сделать возможность создания множественной фильтрации
 	return (
 		<>
 			<Tooltip title='Фильтр' arrow>

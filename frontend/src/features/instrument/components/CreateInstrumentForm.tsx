@@ -35,8 +35,6 @@ type Props = {
 export const CreateInstrumentForm: FC<Props> = ({ data, loading, submitLabel, cancelLabel, onSubmit, onCancel }) => {
 	const [create, { isLoading }] = useCreateInstrumentMutation()
 
-	//TODO я забыл отображать индикатор загрузки | i forgot show loading indicator
-
 	const submitHandler = async (data: IInstrumentForm) => {
 		console.log('create instrument', data)
 
