@@ -1,21 +1,21 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/gin-gonic/gin"
 )
 
-const excludedPaths = "POST /api/v1/si/locations/receiving"
+// const excludedPaths = "POST /api/v1/si/locations/receiving"
 
 func (m *Middleware) VerifyToken(c *gin.Context) {
-	if strings.Contains(excludedPaths, fmt.Sprintf("%s %s", c.Request.Method, c.Request.URL.String())) {
-		c.Next()
-		return
-	}
+	// if strings.Contains(excludedPaths, fmt.Sprintf("%s %s", c.Request.Method, c.Request.URL.String())) {
+	// 	c.Next()
+	// 	return
+	// }
 
 	token := strings.Replace(c.GetHeader("Authorization"), "Bearer ", "", 1)
 
@@ -28,6 +28,7 @@ func (m *Middleware) VerifyToken(c *gin.Context) {
 		}
 
 		c.SetCookie(m.CookieName, "", -1, "/", domain, m.auth.Secure, true)
+		c.SetSameSite(http.SameSiteLaxMode)
 		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
 		return
 	}
@@ -43,7 +44,7 @@ func (m *Middleware) VerifyToken(c *gin.Context) {
 		return
 	}
 
-	c.Set(m.CtxUser, *user)
+	c.Set(constants.CtxUser, *user)
 
 	c.Next()
 }

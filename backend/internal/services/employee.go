@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
@@ -22,6 +23,7 @@ type Employee interface {
 	GetAll(context.Context, models.GetEmployeesDTO) ([]models.Employee, error)
 	GetByDepartment(context.Context, string) ([]models.Employee, error)
 	GetByMostId(context.Context, string) (*models.EmployeeData, error)
+	GetBySSOId(context.Context, string) (*models.Employee, error)
 	Create(context.Context, models.WriteEmployeeDTO) error
 	Update(context.Context, models.WriteEmployeeDTO) error
 	Delete(context.Context, string) error
@@ -36,6 +38,17 @@ func (s *EmployeeService) GetAll(ctx context.Context, req models.GetEmployeesDTO
 		employees = []models.Employee{}
 	}
 	return employees, nil
+}
+
+func (s *EmployeeService) GetBySSOId(ctx context.Context, id string) (*models.Employee, error) {
+	employee, err := s.repo.GetBySSOId(ctx, id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRows) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("failed to get employee by sso id. error: %w", err)
+	}
+	return employee, nil
 }
 
 func (s *EmployeeService) GetByDepartment(ctx context.Context, departmentId string) ([]models.Employee, error) {

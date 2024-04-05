@@ -5,10 +5,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -148,6 +150,15 @@ func (h *SIHandlers) Save(c *gin.Context) {
 		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("СИ сохранено (перемещено из черновиков)", logger.StringAttr("instrument_id", dto.Id), logger.StringAttr("user_id", user.Id))
+
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о си успешно сохранены"})
 }
 

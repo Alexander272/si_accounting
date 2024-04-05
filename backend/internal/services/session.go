@@ -47,9 +47,16 @@ func (s *SessionService) SignIn(ctx context.Context, u models.SignIn) (*models.U
 		return nil, err
 	}
 
+	// get default filters
+	filters, err := s.filter.Get(ctx, user.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	user.AccessToken = res.AccessToken
 	user.RefreshToken = res.RefreshToken
 	user.Menu = role.Menu
+	user.Filters = filters
 
 	return user, nil
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/instrument"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/location"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/receiving"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/verification"
 	"github.com/gin-gonic/gin"
 )
@@ -88,6 +89,7 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	instrument.Register(siGroup, h.services.Instrument, errBot)
 	verification.Register(siGroup, h.services.Verification, h.services.Documents, errBot)
 	location.Register(siGroup, h.services.Location, errBot)
+	receiving.Register(v1, h.services.Location, errBot)
 
 	departments.Register(secure, h.services.Department, errBot)
 	employees.Register(secure, h.services.Employee, errBot)

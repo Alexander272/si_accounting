@@ -9,6 +9,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -55,6 +56,13 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 
 	user, err := h.service.SignIn(c, dto)
 	if err != nil {
+		logger.Info("Неудачная попытка авторизации",
+			logger.StringAttr("section", "auth"),
+			logger.StringAttr("ip", c.ClientIP()),
+			logger.StringAttr("username", dto.Username),
+			logger.ErrorAttr(err),
+		)
+
 		if strings.Contains(err.Error(), "invalid_grant") {
 			response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 			return
@@ -69,7 +77,15 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 		domain = c.Request.Host
 	}
 
+	logger.Info("Пользователь успешно авторизовался",
+		logger.StringAttr("section", "auth"),
+		logger.StringAttr("ip", c.ClientIP()),
+		logger.StringAttr("user", user.Name),
+		logger.StringAttr("user_id", user.Id),
+	)
+
 	c.SetCookie(h.cookieName, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }
 
@@ -91,7 +107,13 @@ func (h *AuthHandler) SignOut(c *gin.Context) {
 		domain = c.Request.Host
 	}
 
+	logger.Info("Пользователь вышел из системы",
+		logger.StringAttr("section", "auth"),
+		logger.StringAttr("ip", c.ClientIP()),
+	)
+
 	c.SetCookie(h.cookieName, "", -1, "/", domain, h.auth.Secure, true)
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.JSON(http.StatusNoContent, response.IdResponse{})
 }
 
@@ -118,6 +140,14 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 		domain = c.Request.Host
 	}
 
+	// logger.Info("Пользователь успешно обновил сессию",
+	// 	logger.StringAttr("section", "auth"),
+	// 	logger.StringAttr("ip", c.ClientIP()),
+	// 	logger.StringAttr("user", user.Name),
+	// 	logger.StringAttr("user_id", user.Id),
+	// )
+
 	c.SetCookie(h.cookieName, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }

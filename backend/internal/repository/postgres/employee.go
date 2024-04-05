@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -24,6 +26,7 @@ type Employee interface {
 	GetAll(context.Context, models.GetEmployeesDTO) ([]models.Employee, error)
 	GetByDepartment(context.Context, string) ([]models.Employee, error)
 	GetByMostId(context.Context, string) (*models.EmployeeData, error)
+	GetBySSOId(context.Context, string) (*models.Employee, error)
 	Create(context.Context, models.WriteEmployeeDTO) error
 	Update(context.Context, models.WriteEmployeeDTO) error
 	Delete(context.Context, string) error
@@ -72,6 +75,19 @@ func (r *EmployeeRepo) GetByMostId(ctx context.Context, mostId string) (*models.
 	employee := &models.EmployeeData{}
 
 	if err := r.db.Get(employee, query, mostId); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return employee, nil
+}
+
+func (r *EmployeeRepo) GetBySSOId(ctx context.Context, id string) (*models.Employee, error) {
+	query := fmt.Sprintf(`SELECT id, name, department_id, most_id, is_lead FROM %s WHERE sso_id=$1`, EmployeeTable)
+
+	employee := &models.Employee{}
+	if err := r.db.Get(employee, query, id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.ErrNoRows
+		}
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return employee, nil

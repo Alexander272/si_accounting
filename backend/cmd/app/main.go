@@ -17,7 +17,6 @@ import (
 	transport "github.com/Alexander272/si_accounting/backend/internal/transport/http"
 	"github.com/Alexander272/si_accounting/backend/pkg/auth"
 	"github.com/Alexander272/si_accounting/backend/pkg/database/postgres"
-	"github.com/Alexander272/si_accounting/backend/pkg/database/redis"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	_ "github.com/lib/pq"
 	"github.com/subosito/gotenv"
@@ -48,15 +47,15 @@ func main() {
 		logger.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
-	redis, err := redis.NewRedisClient(redis.Config{
-		Host:     conf.Redis.Host,
-		Port:     conf.Redis.Port,
-		DB:       conf.Redis.DB,
-		Password: conf.Redis.Password,
-	})
-	if err != nil {
-		logger.Fatalf("failed to initialize redis %s", err.Error())
-	}
+	// redis, err := redis.NewRedisClient(redis.Config{
+	// 	Host:     conf.Redis.Host,
+	// 	Port:     conf.Redis.Port,
+	// 	DB:       conf.Redis.DB,
+	// 	Password: conf.Redis.Password,
+	// })
+	// if err != nil {
+	// 	logger.Fatalf("failed to initialize redis %s", err.Error())
+	// }
 
 	keycloak := auth.NewKeycloakClient(auth.Deps{
 		Url:       conf.Keycloak.Url,
@@ -69,7 +68,7 @@ func main() {
 	constants.SetReserveUserId(conf.Bot.ReserveUserId)
 
 	//* Services, Repos & API Handlers
-	repos := repository.NewRepository(db, redis)
+	repos := repository.NewRepository(db)
 	services := services.NewServices(services.Deps{
 		Repos:           repos,
 		Keycloak:        keycloak,

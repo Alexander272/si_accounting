@@ -2,7 +2,6 @@ package repository
 
 import (
 	"github.com/Alexander272/si_accounting/backend/internal/repository/postgres"
-	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -63,7 +62,7 @@ type Repository struct {
 	DefaultFilter
 }
 
-func NewRepository(db *sqlx.DB, redis redis.Cmdable) *Repository {
+func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Instrument:    postgres.NewInstrumentRepo(db),
 		Verification:  postgres.NewVerificationRepo(db),

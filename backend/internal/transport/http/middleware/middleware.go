@@ -13,7 +13,6 @@ type Middleware struct {
 	// TODO стоит наверное получать не все сервисы, а только те что используются
 	services *services.Services
 	auth     config.AuthConfig
-	CtxUser  string
 }
 
 func NewMiddleware(services *services.Services, auth config.AuthConfig, keycloak *auth.KeycloakClient) *Middleware {
@@ -22,6 +21,5 @@ func NewMiddleware(services *services.Services, auth config.AuthConfig, keycloak
 		keycloak: keycloak,
 		services: services,
 		auth:     auth,
-		CtxUser:  "user_context",
 	}
 }

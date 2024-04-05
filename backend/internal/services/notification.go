@@ -54,7 +54,7 @@ func (s *NotificationService) Start(conf *config.NotificationConfig) error {
 	}
 	// //  вернуть нормальное время запуска
 	// jobStart := now.Add(1 * time.Minute)
-	logger.Info("starting jobs time ", jobStart.Format("02.01.2006 15:04:05"))
+	logger.Info("starting jobs time " + jobStart.Format("02.01.2006 15:04:05"))
 
 	job := gocron.DurationJob(conf.Interval)
 	// task := gocron.NewTask(s.Send, conf.Times)
@@ -121,7 +121,7 @@ func (s *NotificationService) CheckSendSI() {
 
 func (s *NotificationService) CheckNotificationTime(times []models.NotificationTime) {
 	index := s.iterationNumber % len(times)
-	logger.Info("job started ", index)
+	logger.Debug("job started ", index)
 
 	notificationTime := times[index]
 
@@ -137,7 +137,7 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 		date := monthEnd.Add(-notificationTime.Sub)
 		s.dates[index] = date
 
-		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	case "add":
 		start := now
 		if index > 0 && s.dates[index-1].Year() > 1 {
@@ -146,27 +146,30 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 		date := start.Add(notificationTime.Add)
 		s.dates[index] = date
 
-		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	case "date":
 		date := time.Date(now.Year(), now.Month(), 0, 0, 0, 0, 0, now.Location()).Add(notificationTime.Date)
 		s.dates[index] = date
 
-		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	}
 
 	if !s.dates[index].Before(time.Now()) {
 		return
 	}
 
-	logger.Info("after")
+	logger.Debug("after")
 
 	startAt := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
 	finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
 
+	//TODO убрать преобразование в строку
 	period := models.Period{
 		StartAt:  startAt.Format("02.01.2006"),
 		FinishAt: finishAt.Format("02.01.2006"),
 	}
+
+	logger.Debug("period ", period)
 
 	si, err := s.si.GetForNotification(context.Background(), period)
 	if err != nil {
@@ -198,7 +201,7 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 
 func (s *NotificationService) Send(times []models.NotificationTime) {
 	index := s.iterationNumber % len(times)
-	logger.Info("job started ", index)
+	logger.Debug("job started ", index)
 
 	notificationTime := times[index]
 
@@ -214,7 +217,7 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 		date := monthEnd.Add(-notificationTime.Sub)
 		s.dates[index] = date
 
-		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	case "add":
 		start := now
 		if index > 0 && s.dates[index-1].Year() > 1 {
@@ -223,12 +226,12 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 		date := start.Add(notificationTime.Add)
 		s.dates[index] = date
 
-		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	case "date":
 		date := time.Date(now.Year(), now.Month(), 0, 0, 0, 0, 0, now.Location()).Add(notificationTime.Date)
 		s.dates[index] = date
 
-		logger.Info("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	}
 
 	if !s.dates[index].Before(time.Now()) {

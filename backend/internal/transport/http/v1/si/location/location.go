@@ -4,10 +4,12 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,8 +33,9 @@ func Register(api *gin.RouterGroup, service services.Location, errBot error_bot.
 		locations.GET("/:instrumentId", handlers.GetLast)
 		locations.GET("/all/:instrumentId", handlers.GetByInstrumentId)
 		locations.POST("", handlers.Create)
+		locations.POST("/several", handlers.CreateSeveral)
 		locations.PUT("/:id", handlers.Update)
-		locations.POST("/receiving", handlers.Receiving)
+		// locations.POST("/receiving", handlers.Receiving)
 		locations.DELETE("/:id", handlers.Delete)
 	}
 }
@@ -85,7 +88,49 @@ func (h *LocationHandlers) Create(c *gin.Context) {
 		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("Инструмент перемещен", logger.StringAttr("instrument_id", dto.InstrumentId), logger.StringAttr("user_id", user.Id))
+
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные о месте нахождения успешно добавлены"})
+}
+
+func (h *LocationHandlers) CreateSeveral(c *gin.Context) {
+	var dto models.CreateSeveralLocationDTO
+	if err := c.BindJSON(&dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+	// создавать перемещение могут только люди из этого же подразделения, а если подразделение не нашлось, то доступны все////или все у кого уровень роли не ниже 5
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	dto.UserId = user.Id
+
+	isFull, err := h.service.CreateSeveral(c, dto)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		// h.errBot.Send(c, err.Error(), dto)
+		return
+	}
+
+	logger.Info("Инструменты перемещены", logger.StringAttr("user_id", user.Id))
+
+	message := "Данные о месте нахождения успешно добавлены"
+	if !isFull {
+		message = "Данные о месте нахождения добавлены частично"
+	}
+
+	c.JSON(http.StatusCreated, response.IdResponse{Message: message})
 }
 
 func (h *LocationHandlers) Update(c *gin.Context) {
@@ -107,43 +152,50 @@ func (h *LocationHandlers) Update(c *gin.Context) {
 		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("Место нахождения инструмента изменено", logger.StringAttr("instrument_id", dto.InstrumentId), logger.StringAttr("user_id", user.Id))
+
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
 }
 
-// TODO можно это вынести в отдельный пакет notification и там уже можно будет сделать подтверждение из почты и с защитой будет проще
-func (h *LocationHandlers) Receiving(c *gin.Context) {
-	// если я буду делать подтверждение по почте там нельзя будет отправлять пост запрос и все нужные данные надо будет передавать в query
+// // TODO можно это вынести в отдельный пакет notification и там уже можно будет сделать подтверждение из почты и с защитой будет проще
+// func (h *LocationHandlers) Receiving(c *gin.Context) {
+// 	// если я буду делать подтверждение по почте там нельзя будет отправлять пост запрос и все нужные данные надо будет передавать в query
 
-	//TODO есть проблема инструменты приходят одной кучей, как их принимать если пришла только часть?
-	// похоже надо как-то делить все что приходит + надо наверное выводить держателя для метролога, чтобы она понимала у кого был инструмент
+// 	//TODO есть проблема инструменты приходят одной кучей, как их принимать если пришла только часть?
+// 	// похоже надо как-то делить все что приходит + надо наверное выводить держателя для метролога, чтобы она понимала у кого был инструмент
 
-	var dto models.Confirmation
-	if err := c.BindJSON(&dto); err != nil {
-		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
-		return
-	}
+// 	var dto models.Confirmation
+// 	if err := c.BindJSON(&dto); err != nil {
+// 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+// 		return
+// 	}
 
-	data := models.ReceivingDTO{
-		InstrumentIds: dto.Context.InstrumentIds,
-		Status:        dto.Context.Status,
-	}
+// 	data := models.ReceivingDTO{
+// 		InstrumentIds: dto.Context.InstrumentIds,
+// 		Status:        dto.Context.Status,
+// 	}
 
-	if err := h.service.Receiving(c, data); err != nil {
-		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
-		return
-	}
-	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
-}
+// 	if err := h.service.Receiving(c, data); err != nil {
+// 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+// 		h.errBot.Send(c, err.Error(), dto)
+// 		return
+// 	}
 
-func (h *LocationHandlers) ReceivingFromBot(c *gin.Context) {
-	var dto models.ReceivingFromBotDTO
-	if err := c.BindJSON(&dto); err != nil {
-		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
-		return
-	}
+// 	logger.Info("Получено инструменты",
+// 		logger.StringAttr("user_id", dto.UserID),
+// 		logger.StringAttr("user", dto.UserName),
+// 		logger.StringAttr("instrument_ids", strings.Join(dto.Context.InstrumentIds, ",")),
+// 	)
 
-}
+// 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
+// }
 
 func (h *LocationHandlers) Delete(c *gin.Context) {
 	id := c.Param("id")
@@ -157,5 +209,14 @@ func (h *LocationHandlers) Delete(c *gin.Context) {
 		h.errBot.Send(c, err.Error(), id)
 		return
 	}
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("Место нахождение инструмента удалено", logger.StringAttr("user_id", user.Id))
+
 	c.JSON(http.StatusNoContent, response.IdResponse{})
 }

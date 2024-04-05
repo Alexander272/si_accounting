@@ -53,7 +53,7 @@ func (s *MenuService) GetAll(ctx context.Context) (menu []models.MenuFull, err e
 				Role: models.RoleFull{
 					Id:      m2.RoleId,
 					Name:    m2.RoleName,
-					Number:  m2.RoleNumber,
+					Level:   m2.RoleLevel,
 					Extends: m2.RoleExtends,
 				},
 				MenuItems: []models.MenuItem{item},

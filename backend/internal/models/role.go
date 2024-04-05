@@ -17,7 +17,7 @@ type RoleWithMenuDTO struct {
 type RoleFull struct {
 	Id          string   `json:"id" db:"id"`
 	Name        string   `json:"name" db:"name"`
-	Number      int      `json:"number" db:"number"`
+	Level       int      `json:"level" db:"level"`
 	Extends     []string `json:"extends" db:"extends"`
 	Description string   `json:"description" db:"description"`
 	//TODO menu
@@ -25,7 +25,7 @@ type RoleFull struct {
 type RoleFullDTO struct {
 	Id          string         `json:"id" db:"id"`
 	Name        string         `json:"name" db:"name"`
-	Number      int            `json:"number" db:"number"`
+	Level       int            `json:"level" db:"level"`
 	Extends     pq.StringArray `json:"extends" db:"extends"`
 	Description string         `json:"description" db:"description"`
 }
@@ -37,7 +37,7 @@ type GetRolesDTO struct{}
 type RoleDTO struct {
 	Id          string   `json:"id" db:"id"`
 	Name        string   `json:"name" db:"name" binding:"required"`
-	Number      int      `json:"number" db:"number" binding:"required"`
+	Level       int      `json:"level" db:"level" binding:"required"`
 	Extends     []string `json:"extends" db:"extends"`
 	Description string   `json:"description" db:"description"`
 }

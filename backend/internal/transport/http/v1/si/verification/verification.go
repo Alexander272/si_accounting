@@ -4,11 +4,13 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/verification/documents"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -85,6 +87,19 @@ func (h *VerificationHandlers) Create(c *gin.Context) {
 		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("Добавлена поверка",
+		logger.StringAttr("instrument_id", dto.InstrumentId),
+		logger.StringAttr("status", dto.Status),
+		logger.StringAttr("user_id", user.Id),
+	)
+
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные о поверке успешно добавлены"})
 }
 
@@ -107,5 +122,18 @@ func (h *VerificationHandlers) Update(c *gin.Context) {
 		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("Поверка обновлена",
+		logger.StringAttr("instrument_id", dto.InstrumentId),
+		logger.StringAttr("verification_in", dto.Id),
+		logger.StringAttr("user_id", user.Id),
+	)
+
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о поверке успешно обновлены"})
 }

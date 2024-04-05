@@ -7,13 +7,14 @@ import (
 )
 
 func Init(out io.Writer, env string) {
-	if env == "dev" {
-		logrus.SetLevel(logrus.TraceLevel)
-		logrus.SetFormatter(&logrus.TextFormatter{
-			FullTimestamp:   true,
-			TimestampFormat: "2006/02/01 - 15:04:05",
-		})
-	}
+	// if env == "dev" {
+	logrus.SetLevel(logrus.TraceLevel)
+	logrus.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp:   true,
+		TimestampFormat: "2006/02/01 - 15:04:05",
+		// DisableSorting:  true,
+	})
+	// }
 
 	logrus.SetOutput(out)
 }
@@ -33,8 +34,12 @@ func Debugf(format string, args ...interface{}) {
 	logrus.Debugf(format, args...)
 }
 
-func Info(msg ...interface{}) {
-	logrus.Info(msg...)
+func Info(msg string, params ...Field) {
+	fields := make(map[string]interface{}, 0)
+	for _, v := range params {
+		fields[v.Key] = v.Value
+	}
+	logrus.WithFields(fields).Info(msg)
 }
 
 func Infof(format string, args ...interface{}) {

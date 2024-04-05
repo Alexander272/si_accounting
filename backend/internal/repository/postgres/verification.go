@@ -131,6 +131,8 @@ func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId s
 	return verifications, nil
 }
 
+//TODO чтобы избавиться от разницы в 5 часов надо из значения вычесть 18000
+
 func (r *VerificationRepo) Create(ctx context.Context, v models.CreateVerificationDTO) (string, error) {
 	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date, next_date, register_link, status, notes)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)`,

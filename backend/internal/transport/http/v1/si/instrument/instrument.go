@@ -4,10 +4,12 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -68,6 +70,19 @@ func (h *InstrumentHandlers) Create(c *gin.Context) {
 		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("Создан инструмент",
+		logger.StringAttr("instrument_name", dto.Name),
+		logger.StringAttr("instrument_number", dto.FactoryNumber),
+		logger.StringAttr("user_id", user.Id),
+	)
+
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные об инструменте успешно добавлены"})
 }
 
@@ -90,6 +105,15 @@ func (h *InstrumentHandlers) Update(c *gin.Context) {
 		h.errBot.Send(c, err.Error(), dto)
 		return
 	}
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("Инструмент обновлен", logger.StringAttr("instrument_id", dto.Id), logger.StringAttr("user_id", user.Id))
+
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные об инструменте успешно обновлены"})
 }
 
@@ -105,5 +129,14 @@ func (h *InstrumentHandlers) Delete(c *gin.Context) {
 		h.errBot.Send(c, err.Error(), id)
 		return
 	}
+
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("Инструмент отмечен как удаленный", logger.StringAttr("instrument_id", id), logger.StringAttr("user_id", user.Id))
+
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные об инструменте успешно удалены"})
 }

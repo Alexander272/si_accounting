@@ -34,6 +34,11 @@ type CreateLocationDTO struct {
 	Status          string `json:"status" db:"status"`
 }
 
+type CreateSeveralLocationDTO struct {
+	UserId    string
+	Locations []CreateLocationDTO `json:"locations"`
+}
+
 type UpdateLocationDTO struct {
 	Id           string `json:"id" db:"id" binding:"required"`
 	InstrumentId string `json:"instrumentId" db:"instrument_id" binding:"required"`
@@ -68,4 +73,9 @@ type ReceivingDTO struct {
 
 type ReceivingFromBotDTO struct {
 	UserMostId string `json:"userId" binding:"required"`
+}
+
+type DepartmentFilterDTO struct {
+	DepartmentId  string
+	InstrumentIds []string
 }

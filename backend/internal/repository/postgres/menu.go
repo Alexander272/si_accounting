@@ -28,9 +28,9 @@ type Menu interface {
 
 func (r *MenuRepo) GetAll(ctx context.Context) (menu []models.Menu, err error) {
 	var data []models.MenuPqDTO
-	query := fmt.Sprintf(`SELECT m.id, role_id, name, number, menu_item_id, CASE WHEN extends IS NOT NULL THEN
+	query := fmt.Sprintf(`SELECT m.id, role_id, name, level, menu_item_id, CASE WHEN extends IS NOT NULL THEN
 		ARRAY(SELECT name FROM %s WHERE ARRAY[id] <@ r.extends) ELSE '{}' END AS extends
-		FROM %s AS m INNER JOIN %s AS r ON role_id=r.id ORDER BY number, name`,
+		FROM %s AS m INNER JOIN %s AS r ON role_id=r.id ORDER BY level, name`,
 		RoleTable, MenuByRoleTable, RoleTable,
 	)
 
@@ -43,7 +43,7 @@ func (r *MenuRepo) GetAll(ctx context.Context) (menu []models.Menu, err error) {
 			Id:          mpd.Id,
 			RoleId:      mpd.RoleId,
 			RoleName:    mpd.RoleName,
-			RoleNumber:  mpd.RoleNumber,
+			RoleLevel:   mpd.RoleLevel,
 			RoleExtends: mpd.RoleExtends,
 			MenuItemId:  mpd.MenuItemId,
 		})

@@ -30,8 +30,8 @@ type Role interface {
 
 func (r *RoleRepo) GetAll(ctx context.Context, req models.GetRolesDTO) (roles []models.RoleFull, err error) {
 	var data []models.RoleFullDTO
-	query := fmt.Sprintf(`SELECT id, name, number, description, COALESCE(extends, '{}') AS extends 
-		FROM %s WHERE is_show=true ORDER BY number, name`,
+	query := fmt.Sprintf(`SELECT id, name, level, description, COALESCE(extends, '{}') AS extends 
+		FROM %s WHERE is_show=true ORDER BY level, name`,
 		RoleTable,
 	)
 
@@ -43,7 +43,7 @@ func (r *RoleRepo) GetAll(ctx context.Context, req models.GetRolesDTO) (roles []
 		roles = append(roles, models.RoleFull{
 			Id:          rfd.Id,
 			Name:        rfd.Name,
-			Number:      rfd.Number,
+			Level:       rfd.Level,
 			Extends:     rfd.Extends,
 			Description: rfd.Description,
 		})
@@ -58,7 +58,7 @@ func (r *RoleRepo) Get(ctx context.Context, roleName string) (*models.Role, erro
 		FROM %s AS r 
 		LEFT JOIN %s AS m ON r.id=role_id 
 		LEFT JOIN %s AS i ON menu_item_id=i.id
-		WHERE i.is_show=true ORDER BY number`,
+		WHERE i.is_show=true ORDER BY level`,
 		RoleTable, MenuByRoleTable, MenuItemTable,
 	)
 
@@ -110,10 +110,10 @@ func (r *RoleRepo) Get(ctx context.Context, roleName string) (*models.Role, erro
 }
 
 func (r *RoleRepo) Create(ctx context.Context, role models.RoleDTO) error {
-	query := fmt.Sprintf(`INSERT INTO %s(id, name, number, extends, description) VALUES ($1, $2, $3, $4, $5)`, RoleTable)
+	query := fmt.Sprintf(`INSERT INTO %s(id, name, level, extends, description) VALUES ($1, $2, $3, $4, $5)`, RoleTable)
 	id := uuid.New()
 
-	_, err := r.db.Exec(query, id, role.Name, role.Number, pq.Array(role.Extends))
+	_, err := r.db.Exec(query, id, role.Name, role.Level, pq.Array(role.Extends))
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
@@ -121,9 +121,9 @@ func (r *RoleRepo) Create(ctx context.Context, role models.RoleDTO) error {
 }
 
 func (r *RoleRepo) Update(ctx context.Context, role models.RoleDTO) error {
-	query := fmt.Sprintf(`UPDATE %s SET name=$1, number=$2, extends=$3, description=$4 WHERE id=$5`, RoleTable)
+	query := fmt.Sprintf(`UPDATE %s SET name=$1, level=$2, extends=$3, description=$4 WHERE id=$5`, RoleTable)
 
-	_, err := r.db.Exec(query, role.Name, role.Number, pq.Array(role.Extends), role.Description, role.Id)
+	_, err := r.db.Exec(query, role.Name, role.Level, pq.Array(role.Extends), role.Description, role.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
