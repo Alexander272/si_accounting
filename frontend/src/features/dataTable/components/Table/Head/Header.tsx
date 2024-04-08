@@ -8,6 +8,7 @@ import { SortDownIcon } from '@/components/Icons/SortDownIcon'
 import { HeadCell } from './HeadCell'
 import { HeadCells } from './columns'
 import { Filter } from '../../Filter/Filter'
+import { HeadBadge } from './HeadBadge'
 
 export const Header = () => {
 	const tableSort = useAppSelector(getTableSort)
@@ -50,7 +51,7 @@ export const Header = () => {
 					<Stack direction={'row'} spacing={2} mb={0.5} justifyContent={'center'} alignItems={'center'}>
 						<Tooltip title={'Сортировать'} arrow>
 							<IconButton onClick={setSortHandler(c.id)} sx={{ ml: 1 }}>
-								{tableSort?.field !== c.id || tableSort?.type == 'ASC' ? (
+								{/* {tableSort?.field !== c.id || tableSort?.type == 'ASC' ? (
 									<SortUpIcon fontSize={16} fill={tableSort?.field === c.id ? 'black' : '#adadad'} />
 								) : null}
 
@@ -59,6 +60,34 @@ export const Header = () => {
 										fontSize={16}
 										fill={tableSort?.field === c.id ? 'black' : '#adadad'}
 									/>
+								) : null} */}
+
+								{!tableSort[c.id] || tableSort[c.id] == 'ASC' ? (
+									<HeadBadge
+										color='primary'
+										badgeContent={Object.keys(tableSort).findIndex(k => k == c.id) + 1}
+										invisible={!tableSort[c.id]}
+										anchorOrigin={{
+											vertical: 'top',
+											horizontal: 'left',
+										}}
+									>
+										<SortUpIcon fontSize={16} fill={tableSort[c.id] ? 'black' : '#adadad'} />
+									</HeadBadge>
+								) : null}
+
+								{tableSort[c.id] == 'DESC' ? (
+									<HeadBadge
+										color='primary'
+										badgeContent={Object.keys(tableSort).findIndex(k => k == c.id) + 1}
+										invisible={!tableSort[c.id]}
+										anchorOrigin={{
+											vertical: 'top',
+											horizontal: 'left',
+										}}
+									>
+										<SortDownIcon fontSize={16} fill={tableSort[c.id] ? 'black' : '#adadad'} />
+									</HeadBadge>
 								) : null}
 							</IconButton>
 						</Tooltip>

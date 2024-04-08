@@ -1,5 +1,5 @@
 import { Size } from '@/constants/defaultValues'
-import { ISIParams } from '../types/data'
+import type { IDataItem, ISIParams } from '../types/data'
 
 export const buildSiUrlParams = (req: ISIParams): URLSearchParams => {
 	const params: string[][] = []
@@ -9,7 +9,13 @@ export const buildSiUrlParams = (req: ISIParams): URLSearchParams => {
 
 	if (req.sort) {
 		// req.sort.forEach(s => params.push(['sort_by', `${s.type == 'DESC' ? '-' : ''}${s.field}`]))
-		params.push(['sort_by', `${req.sort.type == 'DESC' ? '-' : ''}${req.sort.field}`])
+		// params.push(['sort_by', `${req.sort.type == 'DESC' ? '-' : ''}${req.sort.field}`])
+		const s = req.sort
+		const sort: string[] = []
+		Object.keys(req.sort).forEach(k => {
+			sort.push(`${s[k as keyof IDataItem] == 'DESC' ? '-' : ''}${k}`)
+		})
+		params.push(['sort_by', sort.join(',')])
 	}
 
 	if (req.filter) {

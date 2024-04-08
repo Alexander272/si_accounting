@@ -4,8 +4,12 @@ import { toast } from 'react-toastify'
 import dayjs from 'dayjs'
 
 import type { IFetchError } from '@/app/types/error'
-import type { ISIFilter, ISISort, ISelected } from '../../types/data'
+import type { ISIFilter, ISISortObj, ISelected } from '../../types/data'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { CheckListIcon } from '@/components/Icons/CheckListIcon'
+import { CheckAllIcon } from '@/components/Icons/CheckAllIcon'
+import { DelayIcon } from '@/components/Icons/DelayIcon'
+import { CalendarIcon } from '@/components/Icons/CalendarIcon'
 import {
 	addSelected,
 	getSelectedItems,
@@ -15,10 +19,6 @@ import {
 	getTableSort,
 	removeSelected,
 } from '../../dataTableSlice'
-import { CheckListIcon } from '@/components/Icons/CheckListIcon'
-import { CheckAllIcon } from '@/components/Icons/CheckAllIcon'
-import { DelayIcon } from '@/components/Icons/DelayIcon'
-import { CalendarIcon } from '@/components/Icons/CalendarIcon'
 import { useGetAllSIQuery, useLazyGetAllSIQuery } from '../../siApiSlice'
 
 export const FastChoose = () => {
@@ -59,19 +59,19 @@ export const FastChoose = () => {
 		fetching(filter ? [filter, newFilter] : [newFilter])
 	}
 
-	const selectMonthHandler = async () => {
+	const selectMonthHandler = (countMonth: number) => async () => {
 		const newFilter: ISIFilter = {
 			field: 'nextVerificationDate',
 			fieldType: 'date',
 			compareType: 'range',
-			valueStart: dayjs().startOf('month').unix().toString(),
-			valueEnd: dayjs().endOf('month').unix().toString(),
+			valueStart: dayjs().add(countMonth, 'M').startOf('month').unix().toString(),
+			valueEnd: dayjs().add(countMonth, 'M').endOf('month').unix().toString(),
 		}
 
 		fetching(filter ? [filter, newFilter] : [newFilter])
 	}
 
-	const fetching = async (filter?: ISIFilter[], sort?: ISISort) => {
+	const fetching = async (filter?: ISIFilter[], sort?: ISISortObj) => {
 		try {
 			const payload = await fetchSi({ size: data?.total, filter, sort }).unwrap()
 			const identifiers =
@@ -147,11 +147,17 @@ export const FastChoose = () => {
 					</ListItemIcon>
 					Все просроченные
 				</MenuItem>
-				<MenuItem onClick={selectMonthHandler}>
+				<MenuItem onClick={selectMonthHandler(0)}>
 					<ListItemIcon>
 						<CalendarIcon fontSize={18} fill='#474747' />
 					</ListItemIcon>
 					Все за текущий месяц
+				</MenuItem>
+				<MenuItem onClick={selectMonthHandler(1)}>
+					<ListItemIcon>
+						<CalendarIcon fontSize={18} fill='#474747' />
+					</ListItemIcon>
+					Все за следующий месяц
 				</MenuItem>
 			</Menu>
 		</>

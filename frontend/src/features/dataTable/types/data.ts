@@ -18,8 +18,14 @@ export type IDataItem = {
 export interface ISIParams {
 	page?: number
 	size?: number
-	sort?: ISISort
+	sort?: ISISortObj
 	filter?: ISIFilter[]
+}
+
+//TODO пишут что map лучше не использовать в state
+export type ISISortMap = Map<keyof IDataItem, 'DESC' | 'ASC'>
+export type ISISortObj = {
+	[K in keyof IDataItem]?: 'DESC' | 'ASC'
 }
 
 export interface ISISort {

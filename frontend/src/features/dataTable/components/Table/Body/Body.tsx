@@ -75,7 +75,7 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 			<FixedSizeList
 				overscanCount={12}
 				height={RowHeight * Size}
-				itemCount={size || Size}
+				itemCount={data.data.length > (size || Size) ? size || Size : data.data.length}
 				itemSize={RowHeight}
 				itemData={data}
 				width={HeadCells.reduce((ac, cur) => ac + cur.width, 10)}

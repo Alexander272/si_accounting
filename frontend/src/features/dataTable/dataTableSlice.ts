@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-import type { IDataItem, ISIFilter, ISIFilterNew, ISISort, ISelected } from './types/data'
+import type { IDataItem, ISIFilter, ISIFilterNew, ISISortObj, ISelected } from './types/data'
 import { RootState } from '@/app/store'
 import { localKeys } from '@/constants/localKeys'
 import { Size } from '@/constants/defaultValues'
@@ -10,7 +10,9 @@ import { setUser } from '../user/userSlice'
 interface IDataTableSlice {
 	page: number
 	size: number
-	sort?: ISISort
+	// sort?: ISISort
+	// sort2?: ISISort[]
+	sort: ISISortObj
 	filter?: ISIFilter
 	filterNew?: ISIFilterNew
 	selected: ISelected[]
@@ -19,10 +21,13 @@ interface IDataTableSlice {
 
 const initialState: IDataTableSlice = {
 	page: +(localStorage.getItem(localKeys.page) || 1),
-	size: +(localStorage.getItem(localKeys.size) || Size), // 15, 30, 50, 100 доступные лимиты. 15 строк макс который влазит без прокрутки
+	size: +(localStorage.getItem(localKeys.size) || Size), // 15, 30, 50, 100 доступные лимиты. 15 строк макс (в chrome) который влазит без прокрутки
+	// sort: {
+	// 	field: 'nextVerificationDate',
+	// 	type: 'ASC',
+	// },
 	sort: {
-		field: 'nextVerificationDate',
-		type: 'ASC',
+		nextVerificationDate: 'ASC',
 	},
 	selected: [],
 }
@@ -33,20 +38,40 @@ const dataTableSlice = createSlice({
 	reducers: {
 		setPage: (state, action: PayloadAction<number>) => {
 			state.page = action.payload
+			localStorage.setItem(localKeys.page, action.payload.toString())
 		},
 		setSize: (state, action: PayloadAction<number>) => {
 			state.size = action.payload
+			localStorage.setItem(localKeys.size, action.payload.toString())
 		},
 
 		setSort: (state, action: PayloadAction<keyof IDataItem>) => {
-			if (state.sort && state.sort.field == action.payload) {
-				if (state.sort.type == 'ASC') {
-					state.sort.type = 'DESC'
-				} else {
-					state.sort = undefined
-				}
-			} else {
-				state.sort = { field: action.payload, type: 'ASC' }
+			// if (state.sort && state.sort.field == action.payload) {
+			// 	if (state.sort.type == 'ASC') {
+			// 		state.sort.type = 'DESC'
+			// 	} else {
+			// 		state.sort = undefined
+			// 	}
+			// } else {
+			// 	state.sort = { field: action.payload, type: 'ASC' }
+			// }
+
+			// const index = state.sort2?.findIndex(s => s.field == action.payload)
+			// if (!state.sort2 || index == -1) {
+			// 	state.sort2 = [...(state.sort2 || []), { field: action.payload, type: 'ASC' }]
+			// } else if (index != undefined) {
+			// 	if (state.sort2[index].type == 'ASC') state.sort2[index].type = 'DESC'
+			// 	else state.sort2 = state.sort2.filter(s => s.field != action.payload)
+			// }
+
+			if (!state.sort || !state.sort[action.payload]) {
+				state.sort = { ...(state.sort || {}), [action.payload]: 'ASC' }
+				return
+			}
+
+			if (state.sort[action.payload] == 'ASC') state.sort[action.payload] = 'DESC'
+			else {
+				delete state.sort[action.payload]
 			}
 		},
 
@@ -89,6 +114,7 @@ const dataTableSlice = createSlice({
 export const getTablePage = (state: RootState) => state.dataTable.page
 export const getTableSize = (state: RootState) => state.dataTable.size
 export const getTableSort = (state: RootState) => state.dataTable.sort
+// export const getTableSort2 = (state: RootState) => state.dataTable.sort2
 export const getTableFilter = (state: RootState) => state.dataTable.filter
 export const getTableFilterNew = (state: RootState) => state.dataTable.filterNew
 export const getSelectedItems = (state: RootState) => state.dataTable.selected

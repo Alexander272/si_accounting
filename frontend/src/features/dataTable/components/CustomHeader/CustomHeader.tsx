@@ -1,16 +1,16 @@
 import { IconButton, Stack, Tooltip, useTheme } from '@mui/material'
 
-import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { SortUpIcon } from '@/components/Icons/SortUpIcon'
-import { SortDownIcon } from '@/components/Icons/SortDownIcon'
+import { useAppDispatch } from '@/hooks/redux'
+// import { SortUpIcon } from '@/components/Icons/SortUpIcon'
+// import { SortDownIcon } from '@/components/Icons/SortDownIcon'
 import type { IDataItem } from '../../types/data'
-import { getTableSort, setSort } from '../../dataTableSlice'
+import { setSort } from '../../dataTableSlice'
 import { Filter } from '../Filter/Filter'
 import { HeadCell } from './HeadCell'
 import { HeadCells } from './columns'
 
 export const CustomHeader = () => {
-	const tableSort = useAppSelector(getTableSort)
+	// const tableSort = useAppSelector(getTableSort)
 
 	const dispatch = useAppDispatch()
 
@@ -50,7 +50,7 @@ export const CustomHeader = () => {
 					<Stack direction={'row'} spacing={2} mb={0.5} justifyContent={'center'} alignItems={'center'}>
 						<Tooltip title={'Сортировать'} arrow>
 							<IconButton onClick={setSortHandler(c.id)} sx={{ ml: 1 }}>
-								{tableSort?.field !== c.id || tableSort?.type == 'ASC' ? (
+								{/* {tableSort?.field !== c.id || tableSort?.type == 'ASC' ? (
 									<SortUpIcon fontSize={16} fill={tableSort?.field === c.id ? 'black' : '#adadad'} />
 								) : null}
 
@@ -59,7 +59,7 @@ export const CustomHeader = () => {
 										fontSize={16}
 										fill={tableSort?.field === c.id ? 'black' : '#adadad'}
 									/>
-								) : null}
+								) : null} */}
 							</IconButton>
 						</Tooltip>
 

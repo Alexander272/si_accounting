@@ -1,10 +1,10 @@
 import { FC } from 'react'
 import { Button, Stack, Tooltip, useTheme } from '@mui/material'
 
-import { useAppSelector } from '@/hooks/redux'
-import { getTableSort } from '@/features/dataTable/dataTableSlice'
-import { SortUpIcon } from '@/components/Icons/SortUpIcon'
-import { SortDownIcon } from '@/components/Icons/SortDownIcon'
+// import { useAppSelector } from '@/hooks/redux'
+// import { getTableSort } from '@/features/dataTable/dataTableSlice'
+// import { SortUpIcon } from '@/components/Icons/SortUpIcon'
+// import { SortDownIcon } from '@/components/Icons/SortDownIcon'
 import { Cell } from './Cell'
 
 type Props = {
@@ -16,7 +16,7 @@ type Props = {
 }
 
 export const CellWithFilters: FC<Props> = ({ id, label, width, first, align }) => {
-	const tableSort = useAppSelector(getTableSort)
+	// const tableSort = useAppSelector(getTableSort)
 
 	// const dispatch = useAppDispatch()
 
@@ -53,13 +53,13 @@ export const CellWithFilters: FC<Props> = ({ id, label, width, first, align }) =
 			<Stack direction={'row'} spacing={2} mb={0.5} justifyContent={'center'} alignItems={'center'}>
 				<Tooltip title={'Сортировать'} arrow>
 					<Button onClick={setSortHandler(id)} sx={{ ml: 1 }}>
-						{tableSort?.field !== id || tableSort?.type == 'ASC' ? (
+						{/* {tableSort?.field !== id || tableSort?.type == 'ASC' ? (
 							<SortUpIcon fontSize={16} color={tableSort?.field === id ? 'black' : '#adadad'} />
 						) : null}
 
 						{tableSort?.field === id && tableSort?.type == 'DESC' ? (
 							<SortDownIcon fontSize={16} color={tableSort?.field === id ? 'black' : '#adadad'} />
-						) : null}
+						) : null} */}
 					</Button>
 				</Tooltip>
 
