@@ -27,8 +27,8 @@ func (m *Middleware) VerifyToken(c *gin.Context) {
 			domain = c.Request.Host
 		}
 
-		c.SetCookie(m.CookieName, "", -1, "/", domain, m.auth.Secure, true)
 		c.SetSameSite(http.SameSiteLaxMode)
+		c.SetCookie(m.CookieName, "", -1, "/", domain, m.auth.Secure, true)
 		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
 		return
 	}

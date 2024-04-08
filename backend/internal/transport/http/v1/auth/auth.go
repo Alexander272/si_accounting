@@ -84,8 +84,8 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 		logger.StringAttr("user_id", user.Id),
 	)
 
-	c.SetCookie(h.cookieName, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
 	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie(h.cookieName, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
 	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }
 
@@ -112,8 +112,8 @@ func (h *AuthHandler) SignOut(c *gin.Context) {
 		logger.StringAttr("ip", c.ClientIP()),
 	)
 
-	c.SetCookie(h.cookieName, "", -1, "/", domain, h.auth.Secure, true)
 	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie(h.cookieName, "", -1, "/", domain, h.auth.Secure, true)
 	c.JSON(http.StatusNoContent, response.IdResponse{})
 }
 
@@ -147,7 +147,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	// 	logger.StringAttr("user_id", user.Id),
 	// )
 
-	c.SetCookie(h.cookieName, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
 	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie(h.cookieName, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
 	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }
