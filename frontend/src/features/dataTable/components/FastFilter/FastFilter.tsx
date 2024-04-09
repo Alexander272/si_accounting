@@ -67,15 +67,22 @@ export const FastFilter = () => {
 			const filter: ISIFilter = {
 				field: 'nextVerificationDate',
 				fieldType: 'date',
-				compareType: 'lte',
-				valueStart: dayjs().startOf('d').unix().toString(),
-				valueEnd: '',
+				values: [
+					{
+						compareType: 'lte',
+						value: dayjs().startOf('d').unix().toString(),
+					},
+				],
 			}
 			if (active == 'month') {
 				const date = dayjs().set('month', month)
-				filter.compareType = 'range'
-				filter.valueStart = date.startOf('month').unix().toString()
-				filter.valueEnd = date.endOf('month').unix().toString()
+				filter.values = [
+					{ compareType: 'gte', value: date.startOf('month').unix().toString() },
+					{ compareType: 'lte', value: date.endOf('month').unix().toString() },
+				]
+				// filter.compareType = 'range'
+				// filter.valueStart = date.startOf('month').unix().toString()
+				// filter.valueEnd = date.endOf('month').unix().toString()
 			}
 			dispatch(setFilters(filter))
 		}
@@ -111,7 +118,13 @@ export const FastFilter = () => {
 				color='inherit'
 				sx={{ paddingX: 1.5 }}
 			>
-				<Badge color='secondary' variant='dot' invisible={!filter} sx={{ mr: 1 }}>
+				<Badge
+					color='secondary'
+					variant='dot'
+					invisible={!filter}
+					anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+					sx={{ mr: 1 }}
+				>
 					<FilterIcon fontSize={16} /*color={filter ? 'black' : '#adadad'}*/ />
 				</Badge>
 				Фильтр

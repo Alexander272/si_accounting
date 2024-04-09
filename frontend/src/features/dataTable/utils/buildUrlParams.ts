@@ -21,13 +21,16 @@ export const buildSiUrlParams = (req: ISIParams): URLSearchParams => {
 	if (req.filter) {
 		req.filter.forEach(f => {
 			params.push([`filters[${f.field}]`, f.fieldType])
+			f.values.forEach(v => {
+				params.push([`${f.field}[${v.compareType}]`, v.value])
+			})
 
-			if (f.compareType == 'range') {
-				params.push([`${f.field}[gte]`, f.valueStart])
-				params.push([`${f.field}[lte]`, f.valueEnd])
-			} else {
-				params.push([`${f.field}[${f.compareType}]`, f.valueStart])
-			}
+			// if (f.compareType == 'range') {
+			// 	params.push([`${f.field}[gte]`, f.valueStart])
+			// 	params.push([`${f.field}[lte]`, f.valueEnd])
+			// } else {
+			// 	params.push([`${f.field}[${f.compareType}]`, f.valueStart])
+			// }
 		})
 		// params.push([`filters[${req.filter.field}]`, req.filter.fieldType])
 

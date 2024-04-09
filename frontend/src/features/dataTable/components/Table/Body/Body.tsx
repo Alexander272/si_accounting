@@ -39,10 +39,7 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 
 	// const { itemId, positionHandler } = useContextMenu()
 
-	const { data, isFetching } = useGetAllSIQuery(
-		{ page, size, sort, filter: filter ? [filter] : [] },
-		{ pollingInterval: 5 * 60000 }
-	)
+	const { data, isFetching } = useGetAllSIQuery({ page, size, sort, filter }, { pollingInterval: 5 * 60000 })
 
 	const selectHandler = useCallback(
 		(item: ISelected, selected: boolean) => {

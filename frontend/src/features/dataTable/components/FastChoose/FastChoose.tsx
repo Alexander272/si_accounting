@@ -36,7 +36,7 @@ export const FastChoose = () => {
 
 	const dispatch = useAppDispatch()
 
-	const { data } = useGetAllSIQuery({ page, size, sort, filter: filter ? [filter] : [] })
+	const { data } = useGetAllSIQuery({ page, size, sort, filter })
 
 	const toggleHandler = () => setOpen(prev => !prev)
 
@@ -44,31 +44,36 @@ export const FastChoose = () => {
 		if (selected.length) {
 			dispatch(removeSelected())
 			toggleHandler()
-		} else fetching(filter ? [filter] : [], sort)
+		} else fetching(filter, sort)
 	}
 
 	const selectOverdueHandler = async () => {
 		const newFilter: ISIFilter = {
 			field: 'nextVerificationDate',
 			fieldType: 'date',
-			compareType: 'lte',
-			valueStart: dayjs().startOf('d').unix().toString(),
-			valueEnd: '',
+			values: [{ compareType: 'lte', value: dayjs().startOf('d').unix().toString() }],
+			// compareType: 'lte',
+			// valueStart: dayjs().startOf('d').unix().toString(),
+			// valueEnd: '',
 		}
 
-		fetching(filter ? [filter, newFilter] : [newFilter])
+		fetching(filter ? [...filter, newFilter] : [newFilter])
 	}
 
 	const selectMonthHandler = (countMonth: number) => async () => {
 		const newFilter: ISIFilter = {
 			field: 'nextVerificationDate',
 			fieldType: 'date',
-			compareType: 'range',
-			valueStart: dayjs().add(countMonth, 'M').startOf('month').unix().toString(),
-			valueEnd: dayjs().add(countMonth, 'M').endOf('month').unix().toString(),
+			values: [
+				{ compareType: 'gte', value: dayjs().add(countMonth, 'M').startOf('month').unix().toString() },
+				{ compareType: 'lte', value: dayjs().add(countMonth, 'M').endOf('month').unix().toString() },
+			],
+			// compareType: 'range',
+			// valueStart: dayjs().add(countMonth, 'M').startOf('month').unix().toString(),
+			// valueEnd: dayjs().add(countMonth, 'M').endOf('month').unix().toString(),
 		}
 
-		fetching(filter ? [filter, newFilter] : [newFilter])
+		fetching(filter ? [...filter, newFilter] : [newFilter])
 	}
 
 	const fetching = async (filter?: ISIFilter[], sort?: ISISortObj) => {

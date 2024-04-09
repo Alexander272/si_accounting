@@ -11,10 +11,7 @@ export const DataTableLoader = () => {
 	const sort = useAppSelector(getTableSort)
 	const filter = useAppSelector(getTableFilter)
 
-	const { isFetching } = useGetAllSIQuery(
-		{ page, size, sort, filter: filter ? [filter] : [] },
-		{ pollingInterval: 5 * 60000 }
-	)
+	const { isFetching } = useGetAllSIQuery({ page, size, sort, filter }, { pollingInterval: 5 * 60000 })
 
 	if (!isFetching) return null
 

@@ -1,10 +1,47 @@
-import { Controller, useFormContext } from 'react-hook-form'
-import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material'
+import { FC } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material'
 
-import { ISIFilter } from '../../types/data'
+import { CompareTypes, IDataItem, ISIFilter } from '../../types/data'
 
-export const TextFilter = () => {
-	const methods = useFormContext<ISIFilter>()
+type TextFilter = {
+	// fieldType: string
+	compareType: CompareTypes
+	valueStart: string
+	// valueEnd: string
+}
+
+const defaultValues: TextFilter = {
+	// field: 'name',
+	// fieldType: 'string',
+	compareType: 'con',
+	valueStart: '',
+	// valueEnd: '',
+}
+
+type Props = {
+	field: keyof IDataItem
+	values?: TextFilter
+	onCancel: () => void
+	onSubmit: (data: ISIFilter) => void
+}
+
+export const TextFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) => {
+	// defaultValues.field = field
+	const methods = useForm<TextFilter>({ values: values || defaultValues })
+
+	const submitHandler = methods.handleSubmit(data => {
+		const value = [{ compareType: data.compareType, value: data.valueStart }]
+		value.push()
+
+		const filter: ISIFilter = {
+			field: field,
+			fieldType: 'date',
+			values: value,
+		}
+
+		onSubmit(filter)
+	})
 
 	return (
 		<>
@@ -26,14 +63,22 @@ export const TextFilter = () => {
 				)}
 			/>
 
-			<Controller
-				name='valueStart'
-				control={methods.control}
-				rules={{ required: true }}
-				render={({ field, fieldState: { error } }) => (
-					<TextField {...field} error={Boolean(error)} label='Значение' fullWidth />
-				)}
+			<TextField
+				{...methods.register('valueStart')}
+				error={Boolean(methods.formState.errors.valueStart)}
+				label='Значение'
+				fullWidth
 			/>
+
+			<Stack direction={'row'} mt={3} spacing={2}>
+				<Button onClick={onCancel} fullWidth>
+					Отменить
+				</Button>
+
+				<Button onClick={submitHandler} fullWidth variant='outlined'>
+					Применить
+				</Button>
+			</Stack>
 		</>
 	)
 }

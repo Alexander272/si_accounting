@@ -66,11 +66,6 @@ export const Header = () => {
 									<HeadBadge
 										color='primary'
 										badgeContent={Object.keys(tableSort).findIndex(k => k == c.id) + 1}
-										invisible={!tableSort[c.id]}
-										anchorOrigin={{
-											vertical: 'top',
-											horizontal: 'left',
-										}}
 									>
 										<SortUpIcon fontSize={16} fill={tableSort[c.id] ? 'black' : '#adadad'} />
 									</HeadBadge>
@@ -80,11 +75,6 @@ export const Header = () => {
 									<HeadBadge
 										color='primary'
 										badgeContent={Object.keys(tableSort).findIndex(k => k == c.id) + 1}
-										invisible={!tableSort[c.id]}
-										anchorOrigin={{
-											vertical: 'top',
-											horizontal: 'left',
-										}}
 									>
 										<SortDownIcon fontSize={16} fill={tableSort[c.id] ? 'black' : '#adadad'} />
 									</HeadBadge>
@@ -92,7 +82,7 @@ export const Header = () => {
 							</IconButton>
 						</Tooltip>
 
-						<Filter cell={c} fieldId={c.id} />
+						<Filter cell={c} />
 					</Stack>
 				</Stack>
 			))}

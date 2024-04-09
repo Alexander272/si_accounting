@@ -1,33 +1,52 @@
 import { FC, useRef, useState } from 'react'
-import { Divider, IconButton, Menu, Stack, Tooltip, Typography } from '@mui/material'
+import { FormProvider, useForm } from 'react-hook-form'
+import { Button, Divider, IconButton, Menu, Stack, Tooltip, Typography } from '@mui/material'
 
+import type { IDataItem, ISIFilterOld } from '../../types/data'
 import type { IHeadCell } from '../DataTableHead/columns'
-import type { ISIFilter } from '../../types/data'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
-import { FilterIcon } from '@/components/Icons/FilterIcon'
 import { getTableFilter, setFilters } from '../../dataTableSlice'
 import { DateFilter } from './DateFilter'
-import { ListFilter } from './ListFilter'
-import { NumberFilter } from './NumberFilter'
 import { TextFilter } from './TextFilter'
-import { HeadBadge } from '../Table/Head/HeadBadge'
+import { NumberFilter } from './NumberFilter'
+import { ListFilter } from './ListFilter'
 
 type Props = {
 	cell: IHeadCell
+	fieldId: keyof IDataItem
 }
 
+// const Reserve = {
+// 	id: 'null',
+// 	name: 'Резерв',
+// 	leaderId: '',
+// }
+
 export const Filter: FC<Props> = ({ cell }) => {
-	const filters = useAppSelector(getTableFilter)
-	// const index = filters?.findIndex(f => f.field == cell.id)
-	const filter = filters?.find(f => f.field == cell.id)
+	const filter = useAppSelector(getTableFilter)
 
 	const dispatch = useAppDispatch()
 
-	const { data: departments } = useGetDepartmentsQuery(null)
-
 	const anchor = useRef<HTMLButtonElement>(null)
 	const [open, setOpen] = useState(false)
+
+	const methods = useForm<ISIFilterOld>({
+		defaultValues: {
+			field: cell.id,
+			fieldType: cell.type || 'string',
+			// compareType: filter?.compareType || !cell.type ? 'con' : 'eq',
+			// valueStart: filter?.valueStart || '',
+			// valueEnd: filter?.valueEnd || '',
+		},
+	})
+
+	const { data: departments } = useGetDepartmentsQuery(null)
+
+	const options = {
+		// place: [Reserve, ...(departments?.data || [])],
+		place: departments?.data || [],
+	}
 
 	const toggleHandler = () => setOpen(prev => !prev)
 
@@ -37,27 +56,23 @@ export const Filter: FC<Props> = ({ cell }) => {
 	}
 
 	const clearHandler = () => {
-		if (filter) dispatch(setFilters({ field: cell.id, fieldType: '', values: [] }))
-		toggleHandler()
-	}
-	const submitHandler = (data: ISIFilter) => {
-		dispatch(setFilters(data))
+		if (filter) dispatch(setFilters())
 		toggleHandler()
 	}
 
-	const values = filter && {
-		compareType: filter.values.length > 1 ? 'range' : filter.values[0].compareType,
-		valueStart: filter.values[0].value,
-		valueEnd: filter.values[1] ? filter.values[1].value : '',
-	}
+	const submitHandler = methods.handleSubmit(data => {
+		// dispatch(setFilters(data.valueStart != '' ? data : undefined))
+		console.log(data)
 
+		toggleHandler()
+	})
+
+	//TODO надо переделать фильтры и сделать возможность создания множественной фильтрации
 	return (
 		<>
 			<Tooltip title='Фильтр' arrow>
 				<IconButton ref={anchor} onClick={clickFilterHandler}>
-					<HeadBadge color='primary' badgeContent={(filters?.findIndex(f => f.field == cell.id) ?? -1) + 1}>
-						<FilterIcon fontSize={16} color={filter?.field === cell.id ? 'black' : '#adadad'} />
-					</HeadBadge>
+					{/* <FilterIcon fontSize={16} color={filter?.field === cell.id ? 'black' : '#adadad'} /> */}
 				</IconButton>
 			</Tooltip>
 
@@ -117,31 +132,25 @@ export const Filter: FC<Props> = ({ cell }) => {
 
 				<Divider sx={{ mb: 2, mt: 1 }} />
 
-				{cell.type == 'date' && (
-					<DateFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
-				)}
-				{cell.type == 'list' && (
-					<ListFilter
-						field={cell.id}
-						values={filter?.values[0].value.split(',')}
-						list={departments?.data || []}
-						onCancel={clearHandler}
-						onSubmit={submitHandler}
-					/>
-				)}
-				{cell.type == 'number' && (
-					<NumberFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
-				)}
-				{!cell.type || cell.type == 'string' ? (
-					<TextFilter
-						field={cell.id}
-						values={
-							filter && { compareType: filter.values[0].compareType, valueStart: filter.values[0].value }
-						}
-						onCancel={clearHandler}
-						onSubmit={submitHandler}
-					/>
-				) : null}
+				<FormProvider {...methods}>
+					{cell.type == 'date' && <DateFilter />}
+
+					{cell.type == 'number' && <NumberFilter />}
+
+					{!cell.type || cell.type == 'string' ? <TextFilter /> : null}
+
+					{cell.type == 'list' && <ListFilter list={options[cell.id as 'place']} />}
+				</FormProvider>
+
+				<Stack direction={'row'} mt={3} spacing={2}>
+					<Button onClick={clearHandler} fullWidth>
+						Отменить
+					</Button>
+
+					<Button onClick={submitHandler} fullWidth variant='outlined'>
+						Применить
+					</Button>
+				</Stack>
 			</Menu>
 		</>
 	)

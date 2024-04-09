@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-import type { IDataItem, ISIFilter, ISIFilterNew, ISISortObj, ISelected } from './types/data'
+import type { IDataItem, ISIFilter, ISISortObj, ISelected } from './types/data'
 import { RootState } from '@/app/store'
 import { localKeys } from '@/constants/localKeys'
 import { Size } from '@/constants/defaultValues'
@@ -13,8 +13,8 @@ interface IDataTableSlice {
 	// sort?: ISISort
 	// sort2?: ISISort[]
 	sort: ISISortObj
-	filter?: ISIFilter
-	filterNew?: ISIFilterNew
+	filter?: ISIFilter[]
+	// filterNew?: ISIFilterNew[]
 	selected: ISelected[]
 	active?: ISelected
 }
@@ -75,11 +75,24 @@ const dataTableSlice = createSlice({
 			}
 		},
 
+		// setFilters: (state, action: PayloadAction<ISIFilter | undefined>) => {
+		// 	state.filter = action.payload
+		// },
 		setFilters: (state, action: PayloadAction<ISIFilter | undefined>) => {
-			state.filter = action.payload
-		},
-		setFilterNew: (state, action: PayloadAction<ISIFilterNew | undefined>) => {
-			state.filterNew = action.payload
+			// state.filter = action.payload
+
+			if (!action.payload) {
+				state.filter = undefined
+				return
+			}
+
+			const index = state.filter?.findIndex(f => f.field == action.payload?.field)
+			if (!state.filter || index == -1) {
+				state.filter = [...(state.filter || []), action.payload]
+			} else if (index != undefined) {
+				if (action.payload.values.length) state.filter[index] = action.payload
+				else state.filter = state.filter.filter(f => f.field != action.payload?.field)
+			}
 		},
 
 		addSelected: (state, action: PayloadAction<ISelected | ISelected[]>) => {
@@ -105,8 +118,20 @@ const dataTableSlice = createSlice({
 			.addCase(setUser, (state, action) => {
 				//TODO учесть что могут быть сохраненные фильтры
 				if (action.payload.filters && action.payload.filters.length) {
-					// TODO в будущем фильтры будут массивом
-					state.filter = action.payload.filters[0]
+					state.filter = action.payload.filters
+					// state.filter = action.payload.filters[0]
+					// state.filter = [
+					// 	{
+					// 		field: action.payload.filters[0].field,
+					// 		fieldType: action.payload.filters[0].fieldType,
+					// 		values: [
+					// 			{
+					// 				compareType: action.payload.filters[0].compareType,
+					// 				value: action.payload.filters[0].valueStart,
+					// 			},
+					// 		],
+					// 	},
+					// ]
 				}
 			}),
 })
@@ -114,23 +139,12 @@ const dataTableSlice = createSlice({
 export const getTablePage = (state: RootState) => state.dataTable.page
 export const getTableSize = (state: RootState) => state.dataTable.size
 export const getTableSort = (state: RootState) => state.dataTable.sort
-// export const getTableSort2 = (state: RootState) => state.dataTable.sort2
 export const getTableFilter = (state: RootState) => state.dataTable.filter
-export const getTableFilterNew = (state: RootState) => state.dataTable.filterNew
 export const getSelectedItems = (state: RootState) => state.dataTable.selected
 export const getActiveItem = (state: RootState) => state.dataTable.active
 
 export const dataTablePath = dataTableSlice.name
 export const dataTableReducer = dataTableSlice.reducer
 
-export const {
-	setPage,
-	setSize,
-	setSort,
-	setFilters,
-	setFilterNew,
-	addSelected,
-	removeSelected,
-	setActive,
-	resetDataTableState,
-} = dataTableSlice.actions
+export const { setPage, setSize, setSort, setFilters, addSelected, removeSelected, setActive, resetDataTableState } =
+	dataTableSlice.actions

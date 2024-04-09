@@ -7,5 +7,4 @@ export const HeadBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
 		border: `2px solid ${theme.palette.background.paper}`,
 		padding: '0',
 	},
-	anchorOrigin: { vertical: 'top', horizontal: 'left' },
 }))

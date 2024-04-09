@@ -5,7 +5,7 @@ import { useAppDispatch } from '@/hooks/redux'
 // import { SortDownIcon } from '@/components/Icons/SortDownIcon'
 import type { IDataItem } from '../../types/data'
 import { setSort } from '../../dataTableSlice'
-import { Filter } from '../Filter/Filter'
+import { Filter } from '../FilterOld/Filter'
 import { HeadCell } from './HeadCell'
 import { HeadCells } from './columns'
 

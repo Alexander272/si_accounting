@@ -34,14 +34,14 @@ export interface ISISort {
 }
 
 export type CompareTypes = 'con' | 'start' | 'end' | 'like' | 'in' | 'eq' | 'gte' | 'lte' | 'range'
-export interface ISIFilter {
+export interface ISIFilterOld {
 	field: keyof IDataItem
 	fieldType: string
 	compareType: CompareTypes
 	valueStart: string
 	valueEnd: string
 }
-export interface ISIFilterNew {
+export interface ISIFilter {
 	field: keyof IDataItem
 	fieldType: string
 	values: ISIFilterValue[]
@@ -49,6 +49,13 @@ export interface ISIFilterNew {
 export interface ISIFilterValue {
 	compareType: CompareTypes
 	value: string
+}
+export interface ISIFilterForm {
+	field: keyof IDataItem
+	fieldType: string
+	compareType: CompareTypes
+	valueStart: string
+	valueEnd: string
 }
 
 export type Status = 'reserve' | 'used' | 'moved'

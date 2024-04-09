@@ -47,6 +47,7 @@ export const theme = createTheme({
 			defaultProps: {
 				disableInteractive: true,
 				arrow: true,
+				enterDelay: 800,
 			},
 			styleOverrides: {
 				tooltip: {
@@ -105,6 +106,14 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					borderRadius: 12,
+				},
+			},
+		},
+		MuiBadge: {
+			defaultProps: {
+				anchorOrigin: {
+					vertical: 'top',
+					horizontal: 'left',
 				},
 			},
 		},

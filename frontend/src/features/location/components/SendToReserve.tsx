@@ -32,7 +32,7 @@ export const SendToReserve = () => {
 
 	const { closeModal } = useModal()
 
-	const { data, isFetching } = useGetAllSIQuery({ page, size, sort, filter: filter ? [filter] : [] })
+	const { data, isFetching } = useGetAllSIQuery({ page, size, sort, filter })
 	const [create] = useCreateSeveralLocationMutation()
 
 	const saveHandler = async () => {

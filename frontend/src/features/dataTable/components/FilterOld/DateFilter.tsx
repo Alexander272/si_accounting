@@ -1,59 +1,17 @@
-import { FC } from 'react'
-import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material'
+import { Controller, useFormContext } from 'react-hook-form'
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs from 'dayjs'
 
-import type { CompareTypes, IDataItem, ISIFilter, ISIFilterValue } from '../../types/data'
+import type { ISIFilterOld } from '../../types/data'
 
-// type CompareTypes = 'eq' | 'gte' | 'lte' | 'range'
-type DateFilter = {
-	// fieldType: string
-	compareType: CompareTypes
-	valueStart: string
-	valueEnd: string
-}
-
-const defaultValues: DateFilter = {
-	// field: 'verificationDate',
-	// fieldType: 'date',
-	compareType: 'eq',
-	valueStart: '',
-	valueEnd: '',
-}
-
-type Props = {
-	field: keyof IDataItem
-	values?: DateFilter
-	onCancel: () => void
-	onSubmit: (data: ISIFilter) => void
-}
-
-export const DateFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) => {
-	// defaultValues.field = field
-	const methods = useForm<DateFilter>({ values: values || defaultValues })
+export const DateFilter = () => {
+	const methods = useFormContext<ISIFilterOld>()
 
 	const compareType = methods.watch('compareType')
 
-	const submitHandler = methods.handleSubmit(data => {
-		const value: ISIFilterValue[] = []
-		if (data.compareType == 'range') {
-			value.push({ compareType: 'gte', value: data.valueStart }, { compareType: 'lte', value: data.valueEnd })
-		} else {
-			value.push({ compareType: data.compareType, value: data.valueStart })
-		}
-
-		const filter: ISIFilter = {
-			field: field,
-			fieldType: 'date',
-			values: value,
-		}
-
-		onSubmit(filter)
-	})
-
 	return (
-		<FormProvider {...methods}>
+		<>
 			<Controller
 				control={methods.control}
 				name='compareType'
@@ -64,8 +22,8 @@ export const DateFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) => 
 
 						<Select {...field} error={Boolean(error)} labelId='filter-select' label='Операторы'>
 							<MenuItem value='eq'>Равна</MenuItem>
-							<MenuItem value='gte'>Больше или равна</MenuItem>
-							<MenuItem value='lte'>Меньше или равна</MenuItem>
+							<MenuItem value='gte'>Больше чем</MenuItem>
+							<MenuItem value='lte'>Меньше чем</MenuItem>
 							<MenuItem value='range'>В диапазоне</MenuItem>
 						</Select>
 					</FormControl>
@@ -119,16 +77,6 @@ export const DateFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) => 
 					)}
 				/>
 			)}
-
-			<Stack direction={'row'} mt={3} spacing={2}>
-				<Button onClick={onCancel} fullWidth>
-					Отменить
-				</Button>
-
-				<Button onClick={submitHandler} fullWidth variant='outlined'>
-					Применить
-				</Button>
-			</Stack>
-		</FormProvider>
+		</>
 	)
 }
