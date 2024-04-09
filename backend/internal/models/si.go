@@ -17,13 +17,13 @@ type SISort struct {
 }
 
 type SIFilter struct {
-	Field     string
-	FieldType string
-	Values    []SIFilterValue
+	Field     string          `json:"field"`
+	FieldType string          `json:"fieldType"`
+	Values    []SIFilterValue `json:"values"`
 }
 type SIFilterValue struct {
-	CompareType string
-	Value       string
+	CompareType string `json:"compareType"`
+	Value       string `json:"value"`
 }
 
 type Period struct {
