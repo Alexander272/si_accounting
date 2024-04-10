@@ -34,7 +34,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			onQueryStarted: async (_arg, api) => {
 				try {
 					await api.queryFulfilled
-					api.dispatch(resetUser)
+					api.dispatch(resetUser())
 				} catch (error) {
 					const fetchError = (error as IBaseFetchError).error
 					toast.error(fetchError.data.message, { autoClose: false })
