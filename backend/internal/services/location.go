@@ -12,12 +12,14 @@ import (
 type LocationService struct {
 	repo     repository.Location
 	employee Employee
+	most     Most
 }
 
-func NewLocationService(repo repository.Location, employee Employee) *LocationService {
+func NewLocationService(repo repository.Location, employee Employee, most Most) *LocationService {
 	return &LocationService{
 		repo:     repo,
 		employee: employee,
+		most:     most,
 	}
 }
 
@@ -113,19 +115,10 @@ func (s *LocationService) Receiving(ctx context.Context, location models.Receivi
 	if err := s.repo.Receiving(ctx, location); err != nil {
 		return fmt.Errorf("failed to receiving si location. error: %w", err)
 	}
+	if err := s.most.Update(ctx, location.PostID); err != nil {
+		return err
+	}
 	return nil
-}
-
-func (s *LocationService) ReceivingFromBot(ctx context.Context, req models.ReceivingFromBotDTO) error {
-	// я могу получить id пользователя и данные о нем
-	// а потом на основе них найти список инструментов которые нужно получить или можно сразу проставить отметку о получении
-
-	// employee, err := s.employee.GetByMostId(ctx, req.UserMostId)
-	// if err != nil {
-	// 	return err
-	// }
-
-	return fmt.Errorf("not implemented")
 }
 
 func (s *LocationService) Delete(ctx context.Context, id string) error {

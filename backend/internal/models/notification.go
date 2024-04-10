@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/mattermost/mattermost-server/v6/model"
+)
 
 type NotificationTime struct {
 	Id    string
@@ -53,4 +57,24 @@ type ConfirmationContext struct {
 	InstrumentIds []string `json:"instrumentIds"`
 	Status        string   `json:"status"`
 	Type          string   `json:"type"`
+}
+
+type CreatePostDTO struct {
+	UserId      string                   `json:"userId" binding:"required"`
+	Message     string                   `json:"message" binding:"required"`
+	Props       []*Props                 `json:"props"`
+	Actions     []*model.PostAction      `json:"actions"`
+	Attachments []*model.SlackAttachment `json:"attachments"`
+}
+type UpdatePostDTO struct {
+	PostId      string                   `json:"postId" binding:"required"`
+	Message     string                   `json:"message" binding:"required"`
+	Props       []*Props                 `json:"props"`
+	Actions     []*model.PostAction      `json:"actions"`
+	Attachments []*model.SlackAttachment `json:"attachments"`
+}
+
+type Props struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }

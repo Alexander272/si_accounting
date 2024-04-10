@@ -46,6 +46,7 @@ func (h *ReceivingHandlers) Receiving(c *gin.Context) {
 	}
 
 	data := models.ReceivingDTO{
+		PostID:        dto.PostID,
 		InstrumentIds: dto.Context.InstrumentIds,
 		Status:        dto.Context.Status,
 	}
@@ -56,7 +57,7 @@ func (h *ReceivingHandlers) Receiving(c *gin.Context) {
 		return
 	}
 
-	logger.Info("Получено инструменты",
+	logger.Info("Получены инструменты",
 		logger.StringAttr("user_id", dto.UserID),
 		logger.StringAttr("user", dto.UserName),
 		logger.StringAttr("instrument_ids", strings.Join(dto.Context.InstrumentIds, ",")),
