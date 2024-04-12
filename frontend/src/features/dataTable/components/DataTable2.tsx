@@ -1,23 +1,19 @@
 import { Box } from '@mui/material'
 
-import { useAppSelector } from '@/hooks/redux'
 // import { Table } from '@/components/Table/Table'
 // import { HeadCells } from './DataTableHead/columns'
 import { DataHeader } from './DataHeader'
 import { DataFooter } from './DataFooter'
 // import { CustomHeader } from './CustomHeader/CustomHeader'
-import { getTableFilter, getTablePage, getTableSize, getTableSort } from '../dataTableSlice'
-import { useGetAllSIQuery } from '../siApiSlice'
 import { Table } from './Table/Table'
+import { useGetAllSI } from '../hooks/getAllSI'
+
+// type Props = {
+// 	status?: SIStatus
+// }
 
 export const DataTable2 = () => {
-	const page = useAppSelector(getTablePage)
-	const size = useAppSelector(getTableSize)
-
-	const sort = useAppSelector(getTableSort)
-	const filter = useAppSelector(getTableFilter)
-
-	const { isFetching } = useGetAllSIQuery({ page, size, sort, filter }, { pollingInterval: 5 * 60000 })
+	const { isFetching } = useGetAllSI()
 
 	return (
 		<Box

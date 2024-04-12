@@ -21,6 +21,8 @@ const employeesSlice = createSlice({
 		setDepartment: (state, action: PayloadAction<IDepartment | undefined>) => {
 			state.department = action.payload
 		},
+
+		resetEmployeeState: () => initialState,
 	},
 })
 
@@ -30,4 +32,4 @@ export const getDepartment = (state: RootState) => state.employees.department
 export const employeesPath = employeesSlice.name
 export const employeesReducer = employeesSlice.reducer
 
-export const { setEmployee, setDepartment } = employeesSlice.actions
+export const { setEmployee, setDepartment, resetEmployeeState } = employeesSlice.actions

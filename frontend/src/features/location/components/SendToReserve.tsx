@@ -39,19 +39,30 @@ export const SendToReserve = () => {
 		const date = dayjs().startOf('d').unix()
 		const locations: Location[] = []
 
+		const location = {
+			department: '',
+			person: '',
+			dateOfIssue: date,
+			dateOfReceiving: 0,
+			needConfirmed: true,
+			status: 'moved',
+		}
+
+		if (active?.id) {
+			locations.push({
+				instrumentId: active.id,
+				...location,
+			})
+		}
 		selectedItems.forEach(i => {
 			locations.push({
 				instrumentId: i.id,
-				department: '',
-				person: '',
-				dateOfIssue: date,
-				dateOfReceiving: 0,
-				needConfirmed: true,
-				status: 'reserve',
+				...location,
 			})
 		})
 
 		try {
+			if (!locations.length) return
 			const payload = await create(locations).unwrap()
 			toast.success(payload.message)
 			closeModal()

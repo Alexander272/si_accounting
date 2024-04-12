@@ -4,7 +4,7 @@ import StyledGridOverlay from '../StyledGridOverlay'
 
 import EmptyIcon from './EmptyIcon'
 
-function DataTableNoRowsOverlay(): JSX.Element {
+export const NoRowsOverlay = () => {
 	return (
 		<StyledGridOverlay>
 			<EmptyIcon />
@@ -14,5 +14,3 @@ function DataTableNoRowsOverlay(): JSX.Element {
 		</StyledGridOverlay>
 	)
 }
-
-export default DataTableNoRowsOverlay

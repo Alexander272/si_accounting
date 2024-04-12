@@ -1,7 +1,7 @@
 import { FC, useRef, useState } from 'react'
 import { Divider, IconButton, Menu, Stack, Tooltip, Typography } from '@mui/material'
 
-import type { IHeadCell } from '../DataTableHead/columns'
+import type { IHeadCell } from '../Table/Head/columns'
 import type { ISIFilter } from '../../types/data'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'

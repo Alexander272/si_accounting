@@ -12,14 +12,14 @@ import { DelayIcon } from '@/components/Icons/DelayIcon'
 import { CalendarIcon } from '@/components/Icons/CalendarIcon'
 import {
 	addSelected,
+	getSIStatus,
 	getSelectedItems,
 	getTableFilter,
-	getTableSize,
-	getTablePage,
 	getTableSort,
 	removeSelected,
 } from '../../dataTableSlice'
-import { useGetAllSIQuery, useLazyGetAllSIQuery } from '../../siApiSlice'
+import { useLazyGetAllSIQuery } from '../../siApiSlice'
+import { useGetAllSI } from '../../hooks/getAllSI'
 
 export const FastChoose = () => {
 	const anchor = useRef<HTMLButtonElement | null>(null)
@@ -28,15 +28,14 @@ export const FastChoose = () => {
 	const [fetchSi] = useLazyGetAllSIQuery()
 
 	const selected = useAppSelector(getSelectedItems)
-	const page = useAppSelector(getTablePage)
-	const size = useAppSelector(getTableSize)
 
+	const status = useAppSelector(getSIStatus)
 	const sort = useAppSelector(getTableSort)
 	const filter = useAppSelector(getTableFilter)
 
 	const dispatch = useAppDispatch()
 
-	const { data } = useGetAllSIQuery({ page, size, sort, filter })
+	const { data } = useGetAllSI()
 
 	const toggleHandler = () => setOpen(prev => !prev)
 
@@ -78,7 +77,7 @@ export const FastChoose = () => {
 
 	const fetching = async (filter?: ISIFilter[], sort?: ISISortObj) => {
 		try {
-			const payload = await fetchSi({ size: data?.total, filter, sort }).unwrap()
+			const payload = await fetchSi({ status, size: data?.total, filter, sort }).unwrap()
 			const identifiers =
 				payload?.data.map(si => {
 					const status = si.place == 'Перемещение' ? 'moved' : si.place == 'Резерв' ? 'reserve' : 'used'

@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-import type { IDataItem, ISIFilter, ISISortObj, ISelected } from './types/data'
+import type { IDataItem, ISIFilter, ISISortObj, ISelected, SIStatus } from './types/data'
 import { RootState } from '@/app/store'
 import { localKeys } from '@/constants/localKeys'
 import { Size } from '@/constants/defaultValues'
@@ -8,6 +8,7 @@ import { changeModalIsOpen } from '../modal/modalSlice'
 import { setUser } from '../user/userSlice'
 
 interface IDataTableSlice {
+	status?: SIStatus
 	page: number
 	size: number
 	// sort?: ISISort
@@ -36,6 +37,9 @@ const dataTableSlice = createSlice({
 	name: 'dataTable',
 	initialState,
 	reducers: {
+		setStatus: (state, action: PayloadAction<SIStatus | undefined>) => {
+			state.status = action.payload
+		},
 		setPage: (state, action: PayloadAction<number>) => {
 			state.page = action.payload
 			localStorage.setItem(localKeys.page, action.payload.toString())
@@ -136,6 +140,7 @@ const dataTableSlice = createSlice({
 			}),
 })
 
+export const getSIStatus = (state: RootState) => state.dataTable.status
 export const getTablePage = (state: RootState) => state.dataTable.page
 export const getTableSize = (state: RootState) => state.dataTable.size
 export const getTableSort = (state: RootState) => state.dataTable.sort
@@ -146,5 +151,14 @@ export const getActiveItem = (state: RootState) => state.dataTable.active
 export const dataTablePath = dataTableSlice.name
 export const dataTableReducer = dataTableSlice.reducer
 
-export const { setPage, setSize, setSort, setFilters, addSelected, removeSelected, setActive, resetDataTableState } =
-	dataTableSlice.actions
+export const {
+	setStatus,
+	setPage,
+	setSize,
+	setSort,
+	setFilters,
+	addSelected,
+	removeSelected,
+	setActive,
+	resetDataTableState,
+} = dataTableSlice.actions

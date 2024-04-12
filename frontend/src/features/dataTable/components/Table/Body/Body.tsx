@@ -2,24 +2,16 @@ import { FC, memo, useCallback } from 'react'
 import { Stack } from '@mui/material'
 import { FixedSizeList } from 'react-window'
 
+import type { ISelected, Status } from '@/features/dataTable/types/data'
 import { RowHeight, Size } from '@/constants/defaultValues'
-import { Row } from './Row'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import {
-	addSelected,
-	getSelectedItems,
-	getTableFilter,
-	getTablePage,
-	getTableSize,
-	getTableSort,
-	removeSelected,
-} from '@/features/dataTable/dataTableSlice'
+import { addSelected, getSelectedItems, getTableSize, removeSelected } from '@/features/dataTable/dataTableSlice'
 import { Coordinates } from '@/features/dataTable/hooks/useContextMenu'
-import { useGetAllSIQuery } from '@/features/dataTable/siApiSlice'
-import { ISelected, Status } from '@/features/dataTable/types/data'
+import { useGetAllSI } from '@/features/dataTable/hooks/getAllSI'
 import { Fallback } from '@/components/Fallback/Fallback'
-import DataTableNoRowsOverlay from '../../NoRowsOverlay/components/DataTableNoRowsOverlay'
 import { HeadCells } from '../Head/columns'
+import { NoRowsOverlay } from '../../NoRowsOverlay/components/NoRowsOverlay'
+import { Row } from './Row'
 
 type Props = {
 	itemId?: string
@@ -27,11 +19,7 @@ type Props = {
 }
 
 export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
-	const page = useAppSelector(getTablePage)
 	const size = useAppSelector(getTableSize)
-
-	const sort = useAppSelector(getTableSort)
-	const filter = useAppSelector(getTableFilter)
 
 	const selectedItems = useAppSelector(getSelectedItems)
 
@@ -39,7 +27,7 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 
 	// const { itemId, positionHandler } = useContextMenu()
 
-	const { data, isFetching } = useGetAllSIQuery({ page, size, sort, filter }, { pollingInterval: 5 * 60000 })
+	const { data, isFetching } = useGetAllSI()
 
 	const selectHandler = useCallback(
 		(item: ISelected, selected: boolean) => {
@@ -53,7 +41,7 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 
 	return (
 		<Stack position={'relative'}>
-			{!data.total && <DataTableNoRowsOverlay />}
+			{!data.total && <NoRowsOverlay />}
 
 			{isFetching && (
 				<Fallback

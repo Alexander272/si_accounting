@@ -15,7 +15,9 @@ export type IDataItem = {
 	notes: string
 }
 
+export type SIStatus = 'work' | 'repair' | 'decommissioning'
 export interface ISIParams {
+	status?: SIStatus
 	page?: number
 	size?: number
 	sort?: ISISortObj

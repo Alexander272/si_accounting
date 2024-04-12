@@ -1,13 +1,13 @@
 import { Button, Stack, Typography, useTheme } from '@mui/material'
 
+import { PermRules } from '@/constants/permissions'
 import { useModal } from '@/features/modal/hooks/useModal'
+import { useCheckPermission } from '@/features/auth/hooks/check'
 import { PlusIcon } from '@/components/Icons/PlusIcon'
 import { FastFilter } from './FastFilter/FastFilter'
-// import { DataTableLoader } from './DataTableLoader'
-import { Tools } from './Tools/Tools'
 import { FastChoose } from './FastChoose/FastChoose'
-import { useCheckPermission } from '@/features/auth/hooks/check'
-import { PermRules } from '@/constants/permissions'
+import { Tools } from './Tools/Tools'
+import { SelectSIList } from './SelectSIList/SelectSIList'
 
 export const DataHeader = () => {
 	const { palette } = useTheme()
@@ -20,19 +20,22 @@ export const DataHeader = () => {
 	return (
 		<Stack position={'relative'}>
 			<Stack direction={'row'} spacing={2} paddingX={3} paddingY={2} justifyContent={'space-between'}>
-				<Stack direction={'row'} spacing={2}>
+				<Stack direction={'row'}>
 					<Typography color={'primary'} variant='h5'>
 						Средства измерения
 					</Typography>
 
 					{useCheckPermission(PermRules.SI.Write) ? (
-						<Button
-							onClick={openHandler}
-							variant='outlined'
-							sx={{ borderWidth: 2, minWidth: 54, ':hover': { borderWidth: 2 } }}
-						>
-							<PlusIcon fontSize={14} color={palette.primary.main} />
-						</Button>
+						<>
+							<SelectSIList />
+							<Button
+								onClick={openHandler}
+								variant='outlined'
+								sx={{ borderWidth: 2, minWidth: 54, ml: 2, ':hover': { borderWidth: 2 } }}
+							>
+								<PlusIcon fontSize={14} color={palette.primary.main} />
+							</Button>
+						</>
 					) : null}
 				</Stack>
 
