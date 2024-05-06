@@ -4,6 +4,7 @@ type SIParams struct {
 	Page    SIPage
 	Sort    []SISort
 	Filters []SIFilter
+	Status  string
 }
 
 type SIPage struct {
@@ -27,8 +28,8 @@ type SIFilterValue struct {
 }
 
 type Period struct {
-	StartAt  string
-	FinishAt string
+	StartAt  int64
+	FinishAt int64
 }
 
 type SIList struct {

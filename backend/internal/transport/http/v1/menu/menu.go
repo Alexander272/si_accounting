@@ -40,11 +40,11 @@ func (h *MenuHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Create(c, dto); err != nil {
-		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
-		return
-	}
+	// if err := h.service.Create(c, dto); err != nil {
+	// 	response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+	// 	h.errBot.Send(c, err.Error(), dto)
+	// 	return
+	// }
 
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Успешно добавлено"})
 }
@@ -63,11 +63,11 @@ func (h *MenuHandlers) Update(c *gin.Context) {
 	}
 	dto.Id = id
 
-	if err := h.service.Update(c, dto); err != nil {
-		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
-		return
-	}
+	// if err := h.service.Update(c, dto); err != nil {
+	// 	response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+	// 	h.errBot.Send(c, err.Error(), dto)
+	// 	return
+	// }
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Успешно обновлено"})
 }

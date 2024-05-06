@@ -2,8 +2,8 @@ package auth
 
 import (
 	"context"
+	"log"
 
-	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/Nerzal/gocloak/v13"
 )
 
@@ -29,7 +29,7 @@ func NewKeycloakClient(deps Deps) *KeycloakClient {
 
 	token, err := client.LoginAdmin(ctx, deps.AdminName, deps.AdminPass, deps.Realm)
 	if err != nil {
-		logger.Fatalf("failed to login admin to keycloak. error: %s", err.Error())
+		log.Fatalf("failed to login admin to keycloak. error: %s", err.Error())
 	}
 
 	// store, err := client.GetKeyStoreConfig()
@@ -37,7 +37,7 @@ func NewKeycloakClient(deps Deps) *KeycloakClient {
 
 	clients, err := client.GetClients(ctx, token.AccessToken, deps.Realm, gocloak.GetClientsParams{ClientID: &deps.ClientId})
 	if err != nil {
-		logger.Fatalf("failed to get clients to keycloak. error: %s", err.Error())
+		log.Fatalf("failed to get clients to keycloak. error: %s", err.Error())
 	}
 	//logger.Debug(clients)
 

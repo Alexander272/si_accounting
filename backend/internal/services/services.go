@@ -15,12 +15,11 @@ type Services struct {
 	SI
 	Department
 	Employee
-	Role
 	DefaultFilter
+	File
 
-	ApiPaths
+	Role
 	MenuItem
-	MenuWithApi
 	Menu
 
 	Session
@@ -55,11 +54,11 @@ func NewServices(deps Deps) *Services {
 
 	filter := NewDefaultFilterService(deps.Repos.DefaultFilter)
 
+	file := NewFileService(si)
+
 	role := NewRoleService(deps.Repos.Role)
-	api := NewApiPathsService(deps.Repos.ApiPaths)
 	menuItem := NewMenuItemService(deps.Repos.MenuItem)
-	menuWithApi := NewMenuWithApiService(deps.Repos.MenuWithApi)
-	menu := NewMenuService(deps.Repos.Menu, menuWithApi)
+	menu := NewMenuService(deps.Repos.Menu, menuItem)
 
 	// TODO можно включить для keycloak настройку что он за прокси и запустить сервер на 80 (или на другом) порту для вывода интерфейса
 	// TODO при авторизации пользователя его можно искать сразу по нескольким realm
@@ -79,13 +78,12 @@ func NewServices(deps Deps) *Services {
 		SI:            si,
 		Department:    department,
 		Employee:      employee,
-		Role:          role,
 		DefaultFilter: filter,
+		File:          file,
 
-		ApiPaths:    api,
-		MenuItem:    menuItem,
-		MenuWithApi: menuWithApi,
-		Menu:        menu,
+		Role:     role,
+		MenuItem: menuItem,
+		Menu:     menu,
 
 		Session:    session,
 		Permission: permission,

@@ -1,35 +1,36 @@
 package receiving
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type ReceivingHandlers struct {
 	service services.Location
-	errBot  error_bot.ErrorBotApi
 }
 
-func NewReceivingHandlers(service services.Location, errBot error_bot.ErrorBotApi) *ReceivingHandlers {
+func NewReceivingHandlers(service services.Location) *ReceivingHandlers {
 	return &ReceivingHandlers{
 		service: service,
-		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Location, errBot error_bot.ErrorBotApi) {
-	handlers := NewReceivingHandlers(service, errBot)
+func Register(api *gin.RouterGroup, service services.Location, middleware *middleware.Middleware) {
+	handlers := NewReceivingHandlers(service)
 
-	locations := api.Group("/locations")
+	locations := api.Group("/si/locations")
 	{
 		locations.POST("/receiving", handlers.Receiving)
+		locations.POST("/receiving/dialog", handlers.ReceivingDialog)
 	}
 }
 
@@ -45,22 +46,83 @@ func (h *ReceivingHandlers) Receiving(c *gin.Context) {
 		return
 	}
 
-	data := models.ReceivingDTO{
-		PostID:        dto.PostID,
-		InstrumentIds: dto.Context.InstrumentIds,
-		Status:        dto.Context.Status,
-	}
+	// data := models.ReceivingDTO{
+	// 	// PostID:        dto.PostID,
+	// 	InstrumentIds: dto.Context.InstrumentIds,
+	// 	Status:        dto.Context.Status,
+	// }
 
-	if err := h.service.Receiving(c, data); err != nil {
-		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
-		return
-	}
+	// if err := h.service.Receiving(c, data); err != nil {
+	// 	response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+	// 	h.errBot.Send(c, err.Error(), dto)
+	// 	return
+	// }
 
 	logger.Info("Получены инструменты",
 		logger.StringAttr("user_id", dto.UserID),
 		logger.StringAttr("user", dto.UserName),
 		logger.StringAttr("instrument_ids", strings.Join(dto.Context.InstrumentIds, ",")),
+	)
+
+	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
+}
+
+func (h *ReceivingHandlers) ReceivingDialog(c *gin.Context) {
+	var dto models.DialogResponse
+	if err := c.BindJSON(&dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+
+	// instruments := []models.SelectedSI{}
+	// InstrumentIds, missing := []string{}, []models.SelectedSI{}
+	// PostID, Status := "", ""
+	// state := strings.Split(dto.State, "&")
+	// for _, s := range state {
+	// 	arr := strings.SplitN(s, ":", 2)
+	// 	switch arr[0] {
+	// 	case "PostId":
+	// 		PostID = arr[1]
+	// 	case "Status":
+	// 		Status = arr[1]
+	// 	case "SI":
+	// 		err := json.Unmarshal([]byte(arr[1]), &instruments)
+	// 		if err != nil {
+	// 			response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+	// 			return
+	// 		}
+	// 	}
+	// }
+
+	// for k, v := range dto.Submission {
+	// 	if v {
+	// 		InstrumentIds = append(InstrumentIds, k)
+	// 	} else {
+	// 		for _, v := range instruments {
+	// 			if v.Id == k {
+	// 				missing = append(missing, v)
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	// data := models.ReceivingDTO{
+	// 	PostID:        PostID,
+	// 	InstrumentIds: InstrumentIds,
+	// 	Missing:       missing,
+	// 	Status:        Status,
+	// }
+
+	if err := h.service.Receiving(c, dto); err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+
+	logger.Info("Получены инструменты",
+		logger.StringAttr("user_id", dto.UserID),
+		logger.StringAttr("instrument_ids", fmt.Sprint(dto.Submission)),
 	)
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})

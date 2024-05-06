@@ -9,47 +9,27 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type SIHandlers struct {
-	service      services.SI
-	errBot       error_bot.ErrorBotApi
-	formatFields map[string]string
+	service services.SI
 }
 
-func NewSIHandlers(service services.SI, errBot error_bot.ErrorBotApi) *SIHandlers {
-	format := make(map[string]string)
-
-	format["name"] = "name"
-	format["type"] = "type"
-	format["factoryNumber"] = "factory_number"
-	format["measurementLimits"] = "measurement_limits"
-	format["accuracy"] = "accuracy"
-	format["stateRegister"] = "state_register"
-	format["manufacturer"] = "manufacturer"
-	format["yearOfIssue"] = "year_of_issue"
-	format["interVerificationInterval"] = "inter_verification_interval"
-	format["notes"] = "notes"
-	format["verificationDate"] = "date"
-	format["nextVerificationDate"] = "next_date"
-	format["place"] = "department_id"
-
+func NewSIHandlers(service services.SI) *SIHandlers {
 	return &SIHandlers{
-		service:      service,
-		errBot:       errBot,
-		formatFields: format,
+		service: service,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.SI, errBot error_bot.ErrorBotApi) {
-	handlers := NewSIHandlers(service, errBot)
+func Register(api *gin.RouterGroup, service services.SI, middleware *middleware.Middleware) {
+	handlers := NewSIHandlers(service)
 
-	api.GET("", handlers.GetAll)
-	api.POST("/save", handlers.Save)
-	// api.GET("/notification", handlers.GetForNotification)
+	api.GET("", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetAll)
+	api.POST("/save", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Save)
 }
 
 func (h *SIHandlers) GetAll(c *gin.Context) {
@@ -66,7 +46,6 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 		params.Page.Limit = 15
 	} else {
 		params.Page.Limit = limit
-
 	}
 
 	p, err := strconv.Atoi(page)
@@ -86,7 +65,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 			}
 
 			params.Sort = append(params.Sort, models.SISort{
-				Field: h.formatFields[field],
+				Field: field,
 				Type:  t,
 			})
 		}
@@ -116,7 +95,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 		}
 
 		f := models.SIFilter{
-			Field:     h.formatFields[k],
+			Field:     k,
 			FieldType: v,
 			Values:    values,
 		}
@@ -124,10 +103,24 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 		params.Filters = append(params.Filters, f)
 	}
 
+	status := c.Query("status")
+	if status == "" {
+		params.Status = constants.InstrumentStatusWork
+	} else {
+		switch status {
+		case "work":
+			params.Status = constants.InstrumentStatusWork
+		case "repair":
+			params.Status = constants.InstrumentStatusRepair
+		case "decommissioning":
+			params.Status = constants.InstrumentStatusDec
+		}
+	}
+
 	si, err := h.service.GetAll(c, params)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), params)
+		error_bot.Send(c, err.Error(), params)
 		return
 	}
 
@@ -147,7 +140,7 @@ func (h *SIHandlers) Save(c *gin.Context) {
 
 	if err := h.service.Save(c, dto.Id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 

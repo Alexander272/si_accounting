@@ -5,35 +5,35 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type DocumentsHandlers struct {
 	service services.Documents
-	errBot  error_bot.ErrorBotApi
 }
 
-func NewDocumentsHandlers(service services.Documents, errBot error_bot.ErrorBotApi) *DocumentsHandlers {
+func NewDocumentsHandlers(service services.Documents) *DocumentsHandlers {
 	return &DocumentsHandlers{
 		service: service,
-		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Documents, errBot error_bot.ErrorBotApi) {
-	handlers := NewDocumentsHandlers(service, errBot)
+func Register(api *gin.RouterGroup, service services.Documents, middleware *middleware.Middleware) {
+	handlers := NewDocumentsHandlers(service)
 
 	documents := api.Group("/documents")
 	{
-		documents.GET("list", handlers.getList)
-		documents.POST("", handlers.upload)
-		documents.GET("", handlers.download)
-		documents.DELETE("/:id", handlers.delete)
+		documents.GET("list", middleware.CheckPermissions(constants.SI, constants.Read), handlers.getList)
+		documents.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.upload)
+		documents.GET("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.download)
+		documents.DELETE("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.delete)
 	}
 }
 
@@ -57,7 +57,7 @@ func (h *DocumentsHandlers) getList(c *gin.Context) {
 	docs, err := h.service.Get(c, dto)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: docs})
@@ -78,7 +78,7 @@ func (h *DocumentsHandlers) download(c *gin.Context) {
 	fileStat, err := os.Stat(filePath)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Файл не найден")
-		h.errBot.Send(c, err.Error(), filePath)
+		error_bot.Send(c, err.Error(), filePath)
 		return
 	}
 
@@ -133,7 +133,7 @@ func (h *DocumentsHandlers) upload(c *gin.Context) {
 	dto := models.DocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId, Files: files}
 	if err := h.service.Upload(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Файлы загружены"})
@@ -166,7 +166,7 @@ func (h *DocumentsHandlers) delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, req); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), req)
+		error_bot.Send(c, err.Error(), req)
 		return
 	}
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Файл удален"})

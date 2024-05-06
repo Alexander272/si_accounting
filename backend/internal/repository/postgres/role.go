@@ -54,12 +54,12 @@ func (r *RoleRepo) GetAll(ctx context.Context, req models.GetRolesDTO) (roles []
 
 func (r *RoleRepo) Get(ctx context.Context, roleName string) (*models.Role, error) {
 	var data []models.RoleWithMenuDTO
-	query := fmt.Sprintf(`SELECT r.id, r.name, COALESCE(extends, '{}') AS extends, i.name AS menu
+	query := fmt.Sprintf(`SELECT r.id, r.name, COALESCE(extends, '{}') AS extends, i.name||':'||i.method AS menu
 		FROM %s AS r 
 		LEFT JOIN %s AS m ON r.id=role_id 
 		LEFT JOIN %s AS i ON menu_item_id=i.id
 		WHERE i.is_show=true ORDER BY level`,
-		RoleTable, MenuByRoleTable, MenuItemTable,
+		RoleTable, MenuTable, MenuItemTable,
 	)
 
 	if err := r.db.Select(&data, query); err != nil {

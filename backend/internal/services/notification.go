@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/Alexander272/si_accounting/backend/internal/config"
@@ -25,7 +26,7 @@ type NotificationService struct {
 func NewNotificationService(si SI, bot Most, errBot ErrorBot) *NotificationService {
 	cron, err := gocron.NewScheduler()
 	if err != nil {
-		logger.Fatalf("failed to create new scheduler. error: %s", err.Error())
+		log.Fatalf("failed to create new scheduler. error: %s", err.Error())
 	}
 
 	return &NotificationService{
@@ -96,7 +97,7 @@ func (s *NotificationService) CheckSendSI() {
 	//TODO есть проблема. уведомления будут отправляться каждый день пока не подтвердят, что наверное не очень хорошо
 	nots, err := s.si.GetForNotification(context.Background(), models.Period{})
 	if err != nil {
-		logger.Errorf("notification error: %s", err.Error())
+		logger.Error("notification error:", logger.ErrAttr(err))
 		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: nil, Url: "notification bot. get si list (checkSend)"})
 		return
 	}
@@ -109,7 +110,7 @@ func (s *NotificationService) CheckSendSI() {
 		n.Message = "Подтвердите получение инструментов"
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
-			logger.Errorf("notification error: %s", err.Error())
+			logger.Error("notification error:", logger.ErrAttr(err))
 			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot. send to bot (checkSend)"})
 
 		}
@@ -128,6 +129,9 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 	now := time.Now()
 	// возможно часы надо все-таки обнулить (как бы ошибок не было из-за часов)
 	monthEnd := time.Date(now.Year(), now.Month()+1, 0, now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
+	if s.iterationNumber >= len(times) {
+		monthEnd = time.Date(now.Year(), now.Month()+2, 0, now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
+	}
 
 	//? задача в cron запускается 1 раз в сутки. текущая дата сравнивается с расчетной и если текущая дата >=, то индекс переключается.
 	// поскольку следующая дата высчитывается на основе предыдущей сделан массив в который записывается все рассчитанные даты.
@@ -154,6 +158,9 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
 	}
 
+	// logger.Debug("dates ", s.dates[index])
+	// logger.Debug("is before ", s.dates[index].Before(time.Now()))
+
 	if !s.dates[index].Before(time.Now()) {
 		return
 	}
@@ -163,17 +170,19 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 	startAt := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
 	finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
 
-	//TODO убрать преобразование в строку
+	// убрать преобразование в строку
 	period := models.Period{
-		StartAt:  startAt.Format("02.01.2006"),
-		FinishAt: finishAt.Format("02.01.2006"),
+		// StartAt:  startAt.Format("02.01.2006"),
+		// FinishAt: finishAt.Format("02.01.2006"),
+		StartAt:  startAt.Unix(),
+		FinishAt: finishAt.Unix(),
 	}
 
-	logger.Debug("period ", period)
+	// logger.Debug("period ", period)
 
 	si, err := s.si.GetForNotification(context.Background(), period)
 	if err != nil {
-		logger.Errorf("notification error: %s", err.Error())
+		logger.Error("notification error:", logger.ErrAttr(err))
 		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: period, Url: "notification bot"})
 		return
 	}
@@ -190,13 +199,15 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 		n.Message = "Необходимо сдать инструменты до `" + term + "`"
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
-			logger.Errorf("notification error: %s", err.Error())
+			logger.Error("notification error:", logger.ErrAttr(err))
 			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})
-
 		}
 	}
 
-	s.iterationNumber = index + 1
+	if s.iterationNumber >= len(times) {
+		s.iterationNumber = index
+	}
+	s.iterationNumber = (index + 1)
 }
 
 func (s *NotificationService) Send(times []models.NotificationTime) {
@@ -244,13 +255,15 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 	finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
 
 	period := models.Period{
-		StartAt:  startAt.Format("02.01.2006"),
-		FinishAt: finishAt.Format("02.01.2006"),
+		// StartAt:  startAt.Format("02.01.2006"),
+		// FinishAt: finishAt.Format("02.01.2006"),
+		StartAt:  startAt.Unix(),
+		FinishAt: finishAt.Unix(),
 	}
 
 	si, err := s.si.GetForNotification(context.Background(), period)
 	if err != nil {
-		logger.Errorf("notification error: %s", err.Error())
+		logger.Error("notification error:", logger.ErrAttr(err))
 		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: period, Url: "notification bot"})
 		return
 	}
@@ -269,7 +282,7 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 		n.Message = "Необходимо сдать инструменты до `" + term + "`"
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
-			logger.Errorf("notification error: %s", err.Error())
+			logger.Error("notification error:", logger.ErrAttr(err))
 			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})
 
 		}

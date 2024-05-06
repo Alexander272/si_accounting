@@ -10,9 +10,7 @@ const (
 
 	DefaultFilterTable = "default_filters"
 
-	RoleTable        = "roles"
-	ApiTable         = "api_paths"
-	MenuWithApiTable = "menu_items_with_api"
-	MenuItemTable    = "menu_items"
-	MenuByRoleTable  = "menu_by_role"
+	RoleTable     = "roles"
+	MenuItemTable = "menu_item"
+	MenuTable     = "menu"
 )

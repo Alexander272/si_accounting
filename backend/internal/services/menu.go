@@ -10,70 +10,73 @@ import (
 
 type MenuService struct {
 	repo repository.Menu
-	api  MenuWithApi
+	item MenuItem
 }
 
-func NewMenuService(repo repository.Menu, api MenuWithApi) *MenuService {
+func NewMenuService(repo repository.Menu, item MenuItem) *MenuService {
 	return &MenuService{
 		repo: repo,
-		api:  api,
+		item: item,
 	}
 }
 
 type Menu interface {
-	GetAll(context.Context) ([]models.MenuFull, error)
-	Create(context.Context, models.MenuDTO) error
-	Update(context.Context, models.MenuDTO) error
+	GetAll(context.Context) ([]*models.MenuFull, error)
+	Create(context.Context, *models.MenuDTO) error
+	Update(context.Context, *models.MenuDTO) error
 	Delete(context.Context, string) error
 }
 
-func (s *MenuService) GetAll(ctx context.Context) (menu []models.MenuFull, err error) {
-	m, err := s.repo.GetAll(ctx)
+func (s *MenuService) GetAll(ctx context.Context) ([]*models.MenuFull, error) {
+	menu, err := s.repo.GetAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all menu. error: %w", err)
 	}
 
-	api, err := s.api.GetAll(ctx)
+	items, err := s.item.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	for i, m2 := range m {
-		item := models.MenuItem{}
-		for _, mi := range api {
-			if mi.Id == m2.MenuItemId {
-				item = mi
+	menuFull := []*models.MenuFull{}
+
+	for i, m := range menu {
+		menuItem := &models.MenuItem{}
+		for _, item := range items {
+			if m.MenuItemId == item.Id {
+				menuItem = item
 				break
 			}
 		}
 
-		if i == 0 || menu[len(menu)-1].Id != m2.RoleId {
-			menu = append(menu, models.MenuFull{
-				Id: m2.RoleId,
+		if i == 0 || menuFull[len(menuFull)-1].Id != m.RoleId {
+			menuFull = append(menuFull, &models.MenuFull{
+				Id: m.RoleId,
 				Role: models.RoleFull{
-					Id:      m2.RoleId,
-					Name:    m2.RoleName,
-					Level:   m2.RoleLevel,
-					Extends: m2.RoleExtends,
+					Id:      m.RoleId,
+					Name:    m.RoleName,
+					Level:   m.RoleLevel,
+					Extends: m.RoleExtends,
 				},
-				MenuItems: []models.MenuItem{item},
+				MenuItems: []*models.MenuItem{menuItem},
 			})
 		} else {
-			menu[len(menu)-1].MenuItems = append(menu[len(menu)-1].MenuItems, item)
+			menuFull[len(menuFull)-1].MenuItems = append(menuFull[len(menuFull)-1].MenuItems, menuItem)
 		}
+
 	}
 
-	return menu, nil
+	return menuFull, nil
 }
 
-func (s *MenuService) Create(ctx context.Context, menu models.MenuDTO) error {
+func (s *MenuService) Create(ctx context.Context, menu *models.MenuDTO) error {
 	if err := s.repo.Create(ctx, menu); err != nil {
 		return fmt.Errorf("failed to create menu. error: %w", err)
 	}
 	return nil
 }
 
-func (s *MenuService) Update(ctx context.Context, menu models.MenuDTO) error {
+func (s *MenuService) Update(ctx context.Context, menu *models.MenuDTO) error {
 	if err := s.repo.Update(ctx, menu); err != nil {
 		return fmt.Errorf("failed to update menu. error: %w", err)
 	}

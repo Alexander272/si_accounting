@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 
-	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
@@ -22,7 +22,7 @@ type Permission interface {
 func NewPermissionService(confPath string, menu Menu) *PermissionService {
 	permission := &PermissionService{}
 	if err := permission.Register(confPath, menu); err != nil {
-		logger.Fatalf("failed to initialize permission service. error: %s", err.Error())
+		log.Fatalf("failed to initialize permission service. error: %s", err.Error())
 	}
 	return permission
 }
@@ -71,36 +71,23 @@ func (s *PolicyAdapter) LoadPolicy(model model.Model) error {
 		return err
 	}
 
-	// lines := []string{}
-
-	// load api paths
-	for _, mf := range menu {
-		for _, mi := range mf.MenuItems {
-			for _, a := range mi.Api {
-				line := fmt.Sprintf("p, %s, %s, %s", mf.Role.Name, a.Path, a.Method)
-				// logger.Debug("api line ", line)
-				if err := persist.LoadPolicyLine(line, model); err != nil {
-					return fmt.Errorf("failed to load policy. error: %w", err)
-				}
-				// lines = append(lines, fmt.Sprintf("p, %s, %s, %s", mf.Role.Name, a.Path, a.Method))
+	for _, m := range menu {
+		for _, mi := range m.MenuItems {
+			line := fmt.Sprintf("p, %s, %s, %s", m.Role.Name, mi.Name, mi.Method)
+			if err := persist.LoadPolicyLine(line, model); err != nil {
+				return fmt.Errorf("failed to load policy. error: %w", err)
 			}
 		}
-	}
 
-	// load users group (role)
-	for _, mf := range menu {
-		// lines = append(lines, fmt.Sprintf("g, %s, %s", mf.Role.Name, mf.Role.Extends))
-		if len(mf.Role.Extends) == 0 {
-			line := fmt.Sprintf("g, %s, ", mf.Role.Name)
-			// logger.Debug("role line ", line)
+		if len(m.Role.Extends) == 0 {
+			line := fmt.Sprintf("g, %s, ", m.Role.Name)
 			if err := persist.LoadPolicyLine(line, model); err != nil {
 				return fmt.Errorf("failed to load group policy. error: %w", err)
 			}
 		}
 
-		for _, v := range mf.Role.Extends {
-			line := fmt.Sprintf("g, %s, %s", mf.Role.Name, v)
-			// logger.Debug("role line ", line)
+		for _, v := range m.Role.Extends {
+			line := fmt.Sprintf("g, %s, %s", m.Role.Name, v)
 			if err := persist.LoadPolicyLine(line, model); err != nil {
 				return fmt.Errorf("failed to load group policy. error: %w", err)
 			}

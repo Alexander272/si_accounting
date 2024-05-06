@@ -3,35 +3,35 @@ package employees
 import (
 	"net/http"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
 type EmployeeHandlers struct {
 	service services.Employee
-	errBot  error_bot.ErrorBotApi
 }
 
-func NewEmployeeHandlers(service services.Employee, errBot error_bot.ErrorBotApi) *EmployeeHandlers {
+func NewEmployeeHandlers(service services.Employee) *EmployeeHandlers {
 	return &EmployeeHandlers{
 		service: service,
-		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Employee, errBot error_bot.ErrorBotApi) {
-	handlers := NewEmployeeHandlers(service, errBot)
+func Register(api *gin.RouterGroup, service services.Employee, middleware *middleware.Middleware) {
+	handlers := NewEmployeeHandlers(service)
 
 	employees := api.Group("/employees")
 	{
-		employees.GET("", handlers.GetAll)
-		employees.GET("/:departmentId", handlers.GetByDepartment)
-		employees.POST("", handlers.Create)
-		employees.PUT("/:id", handlers.Update)
-		employees.DELETE("/:id", handlers.Delete)
+		employees.GET("", middleware.CheckPermissions(constants.Employee, constants.Read), handlers.GetAll)
+		employees.GET("/:departmentId", middleware.CheckPermissions(constants.Employee, constants.Read), handlers.GetByDepartment)
+		employees.POST("", middleware.CheckPermissions(constants.Employee, constants.Write), handlers.Create)
+		employees.PUT("/:id", middleware.CheckPermissions(constants.Employee, constants.Write), handlers.Update)
+		employees.DELETE("/:id", middleware.CheckPermissions(constants.Employee, constants.Write), handlers.Delete)
 	}
 }
 
@@ -46,7 +46,7 @@ func (h *EmployeeHandlers) GetAll(c *gin.Context) {
 	employees, err := h.service.GetAll(c, models.GetEmployeesDTO{Filters: filter})
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), filter)
+		error_bot.Send(c, err.Error(), filter)
 		return
 	}
 
@@ -63,7 +63,7 @@ func (h *EmployeeHandlers) GetByDepartment(c *gin.Context) {
 	users, err := h.service.GetByDepartment(c, departmentId)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), departmentId)
+		error_bot.Send(c, err.Error(), departmentId)
 		return
 	}
 
@@ -79,7 +79,7 @@ func (h *EmployeeHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -102,7 +102,7 @@ func (h *EmployeeHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -118,7 +118,7 @@ func (h *EmployeeHandlers) Delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), id)
+		error_bot.Send(c, err.Error(), id)
 		return
 	}
 

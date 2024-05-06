@@ -32,7 +32,7 @@ func (s *ErrorBotService) Send(ctx context.Context, data bot.Data) {
 		var err error
 		req, err = json.Marshal(data.Request)
 		if err != nil {
-			logger.Errorf("failed to marshal request body. error: %s", err.Error())
+			logger.Error("failed to marshal request body.", logger.ErrAttr(err))
 		}
 	}
 
@@ -52,11 +52,11 @@ func (s *ErrorBotService) Send(ctx context.Context, data bot.Data) {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(message); err != nil {
-		logger.Errorf("failed to encode struct. error: %s", err.Error())
+		logger.Error("failed to encode struct.", logger.ErrAttr(err))
 	}
 
 	_, err := http.Post(s.URL, "application/json", &buf)
 	if err != nil {
-		logger.Errorf("failed to send error to bot. error: %s", err.Error())
+		logger.Error("failed to send error to bot.", logger.ErrAttr(err))
 	}
 }

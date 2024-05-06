@@ -13,12 +13,30 @@ import (
 )
 
 type SIRepo struct {
-	db *sqlx.DB
+	db           *sqlx.DB
+	formatFields map[string]string
 }
 
 func NewSIRepo(db *sqlx.DB) *SIRepo {
+	format := make(map[string]string)
+
+	format["name"] = "name"
+	format["type"] = "type"
+	format["factoryNumber"] = "factory_number"
+	format["measurementLimits"] = "measurement_limits"
+	format["accuracy"] = "accuracy"
+	format["stateRegister"] = "state_register"
+	format["manufacturer"] = "manufacturer"
+	format["yearOfIssue"] = "year_of_issue"
+	format["interVerificationInterval"] = "inter_verification_interval"
+	format["notes"] = "notes"
+	format["verificationDate"] = "date"
+	format["nextVerificationDate"] = "next_date"
+	format["place"] = "department_id"
+
 	return &SIRepo{
-		db: db,
+		db:           db,
+		formatFields: format,
 	}
 }
 
@@ -35,14 +53,14 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 
 	order := " ORDER BY "
 	for _, s := range req.Sort {
-		order += fmt.Sprintf("%s %s, ", s.Field, s.Type)
+		order += fmt.Sprintf("%s %s, ", r.formatFields[s.Field], s.Type)
 	}
 	order += "created_at, id"
 
 	filter := ""
 	for _, ns := range req.Filters {
 		for _, sv := range ns.Values {
-			filter += " AND " + getFilterLine(sv.CompareType, ns.Field, count)
+			filter += " AND " + getFilterLine(sv.CompareType, r.formatFields[ns.Field], count)
 			if sv.CompareType == "in" {
 				sv.Value = strings.ReplaceAll(sv.Value, ",", "|")
 			}
@@ -51,7 +69,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 		}
 	}
 
-	params = append(params, req.Page.Limit, req.Page.Offset)
+	params = append(params, req.Status, req.Page.Limit, req.Page.Offset)
 
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, year_of_issue, 
 		inter_verification_interval, notes, i.status, v.date, v.next_date, m.place, COUNT(*) OVER() as total_count
@@ -59,9 +77,9 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place, department_id 
 			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) as m ON TRUE
-		WHERE i.status='%s'%s%s LIMIT $%d OFFSET $%d`,
-		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable, constants.InstrumentStatusWork,
-		filter, order, count, count+1,
+		WHERE i.status=$%d%s%s LIMIT $%d OFFSET $%d`,
+		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable,
+		count, filter, order, count+1, count+2,
 	)
 
 	// logger.Debug(query)
@@ -96,15 +114,17 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 }
 
 func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (nots []models.Notification, err error) {
+	var params []interface{}
 	periodCond := ""
 	status := constants.LocationStatusMoved
 	notType := "receiving"
-	if req.StartAt != "" {
+	params = append(params, status)
+	if req.StartAt != 0 {
 		status = constants.LocationStatusUsed
 		periodCond = "AND next_date>=$2 AND next_date<=$3"
 		notType = ""
+		params = append(params, req.StartAt, req.FinishAt)
 	}
-	var params []interface{}
 
 	var data []models.SIFromNotification
 	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, COALESCE(e.name, '') AS person, COALESCE(d.name, '') AS department,
@@ -120,19 +140,18 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 		InstrumentTable, VerificationTable, SIMovementTable, EmployeeTable, DepartmentTable, EmployeeTable, periodCond,
 	)
 
-	params = append(params, status)
-	if req.StartAt != "" {
-		startAt, err := time.Parse(constants.DateFormat, req.StartAt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse start date. error: %w", err)
-		}
-		finishAt, err := time.Parse(constants.DateFormat, req.FinishAt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse finish date. error: %w", err)
-		}
+	// if req.StartAt != "" {
+	// 	startAt, err := time.Parse(constants.DateFormat, req.StartAt)
+	// 	if err != nil {
+	// 		return nil, fmt.Errorf("failed to parse start date. error: %w", err)
+	// 	}
+	// 	finishAt, err := time.Parse(constants.DateFormat, req.FinishAt)
+	// 	if err != nil {
+	// 		return nil, fmt.Errorf("failed to parse finish date. error: %w", err)
+	// 	}
 
-		params = append(params, startAt.Unix(), finishAt.Unix())
-	}
+	// 	params = append(params, startAt.Unix(), finishAt.Unix())
+	// }
 
 	if err := r.db.Select(&data, query, params...); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)

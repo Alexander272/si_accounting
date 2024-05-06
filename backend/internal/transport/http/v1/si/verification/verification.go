@@ -8,35 +8,34 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/verification/documents"
+	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type VerificationHandlers struct {
 	service services.Verification
-	errBot  error_bot.ErrorBotApi
 }
 
-func NewVerificationHandlers(service services.Verification, errBot error_bot.ErrorBotApi) *VerificationHandlers {
+func NewVerificationHandlers(service services.Verification) *VerificationHandlers {
 	return &VerificationHandlers{
 		service: service,
-		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Verification, docs services.Documents, errBot error_bot.ErrorBotApi) {
-	handlers := NewVerificationHandlers(service, errBot)
+func Register(api *gin.RouterGroup, service services.Verification, docs services.Documents, middleware *middleware.Middleware) {
+	handlers := NewVerificationHandlers(service)
 
 	verifications := api.Group("/verifications")
 	{
-		verifications.GET("/:instrumentId", handlers.GetLast)
-		verifications.GET("/all/:instrumentId", handlers.GetByInstrumentId)
-		verifications.POST("", handlers.Create)
-		verifications.PUT("/:id", handlers.Update)
+		verifications.GET("/:instrumentId", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetLast)
+		verifications.GET("/all/:instrumentId", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetByInstrumentId)
+		verifications.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Create)
+		verifications.PUT("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Update)
 	}
-	documents.Register(verifications, docs, errBot)
+	documents.Register(verifications, docs, middleware)
 }
 
 func (h *VerificationHandlers) GetLast(c *gin.Context) {
@@ -53,7 +52,7 @@ func (h *VerificationHandlers) GetLast(c *gin.Context) {
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), instrumentId)
+		error_bot.Send(c, err.Error(), instrumentId)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: verification})
@@ -69,7 +68,7 @@ func (h *VerificationHandlers) GetByInstrumentId(c *gin.Context) {
 	verifications, err := h.service.GetByInstrumentId(c, instrumentId)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), instrumentId)
+		error_bot.Send(c, err.Error(), instrumentId)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: verifications})
@@ -84,7 +83,7 @@ func (h *VerificationHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -119,7 +118,7 @@ func (h *VerificationHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 

@@ -59,7 +59,7 @@ func (r *EmployeeRepo) GetAll(ctx context.Context, req models.GetEmployeesDTO) (
 }
 
 func (r *EmployeeRepo) GetByDepartment(ctx context.Context, departmentId string) (employees []models.Employee, err error) {
-	query := fmt.Sprintf(`SELECT id, name, most_id FROM %s WHERE department_id=$1`, EmployeeTable)
+	query := fmt.Sprintf(`SELECT id, name, most_id FROM %s WHERE department_id=$1 ORDER BY name`, EmployeeTable)
 
 	if err := r.db.Select(&employees, query, departmentId); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)

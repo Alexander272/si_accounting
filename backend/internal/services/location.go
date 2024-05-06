@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/repository"
+	"github.com/goccy/go-json"
 )
 
 type LocationService struct {
@@ -29,7 +32,7 @@ type Location interface {
 	CreateSeveral(context.Context, models.CreateSeveralLocationDTO) (bool, error)
 	Create(context.Context, models.CreateLocationDTO) error
 	Update(context.Context, models.UpdateLocationDTO) error
-	Receiving(context.Context, models.ReceivingDTO) error
+	Receiving(context.Context, models.DialogResponse) error
 	Delete(context.Context, string) error
 }
 
@@ -98,6 +101,10 @@ func (s *LocationService) CreateSeveral(ctx context.Context, dto models.CreateSe
 		}
 	}
 
+	if len(dto.Locations) == 0 {
+		return isFull, nil
+	}
+
 	if err := s.repo.CreateSeveral(ctx, dto.Locations); err != nil {
 		return isFull, fmt.Errorf("failed to create several locations. error: %w", err)
 	}
@@ -111,12 +118,79 @@ func (s *LocationService) Update(ctx context.Context, location models.UpdateLoca
 	return nil
 }
 
-func (s *LocationService) Receiving(ctx context.Context, location models.ReceivingDTO) error {
+// Получение инструментов. Запрос прилетает из канала mattermost
+func (s *LocationService) ReceivingOld(ctx context.Context, location models.ReceivingDTO) error {
 	if err := s.repo.Receiving(ctx, location); err != nil {
 		return fmt.Errorf("failed to receiving si location. error: %w", err)
 	}
-	if err := s.most.Update(ctx, location.PostID); err != nil {
+
+	// Обновление сообщения в канале (чтобы там хоть что-то менялось и пользователь видел реакцию на его действия)
+	// if err := s.most.Update(ctx, location); err != nil {
+	// 	return err
+	// }
+	return nil
+}
+func (s *LocationService) Receiving(ctx context.Context, dto models.DialogResponse) error {
+	post := models.UpdatePostData{}
+	InstrumentIds := []string{}
+
+	state := strings.Split(dto.State, "&")
+	for _, s := range state {
+		arr := strings.SplitN(s, ":", 2)
+		switch arr[0] {
+		case "PostId":
+			post.PostID = arr[1]
+		case "Status":
+			post.Status = arr[1]
+		case "SI":
+			err := json.Unmarshal([]byte(arr[1]), &post.Instruments)
+			if err != nil {
+				return fmt.Errorf("failed to json unmarshal. error: %w", err)
+			}
+		}
+	}
+
+	for k, v := range dto.Submission {
+		if v {
+			InstrumentIds = append(InstrumentIds, k)
+		} else {
+			for _, v := range post.Instruments {
+				if v.Id == k {
+					post.Missing = append(post.Missing, v)
+					break
+				}
+			}
+		}
+	}
+
+	location := models.ReceivingDTO{
+		// PostID:        PostID,
+		InstrumentIds: InstrumentIds,
+		// Missing:       missing,
+		Status: post.Status,
+	}
+
+	if err := s.repo.Receiving(ctx, location); err != nil {
+		return fmt.Errorf("failed to receiving si location. error: %w", err)
+	}
+
+	// Обновление сообщения в канале (чтобы там хоть что-то менялось и пользователь видел реакцию на его действия)
+	if err := s.most.Update(ctx, post); err != nil {
 		return err
+	}
+
+	// Отправка сообщения для подтверждения получения оставшихся инструментов
+	if len(post.Missing) != 0 {
+		not := models.Notification{
+			MostId:  dto.UserID,
+			Type:    constants.StatusReceiving,
+			Status:  post.Status,
+			Message: "Подтвердите получение инструментов",
+			SI:      post.Missing,
+		}
+		if err := s.most.Send(ctx, not); err != nil {
+			return err
+		}
 	}
 	return nil
 }

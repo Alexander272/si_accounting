@@ -3,14 +3,11 @@ package v1
 import (
 	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/auth"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/employees"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/menu"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/menu_item"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/menu_with_api"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/file"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/roles"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/instrument"
@@ -24,14 +21,12 @@ type Handler struct {
 	services   *services.Services
 	conf       *config.Config
 	middleware *middleware.Middleware
-	cookieName string
 }
 
 type Deps struct {
 	Services   *services.Services
 	Conf       *config.Config
 	Middleware *middleware.Middleware
-	CookieName string
 }
 
 func NewHandler(deps Deps) *Handler {
@@ -39,7 +34,6 @@ func NewHandler(deps Deps) *Handler {
 		services:   deps.Services,
 		conf:       deps.Conf,
 		middleware: deps.Middleware,
-		cookieName: deps.CookieName,
 	}
 }
 
@@ -77,25 +71,26 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	v1 := group.Group("/v1")
 
 	// errBot := error_bot.NewErrorBotApi(h.conf.ErrorBot.Url, h.conf.ErrorBot.ApiPath)
-	errBot := error_bot.NewErrorBotApi(h.services.ErrorBot)
 
-	auth.Register(v1, auth.Deps{Service: h.services.Session, Auth: h.conf.Auth, CookieName: h.cookieName, ErrBot: errBot})
+	auth.Register(v1, auth.Deps{Service: h.services.Session, Auth: h.conf.Auth})
 
 	// secure := v1.Group("")
-	secure := v1.Group("", h.middleware.VerifyToken, h.middleware.CheckPermissions)
+	secure := v1.Group("", h.middleware.VerifyToken)
 
 	siGroup := secure.Group("/si")
-	si.Register(siGroup, h.services.SI, errBot)
-	instrument.Register(siGroup, h.services.Instrument, errBot)
-	verification.Register(siGroup, h.services.Verification, h.services.Documents, errBot)
-	location.Register(siGroup, h.services.Location, errBot)
-	receiving.Register(v1, h.services.Location, errBot)
+	si.Register(siGroup, h.services.SI, h.middleware)
+	instrument.Register(siGroup, h.services.Instrument, h.middleware)
+	verification.Register(siGroup, h.services.Verification, h.services.Documents, h.middleware)
+	location.Register(siGroup, h.services.Location, h.middleware)
+	receiving.Register(v1, h.services.Location, h.middleware)
 
-	departments.Register(secure, h.services.Department, errBot)
-	employees.Register(secure, h.services.Employee, errBot)
+	file.Register(secure, h.services.File, h.middleware)
 
-	roles.Register(secure, h.services.Role, errBot)
-	menu.Register(secure, h.services.Menu, errBot)
-	menu_item.Register(secure, h.services.MenuItem, errBot)
-	menu_with_api.Register(secure, h.services.MenuWithApi, errBot)
+	departments.Register(secure, h.services.Department, h.middleware)
+	employees.Register(secure, h.services.Employee, h.middleware)
+
+	roles.Register(secure, h.services.Role, h.middleware)
+	// menu.Register(secure, h.services.Menu, errBot)
+	// menu_item.Register(secure, h.services.MenuItem, errBot)
+	// menu_with_api.Register(secure, h.services.MenuWithApi, errBot)
 }

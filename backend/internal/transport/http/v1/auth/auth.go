@@ -5,34 +5,29 @@ import (
 	"strings"
 
 	"github.com/Alexander272/si_accounting/backend/internal/config"
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type AuthHandler struct {
-	service    services.Session
-	auth       config.AuthConfig
-	cookieName string
-	errBot     error_bot.ErrorBotApi
+	service services.Session
+	auth    config.AuthConfig
 }
 
 type Deps struct {
-	Service    services.Session
-	Auth       config.AuthConfig
-	CookieName string
-	ErrBot     error_bot.ErrorBotApi
+	Service services.Session
+	Auth    config.AuthConfig
 }
 
 func NewAuthHandlers(deps Deps) *AuthHandler {
 	return &AuthHandler{
-		service:    deps.Service,
-		auth:       deps.Auth,
-		cookieName: deps.CookieName,
-		errBot:     deps.ErrBot,
+		service: deps.Service,
+		auth:    deps.Auth,
 	}
 }
 
@@ -60,7 +55,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 			logger.StringAttr("section", "auth"),
 			logger.StringAttr("ip", c.ClientIP()),
 			logger.StringAttr("username", dto.Username),
-			logger.ErrorAttr(err),
+			logger.ErrAttr(err),
 		)
 
 		if strings.Contains(err.Error(), "invalid_grant") {
@@ -68,7 +63,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -85,12 +80,12 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 	)
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie(h.cookieName, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
+	c.SetCookie(constants.AuthCookie, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
 	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }
 
 func (h *AuthHandler) SignOut(c *gin.Context) {
-	refreshToken, err := c.Cookie(h.cookieName)
+	refreshToken, err := c.Cookie(constants.AuthCookie)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "Сессия не найдена")
 		return
@@ -98,7 +93,7 @@ func (h *AuthHandler) SignOut(c *gin.Context) {
 
 	if err := h.service.SignOut(c, refreshToken); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), refreshToken)
+		error_bot.Send(c, err.Error(), refreshToken)
 		return
 	}
 
@@ -113,12 +108,12 @@ func (h *AuthHandler) SignOut(c *gin.Context) {
 	)
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie(h.cookieName, "", -1, "/", domain, h.auth.Secure, true)
+	c.SetCookie(constants.AuthCookie, "", -1, "/", domain, h.auth.Secure, true)
 	c.JSON(http.StatusNoContent, response.IdResponse{})
 }
 
 func (h *AuthHandler) Refresh(c *gin.Context) {
-	refreshToken, err := c.Cookie(h.cookieName)
+	refreshToken, err := c.Cookie(constants.AuthCookie)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "Сессия не найдена")
 		return
@@ -131,7 +126,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), refreshToken)
+		error_bot.Send(c, err.Error(), refreshToken)
 		return
 	}
 
@@ -148,6 +143,6 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	// )
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie(h.cookieName, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
+	c.SetCookie(constants.AuthCookie, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
 	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }

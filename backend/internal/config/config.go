@@ -11,6 +11,8 @@ import (
 type (
 	Config struct {
 		Environment string `yaml:"environment" env:"APP_ENV" env-default:"dev"`
+		LogLevel    string `yaml:"log_level" env-default:"info"`
+		LogSource   bool   `yaml:"log_source" env-default:"false"`
 		// Redis        RedisConfig
 		Postgres     PostgresConfig
 		Auth         AuthConfig

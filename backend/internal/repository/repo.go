@@ -30,14 +30,8 @@ type Employee interface {
 type Role interface {
 	postgres.Role
 }
-type ApiPaths interface {
-	postgres.Api
-}
 type MenuItem interface {
 	postgres.MenuItem
-}
-type MenuWithApi interface {
-	postgres.MenuWithApi
 }
 type Menu interface {
 	postgres.Menu
@@ -55,9 +49,7 @@ type Repository struct {
 	Department
 	Employee
 	Role
-	ApiPaths
 	MenuItem
-	MenuWithApi
 	Menu
 	DefaultFilter
 }
@@ -72,9 +64,7 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Department:    postgres.NewDepartmentRepo(db),
 		Employee:      postgres.NewEmployeeRepo(db),
 		Role:          postgres.NewRoleRepo(db),
-		ApiPaths:      postgres.NewApiRepo(db),
 		MenuItem:      postgres.NewMenuItemRepo(db),
-		MenuWithApi:   postgres.NewMenuWithApiRepo(db),
 		Menu:          postgres.NewMenuRepo(db),
 		DefaultFilter: postgres.NewDefaultFilterRepo(db),
 	}

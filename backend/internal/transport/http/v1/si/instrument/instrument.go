@@ -8,33 +8,32 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type InstrumentHandlers struct {
 	service services.Instrument
-	errBot  error_bot.ErrorBotApi
 }
 
-func NewInstrumentHandlers(service services.Instrument, errBot error_bot.ErrorBotApi) *InstrumentHandlers {
+func NewInstrumentHandlers(service services.Instrument) *InstrumentHandlers {
 	return &InstrumentHandlers{
 		service: service,
-		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Instrument, errBot error_bot.ErrorBotApi) {
-	handlers := NewInstrumentHandlers(service, errBot)
+func Register(api *gin.RouterGroup, service services.Instrument, middleware *middleware.Middleware) {
+	handlers := NewInstrumentHandlers(service)
 
 	instruments := api.Group("/instruments")
 	{
 		// instruments.GET("")
-		instruments.GET("/:id", handlers.GetById)
-		instruments.POST("", handlers.Create)
-		instruments.PUT("/:id", handlers.Update)
-		instruments.DELETE("/:id", handlers.Delete)
+		instruments.GET("/:id", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetById)
+		instruments.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Create)
+		instruments.PUT("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Update)
+		instruments.DELETE("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Delete)
 	}
 }
 
@@ -52,7 +51,7 @@ func (h *InstrumentHandlers) GetById(c *gin.Context) {
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), id)
+		error_bot.Send(c, err.Error(), id)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: instrument})
@@ -67,7 +66,7 @@ func (h *InstrumentHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -102,7 +101,7 @@ func (h *InstrumentHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -126,7 +125,7 @@ func (h *InstrumentHandlers) Delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), id)
+		error_bot.Send(c, err.Error(), id)
 		return
 	}
 

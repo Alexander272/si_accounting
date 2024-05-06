@@ -58,6 +58,19 @@ type ConfirmationContext struct {
 	Status        string   `json:"status"`
 	Type          string   `json:"type"`
 }
+type FormField struct {
+	Id       string `json:"name"`
+	Title    string `json:"display_name"`
+	Name     string `json:"placeholder"`
+	Type     string `json:"type"`
+	Default  string `json:"default"`
+	Optional bool   `json:"optional"`
+
+	// display_name	String	Display name of the field shown to the user in the dialog. Maximum 24 characters.
+	// name	String	Name of the field element used by the integration. Maximum 300 characters. You should use unique name fields in the same dialog.
+	// type	String	Set this value to bool for a checkbox element.
+	// default	String	(Optional) Set a default value for this form element. true or false.
+}
 
 type CreatePostDTO struct {
 	UserId      string                   `json:"userId" binding:"required"`
@@ -74,7 +87,25 @@ type UpdatePostDTO struct {
 	Attachments []*model.SlackAttachment `json:"attachments"`
 }
 
+type UpdatePostData struct {
+	PostID      string
+	Status      string
+	Missing     []SelectedSI
+	Instruments []SelectedSI
+}
+
 type Props struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+type DialogResponse struct {
+	Type       string          `json:"type"`
+	CallbackID string          `json:"callback_id"`
+	State      string          `json:"state"`
+	UserID     string          `json:"user_id"`
+	ChannelID  string          `json:"channel_id"`
+	TeamID     string          `json:"team_id"`
+	Submission map[string]bool `json:"submission"`
+	Cancelled  bool            `json:"cancelled"`
 }

@@ -3,34 +3,34 @@ package departments
 import (
 	"net/http"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
-	"github.com/Alexander272/si_accounting/backend/internal/transport/http/api/error_bot"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/gin-gonic/gin"
 )
 
 type DepartmentHandlers struct {
 	service services.Department
-	errBot  error_bot.ErrorBotApi
 }
 
-func NewDepartmentHandlers(service services.Department, errBot error_bot.ErrorBotApi) *DepartmentHandlers {
+func NewDepartmentHandlers(service services.Department) *DepartmentHandlers {
 	return &DepartmentHandlers{
 		service: service,
-		errBot:  errBot,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Department, errBot error_bot.ErrorBotApi) {
-	handlers := NewDepartmentHandlers(service, errBot)
+func Register(api *gin.RouterGroup, service services.Department, middleware *middleware.Middleware) {
+	handlers := NewDepartmentHandlers(service)
 
 	departments := api.Group("/departments")
 	{
-		departments.GET("", handlers.GetAll)
-		departments.POST("", handlers.Create)
-		departments.PUT("/:id", handlers.Update)
-		departments.DELETE("/:id", handlers.Delete)
+		departments.GET("", middleware.CheckPermissions(constants.Department, constants.Read), handlers.GetAll)
+		departments.POST("", middleware.CheckPermissions(constants.Department, constants.Write), handlers.Create)
+		departments.PUT("/:id", middleware.CheckPermissions(constants.Department, constants.Write), handlers.Update)
+		departments.DELETE("/:id", middleware.CheckPermissions(constants.Department, constants.Write), handlers.Delete)
 	}
 }
 
@@ -38,7 +38,7 @@ func (h *DepartmentHandlers) GetAll(c *gin.Context) {
 	departments, err := h.service.GetAll(c)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), nil)
+		error_bot.Send(c, err.Error(), nil)
 		return
 	}
 
@@ -54,7 +54,7 @@ func (h *DepartmentHandlers) Create(c *gin.Context) {
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -76,7 +76,7 @@ func (h *DepartmentHandlers) Update(c *gin.Context) {
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (h *DepartmentHandlers) Delete(c *gin.Context) {
 
 	if err := h.service.Delete(c, id); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		h.errBot.Send(c, err.Error(), id)
+		error_bot.Send(c, err.Error(), id)
 		return
 	}
 
