@@ -33,12 +33,56 @@ func (s *FileService) Export(ctx context.Context, params models.SIParams) (*byte
 	file := excelize.NewFile()
 	sheetName := file.GetSheetName(file.GetActiveSheetIndex())
 
+	headerStyle, err := file.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "top", Style: 1, Color: "#000000"},
+			{Type: "bottom", Style: 1, Color: "#000000"},
+			{Type: "left", Style: 1, Color: "#000000"},
+			{Type: "right", Style: 1, Color: "#000000"},
+		},
+		Alignment: &excelize.Alignment{
+			WrapText:   true,
+			Horizontal: "center",
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create header style. error: %w", err)
+	}
+
+	mainStyle, err := file.NewStyle(&excelize.Style{
+		Border: []excelize.Border{
+			{Type: "top", Style: 1, Color: "#000000"},
+			{Type: "bottom", Style: 1, Color: "#000000"},
+			{Type: "left", Style: 1, Color: "#000000"},
+			{Type: "right", Style: 1, Color: "#000000"},
+		},
+		Alignment: &excelize.Alignment{
+			WrapText: true,
+			Vertical: "center",
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create main style. error: %w", err)
+	}
+
 	columnNames := []string{
 		"Наименование", "Тип СИ", "Заводской номер", "Пределы измерений", "Точность, цена деления, погрешность", "Госреестр СИ", "Изготовитель",
 		"Год выпуска", "Дата поверки (калибровки)", "Межповерочный интервал", "Следующая поверка (калибровка)", "Место нахождения", "Примечание",
 	}
 	if err := file.SetSheetRow(sheetName, "A1", &columnNames); err != nil {
 		return nil, fmt.Errorf("failed to set header row. error: %w", err)
+	}
+
+	endColumn, err := excelize.ColumnNumberToName(len(columnNames))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get column name. error: %w", err)
+	}
+
+	if err := file.SetColWidth(sheetName, "A", endColumn, 25); err != nil {
+		return nil, fmt.Errorf("failed to set column width. error: %w", err)
+	}
+	if err = file.SetCellStyle(sheetName, "A1", endColumn+"1", headerStyle); err != nil {
+		return nil, fmt.Errorf("failed to set header style. error: %w", err)
 	}
 
 	for i, d := range data.SI {
@@ -49,6 +93,9 @@ func (s *FileService) Export(ctx context.Context, params models.SIParams) (*byte
 
 		if err := file.SetSheetRow(sheetName, fmt.Sprintf("A%d", i+2), &values); err != nil {
 			return nil, fmt.Errorf("failed to set header row. error: %w", err)
+		}
+		if err = file.SetCellStyle(sheetName, fmt.Sprintf("A%d", i+2), fmt.Sprintf("%s%d", endColumn, i+2), mainStyle); err != nil {
+			return nil, fmt.Errorf("failed to set style. error: %w", err)
 		}
 	}
 
@@ -82,6 +129,7 @@ func (s *FileService) MakeVerificationSchedule(ctx context.Context, params model
 			{Type: "right", Style: 1, Color: "#000000"},
 		},
 		Alignment: &excelize.Alignment{
+			WrapText:   true,
 			Horizontal: "center",
 		},
 	})
