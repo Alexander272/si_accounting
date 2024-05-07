@@ -1,5 +1,5 @@
 import { Size } from '@/constants/defaultValues'
-import type { IDataItem, ISIParams } from '../types/data'
+import type { IDataItem, ISIParams } from '../features/dataTable/types/data'
 
 export const buildSiUrlParams = (req: ISIParams): URLSearchParams => {
 	const params: string[][] = []

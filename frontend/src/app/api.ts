@@ -19,6 +19,8 @@ export const API = {
 		documents: {
 			base: 'si/verifications/documents',
 		},
+		export: 'files',
+		schedule: 'files/schedule',
 		base: 'si',
 		save: 'si/save',
 	},

@@ -6,15 +6,12 @@ import { DataHeader } from './DataHeader'
 import { DataFooter } from './DataFooter'
 // import { CustomHeader } from './CustomHeader/CustomHeader'
 import { Table } from './Table/Table'
-import { useGetAllSI } from '../hooks/getAllSI'
 
 // type Props = {
 // 	status?: SIStatus
 // }
 
 export const DataTable2 = () => {
-	const { isFetching } = useGetAllSI()
-
 	return (
 		<Box
 			borderRadius={3}
@@ -36,7 +33,7 @@ export const DataTable2 = () => {
 				loading={isFetching}
 				header={<CustomHeader />}
 			/> */}
-			<Table loading={isFetching} />
+			<Table />
 
 			<DataFooter />
 		</Box>

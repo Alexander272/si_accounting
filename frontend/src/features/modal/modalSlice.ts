@@ -15,6 +15,7 @@ export type ModalSelectors =
 	| 'Confirm'
 	| 'ViewLocationHistory'
 	| 'ViewVerificationHistory'
+	| 'Period'
 	| 'Test'
 
 interface IModalState {

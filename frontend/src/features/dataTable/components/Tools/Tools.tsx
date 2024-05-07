@@ -8,11 +8,13 @@ import { useAppSelector } from '@/hooks/redux'
 import { PermRules } from '@/constants/permissions'
 import { useModal } from '@/features/modal/hooks/useModal'
 import { useCheckPermission } from '@/features/auth/hooks/check'
-import { getSelectedItems } from '@/features/dataTable/dataTableSlice'
+import { getSIStatus, getSelectedItems, getTableFilter, getTableSort } from '@/features/dataTable/dataTableSlice'
+import { useLazyExportQuery } from '@/features/files/filesApiSlice'
 import { VerifyIcon } from '@/components/Icons/VerifyIcon'
 import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
 import { FileDownloadIcon } from '@/components/Icons/FileDownloadIcon'
 import { EditEmployeeIcon } from '@/components/Icons/EditEmployeeIcon'
+import { DocumentCheckIcon } from '@/components/Icons/DocumentCheckIcon'
 
 export const Tools = () => {
 	const anchor = useRef<HTMLButtonElement>(null)
@@ -23,16 +25,29 @@ export const Tools = () => {
 
 	const selected = useAppSelector(getSelectedItems)
 
+	const status = useAppSelector(getSIStatus)
+	const sort = useAppSelector(getTableSort)
+	const filter = useAppSelector(getTableFilter)
+
+	const [exportData] = useLazyExportQuery()
+
 	const toggleHandler = () => setOpen(prev => !prev)
 
-	const modalHandler = (selector: ModalSelectors) => () => {
-		toggleHandler()
-		if (!selected.length) toast.error('Инструменты не выбраны')
-		else openModal(selector)
-	}
+	const modalHandler =
+		(selector: ModalSelectors, notEmpty = true) =>
+		() => {
+			toggleHandler()
+			if (notEmpty && !selected.length) toast.error('Инструменты не выбраны')
+			else openModal(selector)
+		}
 
 	const linkHandler = (link: string) => () => {
 		navigate(link)
+	}
+
+	const exportHandler = async () => {
+		await exportData({ status, sort, filter })
+		toggleHandler()
 	}
 
 	const SIMenuItems = [
@@ -54,9 +69,15 @@ export const Tools = () => {
 			</ListItemIcon>
 			Редактировать подразделения
 		</MenuItem>,
-		<MenuItem key='graph' disabled>
+		<MenuItem key='export' onClick={exportHandler}>
 			<ListItemIcon>
 				<FileDownloadIcon fontSize={20} fill={'#757575'} />
+			</ListItemIcon>
+			Экспортировать
+		</MenuItem>,
+		<MenuItem key='graph' onClick={modalHandler('Period', false)}>
+			<ListItemIcon>
+				<DocumentCheckIcon fontSize={20} fill={'#757575'} />
 			</ListItemIcon>
 			Создать график поверки
 		</MenuItem>,

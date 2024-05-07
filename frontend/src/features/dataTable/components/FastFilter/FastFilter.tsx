@@ -121,7 +121,7 @@ export const FastFilter = () => {
 				<Badge
 					color='secondary'
 					variant='dot'
-					invisible={!filter}
+					invisible={!filter?.length}
 					anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
 					sx={{ mr: 1 }}
 				>

@@ -1,4 +1,4 @@
-export const ModalTitles = {
+export const ModalTitles = Object.freeze({
 	ADD_ITEM: 'Добавить СИ',
 	EDIT_ITEM: 'Редактировать СИ',
 	NEW_VERIFICATION: 'Добавить поверку',
@@ -12,4 +12,6 @@ export const ModalTitles = {
 
 	MOVEMENT_HISTORY: 'История перемещений',
 	VERIFICATION_HISTORY: 'История поверок',
-}
+
+	PERIOD: 'Укажите период',
+})

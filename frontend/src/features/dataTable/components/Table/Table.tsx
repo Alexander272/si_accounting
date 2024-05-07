@@ -5,6 +5,7 @@ import { Body } from './Body/Body'
 import { Header } from './Head/Header'
 import { ContextMenu } from '../ContextMenu/ContextMenu'
 import { useContextMenu } from '../../hooks/useContextMenu'
+import { useGetAllSI } from '../../hooks/getAllSI'
 
 type Props = {
 	loading?: boolean
@@ -14,14 +15,16 @@ type Props = {
 }
 
 //TODO по хорошему всякие обработчики кликов и подобного надо передавать снаружи. контекстное меню тоже должно зависеть от таблицы
-export const Table: FC<Props> = ({ loading }) => {
+export const Table: FC<Props> = () => {
+	const { isFetching } = useGetAllSI()
+
 	const { coordinates, isSelected, itemId, status, positionHandler } = useContextMenu()
 
 	return (
 		<Stack sx={{ maxWidth: '100%', overflowY: 'hidden', overflowX: 'auto', position: 'relative' }}>
 			<Header />
 
-			{loading && (
+			{isFetching && (
 				<Box width={'100%'} zIndex={5} marginY={'-2px'} height={4}>
 					<LinearProgress />
 				</Box>

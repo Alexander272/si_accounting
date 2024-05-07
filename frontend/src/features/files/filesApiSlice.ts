@@ -1,11 +1,15 @@
 import { toast } from 'react-toastify'
+import dayjs from 'dayjs'
 
+import type { IPeriodForm } from '@/components/Forms/PeriodForm/type'
+import type { ISIParams } from '../dataTable/types/data'
 import type { IDocument } from './types/file'
 import { HttpCodes } from '@/constants/httpCodes'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
 import { IBaseFetchError } from '@/app/types/error'
 import { saveAs } from '@/utils/saveAs'
+import { buildSiUrlParams } from '@/utils/buildUrlParams'
 
 type GetDocuments = {
 	verificationId: string
@@ -46,7 +50,6 @@ const filesApiSlice = apiSlice.injectEndpoints({
 
 				if (result.error) {
 					console.log(result.error)
-
 					const fetchError = (result.error.data as IBaseFetchError).error
 					toast.error(fetchError.data.message, { autoClose: false })
 				}
@@ -76,8 +79,58 @@ const filesApiSlice = apiSlice.injectEndpoints({
 			}),
 			invalidatesTags: [{ type: 'Verification', id: 'documents' }],
 		}),
+
+		export: builder.query<null, ISIParams>({
+			queryFn: async (params, _api, _, baseQuery) => {
+				const filename = `Список инструментов от ${dayjs().format('DD-MM-YYYY')}.xlsx`
+				const result = await baseQuery({
+					url: API.si.export,
+					params: buildSiUrlParams(params),
+					cache: 'no-cache',
+					responseHandler: response => (response.status === HttpCodes.OK ? response.blob() : response.json()),
+				})
+
+				if (result.error) {
+					console.log(result.error)
+					const fetchError = (result.error.data as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+
+				if (result.data instanceof Blob) saveAs(result.data, filename)
+				return { data: null }
+			},
+		}),
+		getVerificationSchedule: builder.query<null, IPeriodForm>({
+			queryFn: async (params, _api, _, baseQuery) => {
+				const filename = `График поверки от ${dayjs().format('DD-MM-YYYY')}.xlsx`
+				const result = await baseQuery({
+					url: API.si.schedule,
+					params: new URLSearchParams({
+						'period[gte]': params.gte.toString(),
+						'period[lte]': params.lte.toString(),
+					}),
+					cache: 'no-cache',
+					responseHandler: response => (response.status === HttpCodes.OK ? response.blob() : response.json()),
+				})
+
+				if (result.error) {
+					console.log(result.error)
+					const fetchError = (result.error.data as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+
+				if (result.data instanceof Blob) saveAs(result.data, filename)
+				return { data: null }
+			},
+		}),
 	}),
 })
 
-export const { useGetFileListQuery, useUploadFilesMutation, useLazyDownloadFileQuery, useDeleteFileMutation } =
-	filesApiSlice
+export const {
+	useGetFileListQuery,
+	useUploadFilesMutation,
+	useLazyDownloadFileQuery,
+	useDeleteFileMutation,
+	useLazyExportQuery,
+	useLazyGetVerificationScheduleQuery,
+} = filesApiSlice

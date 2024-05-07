@@ -13,6 +13,7 @@ import { EmployeeForm } from '@/features/employees/components/EmployeeForm'
 import { DepartmentForm } from '@/features/employees/components/DepartmentForm'
 import { LocationHistory } from '@/features/location/components/LocationHistory'
 import { VerificationHistory } from '@/features/verification/components/VerificationHistory'
+import { Schedule } from '@/features/dataTable/components/Schedule/Schedule'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
 
@@ -58,6 +59,8 @@ export const Modal = () => {
 					{selector == 'ViewLocationHistory' && ModalTitles.MOVEMENT_HISTORY}
 					{selector == 'ViewVerificationHistory' && ModalTitles.VERIFICATION_HISTORY}
 
+					{selector == 'Period' && ModalTitles.PERIOD}
+
 					{selector == 'Test' && ModalTitles.EDIT_ITEM}
 				</DialogTitle>
 
@@ -77,6 +80,8 @@ export const Modal = () => {
 
 				{selector == 'ViewLocationHistory' && <LocationHistory />}
 				{selector == 'ViewVerificationHistory' && <VerificationHistory />}
+
+				{selector == 'Period' && <Schedule />}
 
 				{selector == 'Test' && <CreateLocation />}
 			</DialogContent>

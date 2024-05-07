@@ -5,7 +5,7 @@ import type { IFetchError } from '@/app/types/error'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
 import { SIMessages } from '@/constants/messages/siMessage'
-import { buildSiUrlParams } from './utils/buildUrlParams'
+import { buildSiUrlParams } from '@/utils/buildUrlParams'
 
 const SIApiSlice = apiSlice.injectEndpoints({
 	overrideExisting: false,
