@@ -66,6 +66,7 @@ export const Header = () => {
 									<HeadBadge
 										color='primary'
 										badgeContent={Object.keys(tableSort).findIndex(k => k == c.id) + 1}
+										invisible={Object.keys(tableSort).length < 2}
 									>
 										<SortUpIcon fontSize={16} fill={tableSort[c.id] ? 'black' : '#adadad'} />
 									</HeadBadge>

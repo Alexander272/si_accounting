@@ -3,7 +3,9 @@ import { AppBar, Box, Stack, Toolbar } from '@mui/material'
 import { useAppSelector } from '@/hooks/redux'
 import { useSignOutMutation } from '@/features/auth/authApiSlice'
 import { getToken } from '@/features/user/userSlice'
+import { GeometryIcon } from '../Icons/GeometryIcon'
 import { NavButton } from './header.style'
+import logo from '@/assets/logo.webp'
 
 export const LayoutHeader = () => {
 	const [signOut] = useSignOutMutation()
@@ -25,15 +27,12 @@ export const LayoutHeader = () => {
 					// marginX: 'auto',
 				}}
 			>
-				<Box>{/* LOGO */}</Box>
+				<Box alignSelf={'center'} display={'flex'} alignItems={'center'}>
+					<img height={46} width={157} src={logo} alt='logo' />
+					<GeometryIcon fill={'#042245'} />
+				</Box>
 				{token && (
 					<Stack direction={'row'} spacing={3} minHeight={'100%'}>
-						{/* <NavLink to='/'>Главная</NavLink> */}
-
-						{/* {CheckPermission({ section: 'criterions', method: 'WRITE' }) && (
-						<NavLink to={'criterions'}>Критерии</NavLink>
-					)} */}
-
 						<NavButton onClick={signOutHandler}>Выйти</NavButton>
 					</Stack>
 				)}

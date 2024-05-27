@@ -56,7 +56,11 @@ export const Filter: FC<Props> = ({ cell }) => {
 		<>
 			<Tooltip title='Фильтр' arrow>
 				<IconButton ref={anchor} onClick={clickFilterHandler}>
-					<HeadBadge color='primary' badgeContent={(filters?.findIndex(f => f.field == cell.id) ?? -1) + 1}>
+					<HeadBadge
+						color='primary'
+						variant={(filters?.length || 0) > 1 ? 'standard' : 'dot'}
+						badgeContent={(filters?.findIndex(f => f.field == cell.id) ?? -1) + 1}
+					>
 						<FilterIcon fontSize={16} color={filter?.field === cell.id ? 'black' : '#adadad'} />
 					</HeadBadge>
 				</IconButton>
