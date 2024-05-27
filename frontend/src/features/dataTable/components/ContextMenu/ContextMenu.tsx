@@ -60,12 +60,6 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 			</ListItemIcon>
 			Добавить поверку
 		</MenuItem>,
-		<MenuItem key='location' disabled={status == 'moved'} onClick={contextHandler('NewLocation')}>
-			<ListItemIcon>
-				<ExchangeIcon fontSize={18} fill={'#757575'} />
-			</ListItemIcon>
-			Добавить перемещение
-		</MenuItem>,
 		// <MenuItem key='testEdit' onClick={contextHandler('Test')}>
 		// 	<ListItemIcon>
 		// 		<EditIcon fontSize={16} fill={'#757575'} />
@@ -73,8 +67,16 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 		// 	Тестирование
 		// </MenuItem>,
 	]
-	//TODO сделать новую форму для этого
 	const LocMenuItems = [
+		<MenuItem key='location' disabled={status == 'moved'} onClick={contextHandler('NewLocation')}>
+			<ListItemIcon>
+				<ExchangeIcon fontSize={18} fill={'#757575'} />
+			</ListItemIcon>
+			Добавить перемещение
+		</MenuItem>,
+	]
+
+	const ResMenuItems = [
 		<MenuItem key='location' disabled={status == 'moved'} onClick={contextHandler('SendToReserve')}>
 			<ListItemIcon>
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
@@ -92,8 +94,7 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 		>
 			{useCheckPermission(PermRules.SI.Write) ? SiMenuItemsWriter : null}
 			{useCheckPermission(PermRules.Location.Write) ? LocMenuItems : null}
-
-			{/* //TODO должны быть пункты для возврата и приема инструмента */}
+			{useCheckPermission(PermRules.Reserve.Write) ? ResMenuItems : null}
 
 			<MenuItem onClick={contextHandler('ViewVerificationHistory')}>
 				<ListItemIcon>

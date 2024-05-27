@@ -6,7 +6,7 @@ import type { ISIFilter } from '../../types/data'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
 import { FilterIcon } from '@/components/Icons/FilterIcon'
-import { getTableFilter, setFilters } from '../../dataTableSlice'
+import { getTableFilter, setFilters, setPage } from '../../dataTableSlice'
 import { DateFilter } from './DateFilter'
 import { ListFilter } from './ListFilter'
 import { NumberFilter } from './NumberFilter'
@@ -42,6 +42,7 @@ export const Filter: FC<Props> = ({ cell }) => {
 	}
 	const submitHandler = (data: ISIFilter) => {
 		dispatch(setFilters(data))
+		dispatch(setPage(1))
 		toggleHandler()
 	}
 

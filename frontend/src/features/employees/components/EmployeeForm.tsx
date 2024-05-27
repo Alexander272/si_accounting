@@ -75,6 +75,7 @@ export const EmployeeForm = () => {
 		try {
 			if (employee) await update(emp).unwrap()
 			else await create(emp).unwrap()
+			toast.success(`Успешно ${employee ? 'обновлено' : 'создано'}`)
 		} catch (error) {
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })
@@ -88,6 +89,7 @@ export const EmployeeForm = () => {
 
 		try {
 			await deleteEmp(employee).unwrap()
+			toast.success(`Успешно удалено`)
 		} catch (error) {
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })

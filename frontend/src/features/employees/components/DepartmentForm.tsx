@@ -45,6 +45,7 @@ export const DepartmentForm = () => {
 		try {
 			if (department) await update(dep).unwrap()
 			else await create(dep).unwrap()
+			toast.success(`Успешно ${department ? 'обновлено' : 'создано'}`)
 		} catch (error) {
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })
@@ -58,6 +59,7 @@ export const DepartmentForm = () => {
 
 		try {
 			await deleteDep(department.id).unwrap()
+			toast.success(`Успешно удалено`)
 		} catch (error) {
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })

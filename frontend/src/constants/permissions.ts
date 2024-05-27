@@ -4,6 +4,7 @@ export const PermRules = {
 		Write: 'si:write',
 	},
 	Location: {
+		Read: 'location:read',
 		Write: 'location:write',
 	},
 	Employee: {
@@ -13,5 +14,9 @@ export const PermRules = {
 	Department: {
 		Read: 'department:read',
 		Write: 'department:write',
+	},
+	Reserve: {
+		Read: 'reserve:read',
+		Write: 'reserve:write',
 	},
 }

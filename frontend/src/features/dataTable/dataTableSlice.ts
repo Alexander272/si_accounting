@@ -112,7 +112,10 @@ const dataTableSlice = createSlice({
 			state.active = action.payload
 		},
 
-		resetDataTableState: () => initialState,
+		resetDataTableState: () => {
+			localStorage.removeItem(localKeys.page)
+			return initialState
+		},
 	},
 	extraReducers: builder =>
 		builder
