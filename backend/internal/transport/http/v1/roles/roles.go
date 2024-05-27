@@ -25,18 +25,18 @@ func NewRoleHandlers(service services.Role) *RoleHandlers {
 func Register(api *gin.RouterGroup, service services.Role, middleware *middleware.Middleware) {
 	handlers := NewRoleHandlers(service)
 
-	roles := api.Group("/roles", middleware.CheckPermissions(constants.Roles, constants.Write))
+	roles := api.Group("/roles", middleware.VerifyToken)
 	{
-		roles.GET("", handlers.GetAll)
-		roles.GET("/:name", handlers.Get)
-		roles.POST("", handlers.Create)
-		roles.PUT("/:id", handlers.Update)
-		roles.DELETE("/:id", handlers.Delete)
+		roles.GET("", middleware.CheckPermissions(constants.Roles, constants.Read), handlers.getAll)
+		roles.GET("/:name", middleware.CheckPermissions(constants.Roles, constants.Write), handlers.get)
+		roles.POST("", middleware.CheckPermissions(constants.Roles, constants.Write), handlers.create)
+		roles.PUT("/:id", middleware.CheckPermissions(constants.Roles, constants.Write), handlers.update)
+		roles.DELETE("/:id", middleware.CheckPermissions(constants.Roles, constants.Write), handlers.delete)
 	}
 }
 
-func (h *RoleHandlers) GetAll(c *gin.Context) {
-	roles, err := h.service.GetAll(c, models.GetRolesDTO{})
+func (h *RoleHandlers) getAll(c *gin.Context) {
+	roles, err := h.service.GetAll(c, &models.GetRolesDTO{})
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), nil)
@@ -46,7 +46,7 @@ func (h *RoleHandlers) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DataResponse{Data: roles})
 }
 
-func (h *RoleHandlers) Get(c *gin.Context) {
+func (h *RoleHandlers) get(c *gin.Context) {
 	roleName := c.Param("name")
 
 	role, err := h.service.Get(c, roleName)
@@ -59,9 +59,9 @@ func (h *RoleHandlers) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DataResponse{Data: role})
 }
 
-func (h *RoleHandlers) Create(c *gin.Context) {
-	var dto models.RoleDTO
-	if err := c.BindJSON(&dto); err != nil {
+func (h *RoleHandlers) create(c *gin.Context) {
+	dto := &models.RoleDTO{}
+	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
@@ -75,15 +75,15 @@ func (h *RoleHandlers) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Роль создана"})
 }
 
-func (h *RoleHandlers) Update(c *gin.Context) {
+func (h *RoleHandlers) update(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id роли не задан")
 		return
 	}
 
-	var dto models.RoleDTO
-	if err := c.BindJSON(&dto); err != nil {
+	dto := &models.RoleDTO{}
+	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
@@ -98,7 +98,7 @@ func (h *RoleHandlers) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Роль обновлена"})
 }
 
-func (h *RoleHandlers) Delete(c *gin.Context) {
+func (h *RoleHandlers) delete(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id роли не задан")

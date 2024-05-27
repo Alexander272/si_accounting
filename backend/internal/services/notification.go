@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Alexander272/si_accounting/backend/internal/config"
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
@@ -108,6 +109,9 @@ func (s *NotificationService) CheckSendSI() {
 		}
 
 		n.Message = "Подтвердите получение инструментов"
+		if n.Status == constants.LocationStatusReserve && n.ChannelId != "" {
+			n.MostId = ""
+		}
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
 			logger.Error("notification error:", logger.ErrAttr(err))
@@ -278,9 +282,11 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 			term += " (Сегодня)"
 		}
 
-		// n.Type = "receiving"
 		n.Message = "Необходимо сдать инструменты до `" + term + "`"
 
+		if n.Status == constants.LocationStatusReserve && n.ChannelId != "" {
+			n.MostId = ""
+		}
 		if err := s.bot.Send(context.Background(), n); err != nil {
 			logger.Error("notification error:", logger.ErrAttr(err))
 			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})

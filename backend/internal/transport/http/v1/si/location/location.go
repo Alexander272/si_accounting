@@ -29,13 +29,13 @@ func Register(api *gin.RouterGroup, service services.Location, middleware *middl
 
 	locations := api.Group("/locations")
 	{
-		locations.GET("/:instrumentId", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetLast)
-		locations.GET("/all/:instrumentId", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetByInstrumentId)
-		locations.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Create)
-		locations.POST("/several", middleware.CheckPermissions(constants.SI, constants.Write), handlers.CreateSeveral)
-		locations.PUT("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Update)
+		locations.GET("/:instrumentId", middleware.CheckPermissions(constants.Location, constants.Read), handlers.GetLast)
+		locations.GET("/all/:instrumentId", middleware.CheckPermissions(constants.Location, constants.Read), handlers.GetByInstrumentId)
+		locations.POST("", middleware.CheckPermissions(constants.Location, constants.Write), handlers.Create)
+		locations.POST("/several", middleware.CheckPermissions(constants.Reserve, constants.Write), handlers.CreateSeveral)
+		locations.PUT("/:id", middleware.CheckPermissions(constants.Location, constants.Write), handlers.Update)
 		// locations.POST("/receiving", handlers.Receiving)
-		locations.DELETE("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Delete)
+		locations.DELETE("/:id", middleware.CheckPermissions(constants.Location, constants.Write), handlers.Delete)
 	}
 }
 

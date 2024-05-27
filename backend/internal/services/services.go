@@ -66,7 +66,7 @@ func NewServices(deps Deps) *Services {
 
 	// TODO для чего я делаю экземпляр ботов для каждого сервиса, когда нужно запустить один и отправлять все запросы на него. тоже самое относится и сервису email, файловому (file - minio) и возможно к некоторым другим. можно в принципе сделать один сервис бота для ошибок и рассылок (стоит рассмотреть и попробовать. можно попробовать связать шаблон и формат данных, а еще бота от имени которого будет отправляться сообщение)
 
-	permission := NewPermissionService("configs/privacy.conf", menu)
+	permission := NewPermissionService("configs/privacy.conf", menu, role)
 
 	notification := NewNotificationService(si, most, errorBot)
 

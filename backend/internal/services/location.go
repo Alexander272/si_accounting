@@ -188,6 +188,10 @@ func (s *LocationService) Receiving(ctx context.Context, dto models.DialogRespon
 			Message: "Подтвердите получение инструментов",
 			SI:      post.Missing,
 		}
+		if not.Status == constants.LocationStatusReserve {
+			not.MostId = ""
+			not.ChannelId = dto.ChannelID
+		}
 		if err := s.most.Send(ctx, not); err != nil {
 			return err
 		}

@@ -167,16 +167,18 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 
 		notStatus := constants.LocationStatusUsed
 		if sn.Person == "" && sn.Department == "" && sn.MostId == "" {
-			sn.MostId = constants.ReserveUserId
+			sn.MostId = constants.ReserveChannelId
+			sn.ChannelId = constants.ReserveChannelId
 			notStatus = constants.LocationStatusReserve
 		}
 
 		if i == 0 || nots[len(nots)-1].MostId != sn.MostId {
 			nots = append(nots, models.Notification{
-				MostId: sn.MostId,
-				Type:   notType,
-				Status: notStatus,
-				SI:     []models.SelectedSI{si},
+				MostId:    sn.MostId,
+				ChannelId: sn.ChannelId,
+				Type:      notType,
+				Status:    notStatus,
+				SI:        []models.SelectedSI{si},
 			})
 		} else {
 			nots[len(nots)-1].SI = append(nots[len(nots)-1].SI, si)

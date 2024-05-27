@@ -1,7 +1,7 @@
 package constants
 
-var ReserveUserId string
+var ReserveChannelId string
 
-func SetReserveUserId(id string) {
-	ReserveUserId = id
+func SetReserveChannelId(id string) {
+	ReserveChannelId = id
 }

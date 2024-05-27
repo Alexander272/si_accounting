@@ -66,6 +66,7 @@ func (s *MostService) Send(ctx context.Context, not models.Notification) error {
 		post.Message = fmt.Sprintf("#### %s\n%s", not.Message, post.Message)
 	}
 	post.UserId = not.MostId
+	post.ChannelId = not.ChannelId
 	post.Props = []*models.Props{
 		{Key: "service", Value: "sia"},
 	}

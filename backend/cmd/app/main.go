@@ -66,7 +66,7 @@ func main() {
 		AdminPass: conf.Keycloak.RootPass,
 	})
 
-	constants.SetReserveUserId(conf.Bot.ReserveUserId)
+	constants.SetReserveChannelId(conf.Bot.ReserveChannelId)
 
 	//* Services, Repos & API Handlers
 	repos := repository.NewRepository(db)

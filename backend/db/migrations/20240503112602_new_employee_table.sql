@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS public.employee
     name text COLLATE pg_catalog."default" NOT NULL,
     department_id uuid NOT NULL,
     most_id text COLLATE pg_catalog."default" NOT NULL DEFAULT ''::text,
+    sso_id text COLLATE pg_catalog."default" NOT NULL DEFAULT ''::text,
     is_lead boolean NOT NULL DEFAULT false,
     created_at timestamp with time zone DEFAULT now(),
     CONSTRAINT users_pkey PRIMARY KEY (id),

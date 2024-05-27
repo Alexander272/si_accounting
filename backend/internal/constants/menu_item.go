@@ -5,6 +5,7 @@ const (
 	Department = "department"
 	Employee   = "employee"
 	Location   = "location"
+	Reserve    = "reserve"
 	Roles      = "roles"
 )
 
