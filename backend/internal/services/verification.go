@@ -72,5 +72,10 @@ func (s *VerificationService) Update(ctx context.Context, v models.UpdateVerific
 	if err := s.repo.Update(ctx, v); err != nil {
 		return fmt.Errorf("failed to update verification. error: %w", err)
 	}
+
+	if err := s.instrument.ChangeStatus(ctx, models.UpdateStatus{Id: v.InstrumentId, Status: v.Status}); err != nil {
+		return err
+	}
+
 	return nil
 }

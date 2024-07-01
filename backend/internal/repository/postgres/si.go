@@ -99,6 +99,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse date. error: %w", err)
 		}
+		list.SI[i].NextDate = ""
 		if nextDate > 0 {
 			list.SI[i].NextDate = time.Unix(nextDate, 0).Format(constants.DateFormat)
 		}

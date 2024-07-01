@@ -90,10 +90,10 @@ func (r *RoleRepo) Get(ctx context.Context, roleName string) (*models.Role, erro
 	// 	RoleTable, MenuTable, MenuItemTable,
 	// )
 	query := fmt.Sprintf(`SELECT r.id, name, COALESCE(extends, '{}') AS extends,
-		ARRAY(SELECT DISTINCT(i.name || ':' || i.method) FROM %s AS m INNER JOIN menu_item AS i ON m.menu_item_id=i.id WHERE role_id=r.id) AS menu
+		ARRAY(SELECT DISTINCT(i.name || ':' || i.method) FROM %s AS m INNER JOIN %s AS i ON m.menu_item_id=i.id WHERE role_id=r.id) AS menu
 		FROM %s AS r
 		ORDER BY level, name`,
-		MenuTable, RoleTable,
+		MenuTable, MenuItemTable, RoleTable,
 	)
 
 	if err := r.db.SelectContext(ctx, &data, query); err != nil {
