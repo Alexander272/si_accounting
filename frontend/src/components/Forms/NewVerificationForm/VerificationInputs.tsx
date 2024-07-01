@@ -7,6 +7,7 @@ import dayjs, { type Dayjs } from 'dayjs'
 import type { IVerificationForm } from './type'
 import { Titles } from './titles'
 import { Upload } from '@/features/files/components/Upload/Upload'
+import { VerificationStatuses } from '@/constants/verification'
 
 type Props = {
 	instrumentId: string
@@ -82,9 +83,9 @@ export const VerificationInputs: FC<Props> = ({ instrumentId, verificationId, st
 						<InputLabel id={'status'}>{Titles.Status}</InputLabel>
 
 						<Select labelId={'status'} label={Titles.Status} error={Boolean(error)} {...field}>
-							<MenuItem value='work'>Пригоден</MenuItem>
-							<MenuItem value='repair'>Нужен ремонт</MenuItem>
-							<MenuItem value='decommissioning'>Не пригоден</MenuItem>
+							<MenuItem value={VerificationStatuses.Work}>Пригоден</MenuItem>
+							<MenuItem value={VerificationStatuses.Repair}>Нужен ремонт</MenuItem>
+							<MenuItem value={VerificationStatuses.Decommissioning}>Не пригоден</MenuItem>
 						</Select>
 					</FormControl>
 				)}

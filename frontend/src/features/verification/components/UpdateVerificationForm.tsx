@@ -8,6 +8,7 @@ import type { Instrument } from '@/features/instrument/types/instrument'
 import type { IVerificationForm } from '@/components/Forms/NewVerificationForm/type'
 import type { IVerification } from '../types/verification'
 import { DraftKey } from '@/constants/localKeys'
+import { VerificationStatuses } from '@/constants/verification'
 import { FormLoader } from '@/components/Loader/FormLoader'
 import { VerificationForm } from '@/components/Forms/NewVerificationForm/VerificationForm'
 import { useUpdateVerificationMutation } from '../verificationApiSlice'
@@ -48,6 +49,7 @@ export const UpdateVerificationForm: FC<Props> = ({
 
 		const verification: IVerification = {
 			...data,
+			nextDate: data.status != VerificationStatuses.Decommissioning ? data.nextDate : 0,
 			instrumentId: instrument.id || '',
 			isDraftInstrument: instrument.status == DraftKey,
 		}
