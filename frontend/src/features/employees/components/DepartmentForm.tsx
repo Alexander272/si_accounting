@@ -92,7 +92,7 @@ export const DepartmentForm = () => {
 					Сохранить
 				</Button>
 				{department && (
-					<Confirm onClick={deleteHandler}>
+					<Confirm onClick={deleteHandler} fullWidth>
 						<Stack direction={'row'} spacing={1} alignItems={'center'} justifyContent={'center'} mb={1}>
 							<WarningIcon fill={palette.error.main} />
 							<Typography fontSize={'1.1rem'} fontWeight='bold'>

@@ -4,6 +4,7 @@ import styled from '@emotion/styled'
 export const Container = styled.div`
 	max-width: 1580px;
 	/* padding: 50px 10px; */
+	height: 100vh;
 	flex-grow: 1;
 	display: flex;
 	flex-direction: column;

@@ -8,7 +8,7 @@ import { useGetEmployeesQuery } from '@/features/employees/employeesApiSlice'
 type Props = {
 	label: string
 	name: 'person'
-	rules?: RegisterOptions
+	rules?: RegisterOptions<ILocationForm, 'person'>
 	disabled?: boolean
 }
 

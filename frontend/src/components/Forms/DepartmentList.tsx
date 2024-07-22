@@ -8,7 +8,7 @@ import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
 type Props = {
 	label: string
 	name: 'department'
-	rules?: RegisterOptions
+	rules?: RegisterOptions<ILocationForm, 'department'>
 	disabled?: boolean
 }
 

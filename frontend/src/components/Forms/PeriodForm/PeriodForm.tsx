@@ -31,7 +31,7 @@ export const PeriodForm: FC<Props> = ({ onSubmit, onCancel }) => {
 					<Controller
 						control={methods.control}
 						name={'gte'}
-						rules={{ required: true }}
+						rules={{ required: true, min: 1000000000 }}
 						render={({ field, fieldState: { error } }) => (
 							<DatePicker
 								{...field}
@@ -52,7 +52,7 @@ export const PeriodForm: FC<Props> = ({ onSubmit, onCancel }) => {
 					<Controller
 						control={methods.control}
 						name={'lte'}
-						rules={{ required: true }}
+						rules={{ required: true, min: 1000000000 }}
 						render={({ field, fieldState: { error } }) => (
 							<DatePicker
 								{...field}

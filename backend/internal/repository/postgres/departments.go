@@ -28,7 +28,7 @@ type Department interface {
 
 func (r *DepartmentRepo) GetAll(ctx context.Context) (departments []models.Department, err error) {
 	//TODO возможно нужно забирать данные о начальнике из таблицы users
-	query := fmt.Sprintf(`SELECT id, name FROM %s`, DepartmentTable)
+	query := fmt.Sprintf(`SELECT id, name FROM %s ORDER BY name`, DepartmentTable)
 
 	if err := r.db.Select(&departments, query); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
@@ -48,7 +48,7 @@ func (r *DepartmentRepo) Create(ctx context.Context, department models.Departmen
 }
 
 func (r *DepartmentRepo) Update(ctx context.Context, department models.Department) error {
-	query := fmt.Sprintf(`UPDATE %s SET name=$1 WHERE id=$3`, DepartmentTable)
+	query := fmt.Sprintf(`UPDATE %s SET name=$1 WHERE id=$2`, DepartmentTable)
 
 	_, err := r.db.Exec(query, department.Name, department.Id)
 	if err != nil {

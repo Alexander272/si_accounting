@@ -70,7 +70,7 @@ export const LocationInputs: FC<Props> = ({ hidden, disabled }) => {
 				<Controller
 					control={control}
 					name={'dateOfIssue'}
-					rules={{ required: true }}
+					rules={{ required: true, min: 1000000000 }}
 					render={({ field, fieldState: { error } }) => (
 						<DatePicker
 							{...field}

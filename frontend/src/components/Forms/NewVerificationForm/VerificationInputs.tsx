@@ -31,7 +31,7 @@ export const VerificationInputs: FC<Props> = ({ instrumentId, verificationId, st
 			<Controller
 				control={control}
 				name={'date'}
-				rules={{ required: true }}
+				rules={{ required: true, min: 1000000000 }}
 				render={({ field, fieldState: { error } }) => (
 					<DatePicker
 						{...field}
@@ -56,7 +56,7 @@ export const VerificationInputs: FC<Props> = ({ instrumentId, verificationId, st
 				<Controller
 					control={control}
 					name={'nextDate'}
-					rules={{ required: true }}
+					rules={{ required: true, min: 1000000000 }}
 					render={({ field, fieldState: { error } }) => (
 						<DatePicker
 							{...field}

@@ -75,7 +75,7 @@ export const DateFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) => 
 			<Controller
 				control={methods.control}
 				name={'valueStart'}
-				rules={{ required: true }}
+				rules={{ required: true, min: 1000000000 }}
 				render={({ field, fieldState: { error } }) => (
 					<DatePicker
 						// {...field}
@@ -99,7 +99,7 @@ export const DateFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) => 
 				<Controller
 					control={methods.control}
 					name={'valueEnd'}
-					rules={{ required: true }}
+					rules={{ required: true, min: 1000000000 }}
 					render={({ field, fieldState: { error } }) => (
 						<DatePicker
 							// {...field}

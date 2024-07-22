@@ -1,5 +1,5 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
-import { setupListeners } from '@reduxjs/toolkit/dist/query'
+import { setupListeners } from '@reduxjs/toolkit/query'
 
 import { dataTablePath, dataTableReducer } from '@/features/dataTable/dataTableSlice'
 import { modalPath, modalReducer } from '@/features/modal/modalSlice'
