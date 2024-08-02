@@ -5,9 +5,9 @@ import { getTableSort, setSort } from '@/features/dataTable/dataTableSlice'
 import { IDataItem } from '@/features/dataTable/types/data'
 import { SortUpIcon } from '@/components/Icons/SortUpIcon'
 import { SortDownIcon } from '@/components/Icons/SortDownIcon'
+import { Filter } from '../../Filter/Filter'
 import { HeadCell } from './HeadCell'
 import { HeadCells } from './columns'
-import { Filter } from '../../Filter/Filter'
 import { HeadBadge } from './HeadBadge'
 
 export const Header = () => {
@@ -76,6 +76,7 @@ export const Header = () => {
 									<HeadBadge
 										color='primary'
 										badgeContent={Object.keys(tableSort).findIndex(k => k == c.id) + 1}
+										invisible={Object.keys(tableSort).length < 2}
 									>
 										<SortDownIcon fontSize={16} fill={tableSort[c.id] ? 'black' : '#adadad'} />
 									</HeadBadge>

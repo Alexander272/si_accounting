@@ -75,12 +75,14 @@ export const DepartmentForm = () => {
 					<Controller
 						control={methods.control}
 						name='name'
-						render={({ field }) => (
+						rules={{ required: true }}
+						render={({ field, fieldState: { error } }) => (
 							<TextField
 								name={field.name}
 								label='Название'
 								value={field.value}
 								onChange={field.onChange}
+								error={Boolean(error)}
 							/>
 						)}
 					/>

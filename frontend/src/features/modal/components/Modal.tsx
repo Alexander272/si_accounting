@@ -14,6 +14,7 @@ import { DepartmentForm } from '@/features/employees/components/DepartmentForm'
 import { LocationHistory } from '@/features/location/components/LocationHistory'
 import { VerificationHistory } from '@/features/verification/components/VerificationHistory'
 import { Schedule } from '@/features/dataTable/components/Schedule/Schedule'
+import { DeleteLocation } from '@/features/location/components/DeleteLocation'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
 
@@ -49,6 +50,7 @@ export const Modal = () => {
 					{selector == 'EditDataItem' && ModalTitles.EDIT_ITEM}
 					{selector == 'NewVerification' && ModalTitles.NEW_VERIFICATION}
 					{selector == 'NewLocation' && ModalTitles.NEW_MOVEMENT}
+					{selector == 'DeleteLocation' && ModalTitles.DEL_MOVEMENT}
 					{selector == 'SendToReserve' && ModalTitles.SEND_TO_RESERVE}
 
 					{selector == 'EditEmployee' && ModalTitles.EDIT_EMPLOYEE}
@@ -73,6 +75,7 @@ export const Modal = () => {
 				{selector == 'EditDataItem' && <UpdateSi />}
 				{selector == 'NewVerification' && <CreateVerification />}
 				{selector == 'NewLocation' && <CreateLocation />}
+				{selector == 'DeleteLocation' && <DeleteLocation />}
 				{selector == 'SendToReserve' && <SendToReserve />}
 
 				{selector == 'EditEmployee' || selector == 'CreateEmployee' ? <EmployeeForm /> : null}

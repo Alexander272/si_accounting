@@ -1,6 +1,6 @@
 import { FC } from 'react'
-import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material'
+import { Controller, useForm } from 'react-hook-form'
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material'
 
 import type { CompareTypes, IDataItem, ISIFilter, ISIFilterValue } from '../../types/data'
 
@@ -34,6 +34,11 @@ export const NumberFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) =
 	const compareType = methods.watch('compareType')
 
 	const submitHandler = methods.handleSubmit(data => {
+		if (data.valueStart == '' && data.valueEnd == '') {
+			onCancel()
+			return
+		}
+
 		const value: ISIFilterValue[] = []
 		if (data.compareType == 'range') {
 			value.push({ compareType: 'gte', value: data.valueStart }, { compareType: 'lte', value: data.valueEnd })
@@ -51,7 +56,7 @@ export const NumberFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) =
 	})
 
 	return (
-		<FormProvider {...methods}>
+		<Box component={'form'} onSubmit={submitHandler}>
 			<Controller
 				control={methods.control}
 				name='compareType'
@@ -94,10 +99,10 @@ export const NumberFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) =
 					Отменить
 				</Button>
 
-				<Button onClick={submitHandler} fullWidth variant='outlined'>
+				<Button type='submit' fullWidth variant='outlined'>
 					Применить
 				</Button>
 			</Stack>
-		</FormProvider>
+		</Box>
 	)
 }

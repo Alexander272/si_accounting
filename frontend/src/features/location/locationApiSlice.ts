@@ -45,6 +45,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 			}),
 			invalidatesTags: [
 				{ type: 'Location', id: 'ALL' },
+				{ type: 'Location', id: 'LAST' },
 				{ type: 'SI', id: 'ALL' },
 			],
 		}),
@@ -56,6 +57,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 			}),
 			invalidatesTags: [
 				{ type: 'Location', id: 'ALL' },
+				{ type: 'Location', id: 'LAST' },
 				{ type: 'SI', id: 'ALL' },
 			],
 		}),
@@ -68,6 +70,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 			}),
 			invalidatesTags: [
 				{ type: 'Location', id: 'LAST' },
+				{ type: 'Location', id: 'ALL' },
 				{ type: 'SI', id: 'ALL' },
 			],
 		}),
@@ -79,6 +82,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 			}),
 			invalidatesTags: [
 				{ type: 'Location', id: 'LAST' },
+				{ type: 'Location', id: 'ALL' },
 				{ type: 'SI', id: 'ALL' },
 			],
 		}),

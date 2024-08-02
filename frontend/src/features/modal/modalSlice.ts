@@ -7,6 +7,7 @@ export type ModalSelectors =
 	| 'EditDataItem'
 	| 'NewVerification'
 	| 'NewLocation'
+	| 'DeleteLocation'
 	| 'SendToReserve'
 	| 'CreateEmployee'
 	| 'EditEmployee'

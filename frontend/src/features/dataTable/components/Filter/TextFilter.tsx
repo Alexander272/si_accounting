@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material'
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material'
 
 import { CompareTypes, IDataItem, ISIFilter } from '../../types/data'
 
@@ -31,6 +31,11 @@ export const TextFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) => 
 	const methods = useForm<TextFilter>({ values: values || defaultValues })
 
 	const submitHandler = methods.handleSubmit(data => {
+		if (data.valueStart == '') {
+			onCancel()
+			return
+		}
+
 		const value = [{ compareType: data.compareType, value: data.valueStart }]
 		value.push()
 
@@ -44,7 +49,7 @@ export const TextFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) => 
 	})
 
 	return (
-		<>
+		<Box component={'form'} onSubmit={submitHandler}>
 			<Controller
 				name='compareType'
 				control={methods.control}
@@ -75,10 +80,10 @@ export const TextFilter: FC<Props> = ({ field, values, onCancel, onSubmit }) => 
 					Отменить
 				</Button>
 
-				<Button onClick={submitHandler} fullWidth variant='outlined'>
+				<Button type='submit' fullWidth variant='outlined'>
 					Применить
 				</Button>
 			</Stack>
-		</>
+		</Box>
 	)
 }

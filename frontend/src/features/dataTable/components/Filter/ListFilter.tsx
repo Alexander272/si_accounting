@@ -33,6 +33,11 @@ export const ListFilter: FC<Props> = ({ field, list, values, onCancel, onSubmit 
 			return ac
 		}, [])
 
+		if (value.length == 0) {
+			onCancel()
+			return
+		}
+
 		const filter: ISIFilter = {
 			field: field,
 			fieldType: 'list',

@@ -1,7 +1,9 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Breadcrumbs, Typography } from '@mui/material'
 
+import { Breadcrumb } from '@/components/Breadcrumb/Breadcrumb'
 import { GroupList } from './GroupList'
 import { CreateButtons } from './CreateButtons'
+import { AppRoutes } from '@/constants/routes'
 
 export const EmployeesList = () => {
 	return (
@@ -16,6 +18,13 @@ export const EmployeesList = () => {
 			flexDirection={'column'}
 			sx={{ backgroundColor: '#fff', userSelect: 'none' }}
 		>
+			<Breadcrumbs aria-label='breadcrumb'>
+				<Breadcrumb to={AppRoutes.HOME}>Главная</Breadcrumb>
+				<Breadcrumb to={AppRoutes.EMPLOYEES} active>
+					Подразделения
+				</Breadcrumb>
+			</Breadcrumbs>
+
 			<Typography variant='h5' align='center'>
 				Сотрудники
 			</Typography>

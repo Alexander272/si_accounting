@@ -3,6 +3,7 @@ export const ModalTitles = Object.freeze({
 	EDIT_ITEM: 'Редактировать СИ',
 	NEW_VERIFICATION: 'Добавить поверку',
 	NEW_MOVEMENT: 'Добавить перемещение',
+	DEL_MOVEMENT: 'Удалить перемещение',
 	SEND_TO_RESERVE: 'Вернуть инструменты',
 
 	CREATE_EMPLOYEE: 'Добавить сотрудника',

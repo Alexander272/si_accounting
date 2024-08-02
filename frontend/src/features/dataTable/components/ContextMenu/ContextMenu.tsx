@@ -15,6 +15,7 @@ import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
 import { CopyIcon } from '@/components/Icons/CopyIcon'
 import { LocHistoryIcon } from '@/components/Icons/LocHistoryIcon'
 import { VerHistoryIcon } from '@/components/Icons/VerHistoryIcon'
+import { CancelMove } from './CancelMove'
 
 type Props = {
 	coordinates?: Coordinates
@@ -74,6 +75,7 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 			</ListItemIcon>
 			Добавить перемещение
 		</MenuItem>,
+		<CancelMove key='cancel-location' itemId={itemId} onClick={contextHandler('DeleteLocation')} />,
 	]
 
 	const ResMenuItems = [
@@ -83,6 +85,7 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 			</ListItemIcon>
 			Вернуть инструмент
 		</MenuItem>,
+		<CancelMove key='cancel-location' itemId={itemId} onClick={contextHandler('DeleteLocation')} />,
 	]
 
 	return (

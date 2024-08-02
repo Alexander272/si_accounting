@@ -66,7 +66,7 @@ export const EmployeeForm = () => {
 	const saveHandler = async (data: IEmployeeForm) => {
 		const emp: IEmployee = {
 			id: employee?.id || '',
-			name: `${data.lastName} ${data.firstName} ${data.surname}`,
+			name: `${data.lastName} ${data.firstName} ${data.surname}`.trim(),
 			departmentId: data.departmentId,
 			isLead: data.isLead,
 			mattermostId: '',
@@ -105,12 +105,14 @@ export const EmployeeForm = () => {
 					<Controller
 						control={methods.control}
 						name='lastName'
-						render={({ field }) => (
+						rules={{ required: true }}
+						render={({ field, fieldState: { error } }) => (
 							<TextField
 								name={field.name}
 								value={field.value}
 								onChange={field.onChange}
 								label='Фамилия'
+								error={Boolean(error)}
 							/>
 						)}
 					/>
@@ -137,7 +139,8 @@ export const EmployeeForm = () => {
 					<Controller
 						control={methods.control}
 						name='departmentId'
-						render={({ field }) => (
+						rules={{ required: true }}
+						render={({ field, fieldState: { error } }) => (
 							<Autocomplete
 								options={departments.data?.data || []}
 								disablePortal
@@ -145,7 +148,12 @@ export const EmployeeForm = () => {
 								onChange={(_event, value) => field.onChange(value?.id || '')}
 								getOptionLabel={option => option.name}
 								renderInput={params => (
-									<TextField {...params} name={field.name} label='Подразделение' />
+									<TextField
+										{...params}
+										name={field.name}
+										label='Подразделение'
+										error={Boolean(error)}
+									/>
 								)}
 							/>
 						)}

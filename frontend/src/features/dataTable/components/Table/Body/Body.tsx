@@ -63,7 +63,7 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 				itemCount={data.data.length > (size || Size) ? size || Size : data.data.length}
 				itemSize={RowHeight}
 				itemData={data}
-				width={HeadCells.reduce((ac, cur) => ac + cur.width, 10)}
+				width={HeadCells.reduce((ac, cur) => ac + cur.width, 0)}
 			>
 				{({ index, style }) => (
 					<Row
