@@ -24,18 +24,23 @@ func NewLocationHandlers(service services.Location) *LocationHandlers {
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Location, middleware *middleware.Middleware) {
+func Register(api *gin.RouterGroup, service services.Location, ware *middleware.Middleware) {
 	handlers := NewLocationHandlers(service)
+
+	delPerm := []*middleware.Permission{
+		{Section: constants.Location, Method: constants.Write},
+		{Section: constants.Reserve, Method: constants.Write},
+	}
 
 	locations := api.Group("/locations")
 	{
-		locations.GET("/:instrumentId", middleware.CheckPermissions(constants.Location, constants.Read), handlers.GetLast)
-		locations.GET("/all/:instrumentId", middleware.CheckPermissions(constants.Location, constants.Read), handlers.GetByInstrumentId)
-		locations.POST("", middleware.CheckPermissions(constants.Location, constants.Write), handlers.Create)
-		locations.POST("/several", middleware.CheckPermissions(constants.Reserve, constants.Write), handlers.CreateSeveral)
-		locations.PUT("/:id", middleware.CheckPermissions(constants.Location, constants.Write), handlers.Update)
+		locations.GET("/:instrumentId", ware.CheckPermissions(constants.Location, constants.Read), handlers.GetLast)
+		locations.GET("/all/:instrumentId", ware.CheckPermissions(constants.Location, constants.Read), handlers.GetByInstrumentId)
+		locations.POST("", ware.CheckPermissions(constants.Location, constants.Write), handlers.Create)
+		locations.POST("/several", ware.CheckPermissions(constants.Reserve, constants.Write), handlers.CreateSeveral)
+		locations.PUT("/:id", ware.CheckPermissions(constants.Location, constants.Write), handlers.Update)
 		// locations.POST("/receiving", handlers.Receiving)
-		locations.DELETE("/:id", middleware.CheckPermissions(constants.Location, constants.Write), handlers.Delete)
+		locations.DELETE("/:id", ware.CheckPermissionsArray(delPerm), handlers.Delete)
 	}
 }
 
@@ -93,7 +98,6 @@ func (h *LocationHandlers) Create(c *gin.Context) {
 	if exists {
 		user = u.(models.User)
 	}
-
 	logger.Info("Инструмент перемещен", logger.StringAttr("instrument_id", dto.InstrumentId), logger.StringAttr("user_id", user.Id))
 
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные о месте нахождения успешно добавлены"})
@@ -115,7 +119,8 @@ func (h *LocationHandlers) CreateSeveral(c *gin.Context) {
 
 	dto.UserId = user.Id
 
-	isFull, err := h.service.CreateSeveral(c, dto)
+	// isFull, err := h.service.CreateSeveral(c, dto)
+	err := h.service.CreateSeveral(c, dto)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		// h.errBot.Send(c, err.Error(), dto)
@@ -125,9 +130,9 @@ func (h *LocationHandlers) CreateSeveral(c *gin.Context) {
 	logger.Info("Инструменты перемещены", logger.StringAttr("user_id", user.Id))
 
 	message := "Данные о месте нахождения успешно добавлены"
-	if !isFull {
-		message = "Данные о месте нахождения добавлены частично"
-	}
+	// if !isFull {
+	// 	message = "Данные о месте нахождения добавлены частично"
+	// }
 
 	c.JSON(http.StatusCreated, response.IdResponse{Message: message})
 }

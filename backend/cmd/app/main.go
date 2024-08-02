@@ -20,13 +20,14 @@ import (
 	"github.com/Alexander272/si_accounting/backend/pkg/database/postgres"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	_ "github.com/lib/pq"
+	"github.com/subosito/gotenv"
 )
 
 func main() {
 	//* Init config
-	// if err := gotenv.Load("../.env"); err != nil {
-	// 	log.Fatalf("error loading env variables: %s", err.Error())
-	// }
+	if err := gotenv.Load("../.env"); err != nil {
+		log.Fatalf("error loading env variables: %s", err.Error())
+	}
 
 	conf, err := config.Init("configs/config.yaml")
 	if err != nil {
@@ -46,16 +47,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
-
-	// redis, err := redis.NewRedisClient(redis.Config{
-	// 	Host:     conf.Redis.Host,
-	// 	Port:     conf.Redis.Port,
-	// 	DB:       conf.Redis.DB,
-	// 	Password: conf.Redis.Password,
-	// })
-	// if err != nil {
-	// 	logger.Fatalf("failed to initialize redis %s", err.Error())
-	// }
 
 	keycloak := auth.NewKeycloakClient(auth.Deps{
 		Url:       conf.Keycloak.Url,
@@ -78,9 +69,6 @@ func main() {
 		BotUrl:          conf.Bot.Url,
 	})
 
-	// casbin := casbin.NewCasbinService(services.Role, services.User, "configs/privacy.conf")
-
-	// handlers := transport.NewHandler(services, casbin, keycloak)
 	handlers := transport.NewHandler(services, keycloak)
 
 	//* HTTP Server

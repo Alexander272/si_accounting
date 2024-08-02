@@ -32,6 +32,7 @@ type Location interface {
 	Create(context.Context, models.CreateLocationDTO) error
 	CreateSeveral(context.Context, []models.CreateLocationDTO) error
 	Update(context.Context, models.UpdateLocationDTO) error
+	UpdatePlace(context.Context, *models.UpdatePlaceDTO) error
 	Receiving(context.Context, models.ReceivingDTO) error
 	Delete(context.Context, string) error
 }
@@ -169,6 +170,19 @@ func (r *LocationRepo) Update(ctx context.Context, l models.UpdateLocationDTO) e
 
 	_, err := r.db.Exec(query, l.DateOfIssue, l.DateOfReceiving, l.Status, l.PersonId, l.DepartmentId, l.Id)
 	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return nil
+}
+
+func (r *LocationRepo) UpdatePlace(ctx context.Context, dto *models.UpdatePlaceDTO) error {
+	query := fmt.Sprintf(`UPDATE %s SET place=COALESCE((SELECT d.name || ' ('|| e.name || ')' 
+			FROM %s AS e LEFT JOIN %s AS d ON department_id=d.id WHERE e.id=person_id), '')
+			WHERE department_id::text=$1 OR person_id::text=$2`,
+		SIMovementTable, EmployeeTable, DepartmentTable,
+	)
+
+	if _, err := r.db.ExecContext(ctx, query, dto.DepartmentId, dto.PersonId); err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return nil

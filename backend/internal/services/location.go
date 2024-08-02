@@ -13,25 +13,28 @@ import (
 )
 
 type LocationService struct {
-	repo     repository.Location
-	employee Employee
-	most     Most
+	repo repository.Location
+	// employee Employee
+	most Most
 }
 
-func NewLocationService(repo repository.Location, employee Employee, most Most) *LocationService {
+// func NewLocationService(repo repository.Location, employee Employee, most Most) *LocationService {
+func NewLocationService(repo repository.Location, most Most) *LocationService {
 	return &LocationService{
-		repo:     repo,
-		employee: employee,
-		most:     most,
+		repo: repo,
+		// employee: employee,
+		most: most,
 	}
 }
 
 type Location interface {
 	GetLast(context.Context, string) (*models.Location, error)
 	GetByInstrumentId(context.Context, string) ([]models.Location, error)
-	CreateSeveral(context.Context, models.CreateSeveralLocationDTO) (bool, error)
+	// CreateSeveral(context.Context, models.CreateSeveralLocationDTO) (bool, error)
+	CreateSeveral(context.Context, models.CreateSeveralLocationDTO) error
 	Create(context.Context, models.CreateLocationDTO) error
 	Update(context.Context, models.UpdateLocationDTO) error
+	UpdatePlace(context.Context, *models.UpdatePlaceDTO) error
 	Receiving(context.Context, models.DialogResponse) error
 	Delete(context.Context, string) error
 }
@@ -70,50 +73,64 @@ func (s *LocationService) Create(ctx context.Context, location models.CreateLoca
 	return nil
 }
 
-func (s *LocationService) CreateSeveral(ctx context.Context, dto models.CreateSeveralLocationDTO) (bool, error) {
-	emp, err := s.employee.GetBySSOId(ctx, dto.UserId)
-	if err != nil && !errors.Is(err, models.ErrNoRows) {
-		return false, err
-	}
+// func (s *LocationService) CreateSeveral(ctx context.Context, dto models.CreateSeveralLocationDTO) (bool, error) {
+// 	emp, err := s.employee.GetBySSOId(ctx, dto.UserId)
+// 	if err != nil && !errors.Is(err, models.ErrNoRows) {
+// 		return false, err
+// 	}
 
-	isFull := true
+// 	isFull := true
 
-	if emp != nil {
-		instrumentIds := []string{}
-		locations := make(map[string]models.CreateLocationDTO)
-		for _, l := range dto.Locations {
-			instrumentIds = append(instrumentIds, l.InstrumentId)
-			locations[l.InstrumentId] = l
-		}
+// 	if emp != nil {
+// 		instrumentIds := []string{}
+// 		locations := make(map[string]models.CreateLocationDTO)
+// 		for _, l := range dto.Locations {
+// 			instrumentIds = append(instrumentIds, l.InstrumentId)
+// 			locations[l.InstrumentId] = l
+// 		}
 
-		filtered, err := s.FilterByDepartmentId(ctx, models.DepartmentFilterDTO{InstrumentIds: instrumentIds, DepartmentId: emp.DepartmentId})
-		if err != nil {
-			return false, err
-		}
+// 		// при возвращении инструментов я отфильтровываю те что не находятся в том же подразделении что и пользователь
+// 		filtered, err := s.FilterByDepartmentId(ctx, models.DepartmentFilterDTO{InstrumentIds: instrumentIds, DepartmentId: emp.DepartmentId})
+// 		if err != nil {
+// 			return false, err
+// 		}
 
-		isFull = len(filtered) == len(dto.Locations)
-		if !isFull {
-			newLocations := []models.CreateLocationDTO{}
-			for _, l := range filtered {
-				newLocations = append(newLocations, locations[l])
-			}
-			dto.Locations = newLocations
-		}
-	}
+// 		isFull = len(filtered) == len(dto.Locations)
+// 		if !isFull {
+// 			newLocations := []models.CreateLocationDTO{}
+// 			for _, l := range filtered {
+// 				newLocations = append(newLocations, locations[l])
+// 			}
+// 			dto.Locations = newLocations
+// 		}
+// 	}
 
-	if len(dto.Locations) == 0 {
-		return isFull, nil
-	}
+// 	if len(dto.Locations) == 0 {
+// 		return isFull, nil
+// 	}
 
+//		if err := s.repo.CreateSeveral(ctx, dto.Locations); err != nil {
+//			return isFull, fmt.Errorf("failed to create several locations. error: %w", err)
+//		}
+//		return isFull, nil
+//	}
+func (s *LocationService) CreateSeveral(ctx context.Context, dto models.CreateSeveralLocationDTO) error {
 	if err := s.repo.CreateSeveral(ctx, dto.Locations); err != nil {
-		return isFull, fmt.Errorf("failed to create several locations. error: %w", err)
+		return fmt.Errorf("failed to create several locations. error: %w", err)
 	}
-	return isFull, nil
+	return nil
 }
 
 func (s *LocationService) Update(ctx context.Context, location models.UpdateLocationDTO) error {
 	if err := s.repo.Update(ctx, location); err != nil {
 		return fmt.Errorf("failed to update si location. error: %w", err)
+	}
+	return nil
+}
+
+func (s *LocationService) UpdatePlace(ctx context.Context, dto *models.UpdatePlaceDTO) error {
+	if err := s.repo.UpdatePlace(ctx, dto); err != nil {
+		return fmt.Errorf("failed to update place. error: %w", err)
 	}
 	return nil
 }

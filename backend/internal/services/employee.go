@@ -10,12 +10,14 @@ import (
 )
 
 type EmployeeService struct {
-	repo repository.Employee
+	repo     repository.Employee
+	location Location
 }
 
-func NewEmployeeService(repo repository.Employee) *EmployeeService {
+func NewEmployeeService(repo repository.Employee, location Location) *EmployeeService {
 	return &EmployeeService{
-		repo: repo,
+		repo:     repo,
+		location: location,
 	}
 }
 
@@ -78,6 +80,11 @@ func (s *EmployeeService) Update(ctx context.Context, employee models.WriteEmplo
 	if err := s.repo.Update(ctx, employee); err != nil {
 		return fmt.Errorf("failed to update employee. error: %w", err)
 	}
+
+	if err := s.location.UpdatePlace(ctx, &models.UpdatePlaceDTO{PersonId: employee.Id}); err != nil {
+		return err
+	}
+
 	return nil
 }
 

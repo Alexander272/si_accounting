@@ -105,9 +105,9 @@ func (r *EmployeeRepo) Create(ctx context.Context, employee models.WriteEmployee
 }
 
 func (r *EmployeeRepo) Update(ctx context.Context, employee models.WriteEmployeeDTO) error {
-	query := fmt.Sprintf(`UPDATE %s SET name=$1, department_id=$2, most_id=$3 WHERE id=$4`, EmployeeTable)
+	query := fmt.Sprintf(`UPDATE %s SET name=$1, department_id=$2 WHERE id=$3`, EmployeeTable)
 
-	_, err := r.db.Exec(query, employee.Name, employee.DepartmentId, employee.MattermostId, employee.Id)
+	_, err := r.db.Exec(query, employee.Name, employee.DepartmentId, employee.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

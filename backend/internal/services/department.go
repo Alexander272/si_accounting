@@ -9,12 +9,14 @@ import (
 )
 
 type DepartmentService struct {
-	repo repository.Department
+	repo     repository.Department
+	location Location
 }
 
-func NewDepartmentService(repo repository.Department) *DepartmentService {
+func NewDepartmentService(repo repository.Department, location Location) *DepartmentService {
 	return &DepartmentService{
-		repo: repo,
+		repo:     repo,
+		location: location,
 	}
 }
 
@@ -47,6 +49,11 @@ func (s *DepartmentService) Update(ctx context.Context, department models.Depart
 	if err := s.repo.Update(ctx, department); err != nil {
 		return fmt.Errorf("failed to update department. error: %w", err)
 	}
+
+	if err := s.location.UpdatePlace(ctx, &models.UpdatePlaceDTO{DepartmentId: department.Id}); err != nil {
+		return err
+	}
+
 	return nil
 }
 

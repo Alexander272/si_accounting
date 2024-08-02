@@ -50,12 +50,12 @@ func (s *NotificationService) Start(conf *config.NotificationConfig) error {
 	s.dates = make([]time.Time, len(conf.Times))
 
 	now := time.Now()
-	jobStart := time.Date(now.Year(), now.Month(), now.Day(), conf.StartTime, 0, 0, 0, now.Location())
-	if now.Hour() >= conf.StartTime {
-		jobStart = jobStart.Add(24 * time.Hour)
-	}
+	// jobStart := time.Date(now.Year(), now.Month(), now.Day(), conf.StartTime, 0, 0, 0, now.Location())
+	// if now.Hour() >= conf.StartTime {
+	// 	jobStart = jobStart.Add(24 * time.Hour)
+	// }
 	// //  вернуть нормальное время запуска
-	// jobStart := now.Add(1 * time.Minute)
+	jobStart := now.Add(1 * time.Minute)
 	logger.Info("starting jobs time " + jobStart.Format("02.01.2006 15:04:05"))
 
 	job := gocron.DurationJob(conf.Interval)
@@ -94,7 +94,7 @@ func (s *NotificationService) Check(times []models.NotificationTime) {
 }
 
 func (s *NotificationService) CheckSendSI() {
-	logger.Debug("CheckSendSI")
+	logger.Info("CheckSendSI")
 	//TODO есть проблема. уведомления будут отправляться каждый день пока не подтвердят, что наверное не очень хорошо
 	nots, err := s.si.GetForNotification(context.Background(), models.Period{})
 	if err != nil {
@@ -125,8 +125,9 @@ func (s *NotificationService) CheckSendSI() {
 // в функции будет текущая дата сравниваться с ожидаемой (либо задана, либо вычисляется по заданному условию) и если сравнение не проходит функция дальше не идет
 
 func (s *NotificationService) CheckNotificationTime(times []models.NotificationTime) {
+	logger.Info("CheckNotificationTime")
 	index := s.iterationNumber % len(times)
-	logger.Debug("job started ", index)
+	logger.Debug("job started ", logger.IntAttr("index", index))
 
 	notificationTime := times[index]
 
@@ -145,7 +146,7 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 		date := monthEnd.Add(-notificationTime.Sub)
 		s.dates[index] = date
 
-		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("check", logger.IntAttr("index", index), logger.StringAttr("date", date.Format("02.01.2006 15:04:05")))
 	case "add":
 		start := now
 		if index > 0 && s.dates[index-1].Year() > 1 {
@@ -154,12 +155,12 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 		date := start.Add(notificationTime.Add)
 		s.dates[index] = date
 
-		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("check", logger.IntAttr("index", index), logger.StringAttr("date", date.Format("02.01.2006 15:04:05")))
 	case "date":
 		date := time.Date(now.Year(), now.Month(), 0, 0, 0, 0, 0, now.Location()).Add(notificationTime.Date)
 		s.dates[index] = date
 
-		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("check", logger.IntAttr("index", index), logger.StringAttr("date", date.Format("02.01.2006 15:04:05")))
 	}
 
 	// logger.Debug("dates ", s.dates[index])
@@ -216,7 +217,7 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 
 func (s *NotificationService) Send(times []models.NotificationTime) {
 	index := s.iterationNumber % len(times)
-	logger.Debug("job started ", index)
+	logger.Debug("job started ", logger.IntAttr("index", index))
 
 	notificationTime := times[index]
 
@@ -232,7 +233,7 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 		date := monthEnd.Add(-notificationTime.Sub)
 		s.dates[index] = date
 
-		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("index ", logger.IntAttr("index", index), logger.StringAttr("date", date.Format("02.01.2006 15:04:05")))
 	case "add":
 		start := now
 		if index > 0 && s.dates[index-1].Year() > 1 {
@@ -241,12 +242,12 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 		date := start.Add(notificationTime.Add)
 		s.dates[index] = date
 
-		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("index ", logger.IntAttr("index", index), logger.StringAttr("date", date.Format("02.01.2006 15:04:05")))
 	case "date":
 		date := time.Date(now.Year(), now.Month(), 0, 0, 0, 0, 0, now.Location()).Add(notificationTime.Date)
 		s.dates[index] = date
 
-		logger.Debug("index ", index, " date ", date.Format("02.01.2006 15:04:05"))
+		logger.Debug("index ", logger.IntAttr("index", index), logger.StringAttr("date", date.Format("02.01.2006 15:04:05")))
 	}
 
 	if !s.dates[index].Before(time.Now()) {

@@ -65,5 +65,5 @@ type SIFromNotification struct {
 	Person        string `db:"person"`
 	Department    string `db:"department"`
 	MostId        string `db:"most_id"`
-	ChannelId     string
+	ChannelId     string `db:"channel_id"`
 }

@@ -55,6 +55,11 @@ type UpdateLocationDTO struct {
 	Status          string `json:"status" db:"status"`
 }
 
+type UpdatePlaceDTO struct {
+	PersonId     string `json:"person" db:"person_id"`
+	DepartmentId string `json:"department" db:"department_id"`
+}
+
 type PartUpdateLocationDTO struct {
 	Id              *string `json:"id" db:"id"`
 	InstrumentId    *string `json:"instrumentId" db:"instrument_id"`

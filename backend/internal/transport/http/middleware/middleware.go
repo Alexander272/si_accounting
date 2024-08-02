@@ -4,7 +4,6 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/pkg/auth"
-	// "github.com/casbin/casbin/v2"
 )
 
 type Middleware struct {

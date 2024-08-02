@@ -9,6 +9,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
 	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -82,6 +83,7 @@ func (h *EmployeeHandlers) Create(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
+	logger.Info("Работник создан", logger.StringAttr("name", dto.Name), logger.StringAttr("id", dto.Id))
 
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Пользователь создан"})
 }
@@ -105,6 +107,7 @@ func (h *EmployeeHandlers) Update(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
+	logger.Info("Работник обновлен", logger.StringAttr("name", dto.Name), logger.StringAttr("id", dto.Id))
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные пользователя обновлены"})
 }
@@ -121,6 +124,7 @@ func (h *EmployeeHandlers) Delete(c *gin.Context) {
 		error_bot.Send(c, err.Error(), id)
 		return
 	}
+	logger.Info("Работник удален", logger.StringAttr("id", id))
 
 	c.JSON(http.StatusNoContent, response.IdResponse{})
 }

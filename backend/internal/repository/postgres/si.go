@@ -129,13 +129,13 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 
 	var data []models.SIFromNotification
 	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, COALESCE(e.name, '') AS person, COALESCE(d.name, '') AS department,
-		COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id
+		COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id, l.channel_id
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT person_id, department_id, status FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
 		LEFT JOIN %s AS e ON e.id=m.person_id
 		LEFT JOIN %s AS d ON d.id=m.department_id
-		LEFT JOIN LATERAL (SELECT most_id FROM %s WHERE department_id=m.department_id AND is_lead=true) AS l ON true
+		LEFT JOIN LATERAL (SELECT most_id, channel_id FROM %s WHERE department_id=m.department_id AND is_lead=true LIMIT 1) AS l ON true
 		WHERE m.status=$1 %s
 		ORDER BY most_id, next_date`,
 		InstrumentTable, VerificationTable, SIMovementTable, EmployeeTable, DepartmentTable, EmployeeTable, periodCond,
@@ -167,7 +167,7 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 		}
 
 		notStatus := constants.LocationStatusUsed
-		if sn.Person == "" && sn.Department == "" && sn.MostId == "" {
+		if sn.Person == "" && sn.Department == "" && sn.MostId == "" && sn.ChannelId == "" {
 			sn.MostId = constants.ReserveChannelId
 			sn.ChannelId = constants.ReserveChannelId
 			notStatus = constants.LocationStatusReserve

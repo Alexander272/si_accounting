@@ -9,6 +9,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
 	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -57,6 +58,7 @@ func (h *DepartmentHandlers) Create(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
+	logger.Info("Подразделение создано", logger.StringAttr("name", dto.Name), logger.StringAttr("id", dto.Id))
 
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Новое подразделение создано"})
 }
@@ -79,6 +81,7 @@ func (h *DepartmentHandlers) Update(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
+	logger.Info("Подразделение обновлено", logger.StringAttr("name", dto.Name), logger.StringAttr("id", dto.Id))
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Подразделение обновлено"})
 }
@@ -95,6 +98,7 @@ func (h *DepartmentHandlers) Delete(c *gin.Context) {
 		error_bot.Send(c, err.Error(), id)
 		return
 	}
+	logger.Info("Подразделение удалено", logger.StringAttr("id", id))
 
 	c.JSON(http.StatusNoContent, response.StatusResponse{})
 }
