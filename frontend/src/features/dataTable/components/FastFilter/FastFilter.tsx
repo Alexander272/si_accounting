@@ -10,14 +10,18 @@ import {
 	Select,
 	type SelectChangeEvent,
 	Stack,
+	Tooltip,
 	Typography,
 } from '@mui/material'
 import dayjs from 'dayjs'
+import { toast } from 'react-toastify'
 
+import type { IFetchError } from '@/app/types/error'
+import type { ISIFilter } from '../../types/data'
 import { FilterIcon } from '@/components/Icons/FilterIcon'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { getTableFilter, setFilters } from '../../dataTableSlice'
-import type { ISIFilter } from '../../types/data'
+import { useSaveFiltersMutation } from '../../filterApiSlice'
 
 const months = [
 	'Январь',
@@ -43,6 +47,8 @@ export const FastFilter = () => {
 	const [month, setMonth] = useState(dayjs().get('month'))
 
 	const dispatch = useAppDispatch()
+
+	const [save] = useSaveFiltersMutation()
 
 	useEffect(() => {
 		// TODO эта строчка сбрасывает фильтры по умолчанию
@@ -106,6 +112,17 @@ export const FastFilter = () => {
 
 	const monthHandler = (event: SelectChangeEvent<number>) => {
 		setMonth(+event.target.value)
+	}
+
+	const saveHandler = async () => {
+		try {
+			await save(filter || []).unwrap()
+			toast.success('Фильтры сохранены')
+			toggleHandler()
+		} catch (error) {
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
+		}
 	}
 
 	return (
@@ -209,11 +226,16 @@ export const FastFilter = () => {
 					</Select>
 				)}
 
-				{filter && (
-					<Button onClick={clearHandler} variant='outlined' fullWidth sx={{ mt: 2 }}>
-						Сбросить фильтры
-					</Button>
-				)}
+				<ButtonGroup fullWidth sx={{ mt: 2 }}>
+					{(filter?.length || 0) > 0 && (
+						<Button onClick={clearHandler} variant='outlined' fullWidth>
+							Сбросить фильтры
+						</Button>
+					)}
+					<Tooltip title='Сохранить текущие фильтры'>
+						<Button onClick={saveHandler}>Сохранить</Button>
+					</Tooltip>
+				</ButtonGroup>
 			</Menu>
 		</>
 	)

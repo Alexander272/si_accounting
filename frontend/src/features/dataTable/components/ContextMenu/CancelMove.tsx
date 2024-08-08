@@ -15,6 +15,7 @@ export const CancelMove: FC<Props> = ({ itemId, onClick }) => {
 
 	if (!data?.data || (data.data.dateOfIssue != dayjs().startOf('d').unix() && data.data.status != 'moved'))
 		return null
+
 	return (
 		<MenuItem onClick={onClick}>
 			<ListItemIcon>

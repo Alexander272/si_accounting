@@ -52,6 +52,7 @@ export const Cell: FC<Props> = ({ label, width, first, align = 'center' }) => {
 				},
 			}}
 		>
+			{/* //TODO Когда текст влазит впритык он обрезается (последние символы заменяются многоточием), а подсказка с полным текстом не показывается */}
 			<Tooltip open={visible} title={label} arrow disableInteractive>
 				<Typography
 					ref={cellValue}

@@ -131,9 +131,22 @@ export const Upload: FC<Props> = ({ verificationId, instrumentId }) => {
 			>
 				<Tooltip
 					title='Допустимые форматы: .doc, .docx, .odt, .xls, .xlsx, .pdf, .png, .jpeg, .jpg, .csv'
+					enterDelay={100}
 					arrow
 				>
-					<Box position={'absolute'} right={8} top={8}>
+					<Box
+						position={'absolute'}
+						right={8}
+						top={4}
+						padding={0.5}
+						height={26}
+						borderRadius={2}
+						sx={{
+							cursor: 'help',
+							transition: '.3s all ease-in-out',
+							':hover': { backgroundColor: '#eee' },
+						}}
+					>
 						<QuestionIcon fontSize={16} color='#828282' />
 					</Box>
 				</Tooltip>

@@ -26,4 +26,5 @@ export const API = {
 	},
 	departments: '/departments',
 	employees: '/employees',
+	filters: '/filters',
 }
