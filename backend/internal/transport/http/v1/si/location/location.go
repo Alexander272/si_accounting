@@ -81,7 +81,7 @@ func (h *LocationHandlers) GetByInstrumentId(c *gin.Context) {
 }
 
 func (h *LocationHandlers) Create(c *gin.Context) {
-	var dto models.CreateLocationDTO
+	dto := &models.CreateLocationDTO{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
@@ -104,7 +104,7 @@ func (h *LocationHandlers) Create(c *gin.Context) {
 }
 
 func (h *LocationHandlers) CreateSeveral(c *gin.Context) {
-	var dto models.CreateSeveralLocationDTO
+	dto := &models.CreateSeveralLocationDTO{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
@@ -144,7 +144,7 @@ func (h *LocationHandlers) Update(c *gin.Context) {
 		return
 	}
 
-	var dto models.UpdateLocationDTO
+	dto := &models.UpdateLocationDTO{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return

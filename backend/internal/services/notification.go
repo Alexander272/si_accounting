@@ -50,12 +50,12 @@ func (s *NotificationService) Start(conf *config.NotificationConfig) error {
 	s.dates = make([]time.Time, len(conf.Times))
 
 	now := time.Now()
-	// jobStart := time.Date(now.Year(), now.Month(), now.Day(), conf.StartTime, 0, 0, 0, now.Location())
-	// if now.Hour() >= conf.StartTime {
-	// 	jobStart = jobStart.Add(24 * time.Hour)
-	// }
+	jobStart := time.Date(now.Year(), now.Month(), now.Day(), conf.StartTime, 0, 0, 0, now.Location())
+	if now.Hour() >= conf.StartTime {
+		jobStart = jobStart.Add(24 * time.Hour)
+	}
 	// //  вернуть нормальное время запуска
-	jobStart := now.Add(1 * time.Minute)
+	// jobStart := now.Add(1 * time.Minute)
 	logger.Info("starting jobs time " + jobStart.Format("02.01.2006 15:04:05"))
 
 	job := gocron.DurationJob(conf.Interval)
@@ -94,9 +94,9 @@ func (s *NotificationService) Check(times []models.NotificationTime) {
 }
 
 func (s *NotificationService) CheckSendSI() {
-	logger.Info("CheckSendSI")
+	logger.Info("CheckSendedSI")
 	//TODO есть проблема. уведомления будут отправляться каждый день пока не подтвердят, что наверное не очень хорошо
-	nots, err := s.si.GetForNotification(context.Background(), models.Period{})
+	nots, err := s.si.GetForNotification(context.Background(), &models.Period{})
 	if err != nil {
 		logger.Error("notification error:", logger.ErrAttr(err))
 		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: nil, Url: "notification bot. get si list (checkSend)"})
@@ -104,7 +104,7 @@ func (s *NotificationService) CheckSendSI() {
 	}
 
 	for _, n := range nots {
-		if n.MostId == "" {
+		if n.MostId == "" && n.ChannelId == "" {
 			continue
 		}
 
@@ -176,7 +176,7 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 	finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
 
 	// убрать преобразование в строку
-	period := models.Period{
+	period := &models.Period{
 		// StartAt:  startAt.Format("02.01.2006"),
 		// FinishAt: finishAt.Format("02.01.2006"),
 		StartAt:  startAt.Unix(),
@@ -259,7 +259,7 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 	startAt := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
 	finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
 
-	period := models.Period{
+	period := &models.Period{
 		// StartAt:  startAt.Format("02.01.2006"),
 		// FinishAt: finishAt.Format("02.01.2006"),
 		StartAt:  startAt.Unix(),

@@ -23,16 +23,16 @@ func NewEmployeeRepo(db *sqlx.DB) *EmployeeRepo {
 }
 
 type Employee interface {
-	GetAll(context.Context, models.GetEmployeesDTO) ([]models.Employee, error)
-	GetByDepartment(context.Context, string) ([]models.Employee, error)
+	GetAll(context.Context, *models.GetEmployeesDTO) ([]*models.Employee, error)
+	GetByDepartment(context.Context, string) ([]*models.Employee, error)
 	GetByMostId(context.Context, string) (*models.EmployeeData, error)
 	GetBySSOId(context.Context, string) (*models.Employee, error)
-	Create(context.Context, models.WriteEmployeeDTO) error
-	Update(context.Context, models.WriteEmployeeDTO) error
+	Create(context.Context, *models.WriteEmployeeDTO) error
+	Update(context.Context, *models.WriteEmployeeDTO) error
 	Delete(context.Context, string) error
 }
 
-func (r *EmployeeRepo) GetAll(ctx context.Context, req models.GetEmployeesDTO) (employees []models.Employee, err error) {
+func (r *EmployeeRepo) GetAll(ctx context.Context, req *models.GetEmployeesDTO) ([]*models.Employee, error) {
 	query := fmt.Sprintf(`SELECT id, name, department_id, most_id, is_lead FROM %s`, EmployeeTable)
 
 	params := []interface{}{}
@@ -52,15 +52,17 @@ func (r *EmployeeRepo) GetAll(ctx context.Context, req models.GetEmployeesDTO) (
 
 	query += filter + sort
 
+	employees := []*models.Employee{}
 	if err := r.db.Select(&employees, query, params...); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return employees, nil
 }
 
-func (r *EmployeeRepo) GetByDepartment(ctx context.Context, departmentId string) (employees []models.Employee, err error) {
+func (r *EmployeeRepo) GetByDepartment(ctx context.Context, departmentId string) ([]*models.Employee, error) {
 	query := fmt.Sprintf(`SELECT id, name, most_id FROM %s WHERE department_id=$1 ORDER BY name`, EmployeeTable)
 
+	employees := []*models.Employee{}
 	if err := r.db.Select(&employees, query, departmentId); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
@@ -93,18 +95,18 @@ func (r *EmployeeRepo) GetBySSOId(ctx context.Context, id string) (*models.Emplo
 	return employee, nil
 }
 
-func (r *EmployeeRepo) Create(ctx context.Context, employee models.WriteEmployeeDTO) error {
+func (r *EmployeeRepo) Create(ctx context.Context, employee *models.WriteEmployeeDTO) error {
 	query := fmt.Sprintf(`INSERT INTO %s(id, name, department_id, most_id) VALUES ($1, $2, $3, $4)`, EmployeeTable)
-	id := uuid.New()
+	employee.Id = uuid.NewString()
 
-	_, err := r.db.Exec(query, id, employee.Name, employee.DepartmentId, employee.MattermostId)
+	_, err := r.db.Exec(query, employee.Id, employee.Name, employee.DepartmentId, employee.MattermostId)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return nil
 }
 
-func (r *EmployeeRepo) Update(ctx context.Context, employee models.WriteEmployeeDTO) error {
+func (r *EmployeeRepo) Update(ctx context.Context, employee *models.WriteEmployeeDTO) error {
 	query := fmt.Sprintf(`UPDATE %s SET name=$1, department_id=$2 WHERE id=$3`, EmployeeTable)
 
 	_, err := r.db.Exec(query, employee.Name, employee.DepartmentId, employee.Id)

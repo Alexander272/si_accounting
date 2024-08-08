@@ -27,20 +27,20 @@ func NewLocationRepo(db *sqlx.DB) *LocationRepo {
 
 type Location interface {
 	GetLast(context.Context, string) (*models.Location, error)
-	GetByInstrumentId(context.Context, string) ([]models.Location, error)
-	FilterByDepartmentId(context.Context, models.DepartmentFilterDTO) ([]string, error)
-	Create(context.Context, models.CreateLocationDTO) error
-	CreateSeveral(context.Context, []models.CreateLocationDTO) error
-	Update(context.Context, models.UpdateLocationDTO) error
+	GetByInstrumentId(context.Context, string) ([]*models.Location, error)
+	FilterByDepartmentId(context.Context, *models.DepartmentFilterDTO) ([]string, error)
+	Create(context.Context, *models.CreateLocationDTO) error
+	CreateSeveral(context.Context, []*models.CreateLocationDTO) error
+	Update(context.Context, *models.UpdateLocationDTO) error
 	UpdatePlace(context.Context, *models.UpdatePlaceDTO) error
-	Receiving(context.Context, models.ReceivingDTO) error
+	Receiving(context.Context, *models.ReceivingDTO) error
 	Delete(context.Context, string) error
 }
 
 func (r *LocationRepo) GetLast(ctx context.Context, instrumentId string) (*models.Location, error) {
 	query := fmt.Sprintf(`SELECT id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed,
 		COALESCE(person_id::text, '') AS person_id, COALESCE(department_id::text, '') AS department_id
-		FROM %s WHERE instrument_id=$1 ORDER BY date_of_issue DESC LIMIT 1`,
+		FROM %s WHERE instrument_id=$1 ORDER BY date_of_issue DESC, created_at DESC LIMIT 1`,
 		SIMovementTable,
 	)
 	location := &models.Location{}
@@ -55,13 +55,14 @@ func (r *LocationRepo) GetLast(ctx context.Context, instrumentId string) (*model
 	return location, nil
 }
 
-func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (locations []models.Location, err error) {
+func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) ([]*models.Location, error) {
 	// var data []pq_models.LocationData
 	query := fmt.Sprintf(`SELECT id, instrument_id, status, date_of_receiving, date_of_issue, place, 
 		COALESCE(person_id::text, '') AS person_id, COALESCE(department_id::text, '') AS department_id, need_confirmed
 		FROM %s WHERE instrument_id=$1 ORDER BY date_of_issue DESC, created_at DESC, id`,
 		SIMovementTable,
 	)
+	locations := []*models.Location{}
 
 	if err := r.db.Select(&locations, query, instrumentId); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
@@ -71,8 +72,8 @@ func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId strin
 }
 
 // Функция для того чтобы найти все инструменты которые находятся в определенном подразделении
-func (r *LocationRepo) FilterByDepartmentId(ctx context.Context, filter models.DepartmentFilterDTO) (instrumentIds []string, err error) {
-	var locations []models.Location
+func (r *LocationRepo) FilterByDepartmentId(ctx context.Context, filter *models.DepartmentFilterDTO) (instrumentIds []string, err error) {
+	locations := []*models.Location{}
 	query := fmt.Sprintf(`SELECT s.instrument_id FROM %s AS m LEFT JOIN LATERAL (SELECT instrument_id, department_id 
 		FROM %s WHERE instrument_id=m.instrument_id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS s ON TRUE
 		WHERE s.instrument_id = ANY($1) AND s.department_id=$2 AND status='%s'`,
@@ -89,7 +90,7 @@ func (r *LocationRepo) FilterByDepartmentId(ctx context.Context, filter models.D
 	return instrumentIds, nil
 }
 
-func (r *LocationRepo) Create(ctx context.Context, l models.CreateLocationDTO) error {
+func (r *LocationRepo) Create(ctx context.Context, l *models.CreateLocationDTO) error {
 	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, person_id, department_id, place)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, COALESCE((
 			SELECT d.name || ' ('|| e.name || ')' FROM %s AS e LEFT JOIN %s AS d ON department_id=d.id WHERE e.id=$7
@@ -119,7 +120,7 @@ func (r *LocationRepo) Create(ctx context.Context, l models.CreateLocationDTO) e
 	return nil
 }
 
-func (r *LocationRepo) CreateSeveral(ctx context.Context, locations []models.CreateLocationDTO) error {
+func (r *LocationRepo) CreateSeveral(ctx context.Context, locations []*models.CreateLocationDTO) error {
 	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, person_id, department_id, place) VALUES `,
 		SIMovementTable,
 	)
@@ -161,7 +162,7 @@ func (r *LocationRepo) CreateSeveral(ctx context.Context, locations []models.Cre
 	return nil
 }
 
-func (r *LocationRepo) Update(ctx context.Context, l models.UpdateLocationDTO) error {
+func (r *LocationRepo) Update(ctx context.Context, l *models.UpdateLocationDTO) error {
 	query := fmt.Sprintf(`UPDATE %s SET date_of_issue=$1, date_of_receiving=$2, status=$3, person_id=$4, department_id=$5,
 		place=COALESCE((SELECT d.name || ' ('|| e.name || ')' FROM %s AS e LEFT JOIN %s AS d ON department_id=d.id WHERE e.id=$4), '')
 		WHERE id=$6`,
@@ -189,7 +190,7 @@ func (r *LocationRepo) UpdatePlace(ctx context.Context, dto *models.UpdatePlaceD
 }
 
 // // По идее это все входит в update -> надо как-то переписать update чтобы записывались только переданные данные даже если они пустые
-func (r *LocationRepo) Receiving(ctx context.Context, data models.ReceivingDTO) error {
+func (r *LocationRepo) Receiving(ctx context.Context, data *models.ReceivingDTO) error {
 	// query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE instrument_id=$3 AND date_of_receiving=0`, SIMovementTable)
 	query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE ARRAY[instrument_id] <@ $3 AND date_of_receiving=0`, SIMovementTable)
 

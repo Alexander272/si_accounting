@@ -29,13 +29,13 @@ func NewLocationService(repo repository.Location, most Most) *LocationService {
 
 type Location interface {
 	GetLast(context.Context, string) (*models.Location, error)
-	GetByInstrumentId(context.Context, string) ([]models.Location, error)
+	GetByInstrumentId(context.Context, string) ([]*models.Location, error)
 	// CreateSeveral(context.Context, models.CreateSeveralLocationDTO) (bool, error)
-	CreateSeveral(context.Context, models.CreateSeveralLocationDTO) error
-	Create(context.Context, models.CreateLocationDTO) error
-	Update(context.Context, models.UpdateLocationDTO) error
+	CreateSeveral(context.Context, *models.CreateSeveralLocationDTO) error
+	Create(context.Context, *models.CreateLocationDTO) error
+	Update(context.Context, *models.UpdateLocationDTO) error
 	UpdatePlace(context.Context, *models.UpdatePlaceDTO) error
-	Receiving(context.Context, models.DialogResponse) error
+	Receiving(context.Context, *models.DialogResponse) error
 	Delete(context.Context, string) error
 }
 
@@ -50,7 +50,7 @@ func (s *LocationService) GetLast(ctx context.Context, instrumentId string) (*mo
 	return location, nil
 }
 
-func (s *LocationService) GetByInstrumentId(ctx context.Context, instrumentId string) ([]models.Location, error) {
+func (s *LocationService) GetByInstrumentId(ctx context.Context, instrumentId string) ([]*models.Location, error) {
 	locations, err := s.repo.GetByInstrumentId(ctx, instrumentId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get locations by instrument id. error: %w", err)
@@ -58,7 +58,7 @@ func (s *LocationService) GetByInstrumentId(ctx context.Context, instrumentId st
 	return locations, nil
 }
 
-func (s *LocationService) FilterByDepartmentId(ctx context.Context, filter models.DepartmentFilterDTO) ([]string, error) {
+func (s *LocationService) FilterByDepartmentId(ctx context.Context, filter *models.DepartmentFilterDTO) ([]string, error) {
 	ids, err := s.repo.FilterByDepartmentId(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to filter locations by department id. error: %w", err)
@@ -66,7 +66,7 @@ func (s *LocationService) FilterByDepartmentId(ctx context.Context, filter model
 	return ids, nil
 }
 
-func (s *LocationService) Create(ctx context.Context, location models.CreateLocationDTO) error {
+func (s *LocationService) Create(ctx context.Context, location *models.CreateLocationDTO) error {
 	if err := s.repo.Create(ctx, location); err != nil {
 		return fmt.Errorf("failed to create si location. error: %w", err)
 	}
@@ -114,14 +114,14 @@ func (s *LocationService) Create(ctx context.Context, location models.CreateLoca
 //		}
 //		return isFull, nil
 //	}
-func (s *LocationService) CreateSeveral(ctx context.Context, dto models.CreateSeveralLocationDTO) error {
+func (s *LocationService) CreateSeveral(ctx context.Context, dto *models.CreateSeveralLocationDTO) error {
 	if err := s.repo.CreateSeveral(ctx, dto.Locations); err != nil {
 		return fmt.Errorf("failed to create several locations. error: %w", err)
 	}
 	return nil
 }
 
-func (s *LocationService) Update(ctx context.Context, location models.UpdateLocationDTO) error {
+func (s *LocationService) Update(ctx context.Context, location *models.UpdateLocationDTO) error {
 	if err := s.repo.Update(ctx, location); err != nil {
 		return fmt.Errorf("failed to update si location. error: %w", err)
 	}
@@ -136,7 +136,7 @@ func (s *LocationService) UpdatePlace(ctx context.Context, dto *models.UpdatePla
 }
 
 // Получение инструментов. Запрос прилетает из канала mattermost
-func (s *LocationService) ReceivingOld(ctx context.Context, location models.ReceivingDTO) error {
+func (s *LocationService) ReceivingOld(ctx context.Context, location *models.ReceivingDTO) error {
 	if err := s.repo.Receiving(ctx, location); err != nil {
 		return fmt.Errorf("failed to receiving si location. error: %w", err)
 	}
@@ -147,8 +147,8 @@ func (s *LocationService) ReceivingOld(ctx context.Context, location models.Rece
 	// }
 	return nil
 }
-func (s *LocationService) Receiving(ctx context.Context, dto models.DialogResponse) error {
-	post := models.UpdatePostData{}
+func (s *LocationService) Receiving(ctx context.Context, dto *models.DialogResponse) error {
+	post := &models.UpdatePostData{}
 	InstrumentIds := []string{}
 
 	state := strings.Split(dto.State, "&")
@@ -180,7 +180,7 @@ func (s *LocationService) Receiving(ctx context.Context, dto models.DialogRespon
 		}
 	}
 
-	location := models.ReceivingDTO{
+	location := &models.ReceivingDTO{
 		// PostID:        PostID,
 		InstrumentIds: InstrumentIds,
 		// Missing:       missing,
@@ -198,7 +198,7 @@ func (s *LocationService) Receiving(ctx context.Context, dto models.DialogRespon
 
 	// Отправка сообщения для подтверждения получения оставшихся инструментов
 	if len(post.Missing) != 0 {
-		not := models.Notification{
+		not := &models.Notification{
 			MostId:  dto.UserID,
 			Type:    constants.StatusReceiving,
 			Status:  post.Status,

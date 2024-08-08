@@ -41,11 +41,11 @@ func NewSIRepo(db *sqlx.DB) *SIRepo {
 }
 
 type SI interface {
-	GetAll(context.Context, models.SIParams) (*models.SIList, error)
-	GetForNotification(context.Context, models.Period) ([]models.Notification, error)
+	GetAll(context.Context, *models.SIParams) (*models.SIList, error)
+	GetForNotification(context.Context, *models.Period) ([]*models.Notification, error)
 }
 
-func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SIList, error) {
+func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SIList, error) {
 	list := &models.SIList{}
 
 	params := []interface{}{}
@@ -108,13 +108,13 @@ func (r *SIRepo) GetAll(ctx context.Context, req models.SIParams) (*models.SILis
 	if len(list.SI) > 0 {
 		list.Total = list.SI[0].Total
 	} else {
-		list.SI = []models.SI{}
+		list.SI = []*models.SI{}
 	}
 
 	return list, nil
 }
 
-func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (nots []models.Notification, err error) {
+func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (nots []*models.Notification, err error) {
 	var params []interface{}
 	periodCond := ""
 	status := constants.LocationStatusMoved
@@ -127,7 +127,7 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 		params = append(params, req.StartAt, req.FinishAt)
 	}
 
-	var data []models.SIFromNotification
+	data := []*models.SIFromNotification{}
 	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, COALESCE(e.name, '') AS person, COALESCE(d.name, '') AS department,
 		COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id, l.channel_id
 		FROM %s AS i
@@ -159,7 +159,7 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 	}
 
 	for i, sn := range data {
-		si := models.SelectedSI{
+		si := &models.SelectedSI{
 			Id:            sn.Id,
 			Name:          sn.Name,
 			FactoryNumber: sn.FactoryNumber,
@@ -174,12 +174,12 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req models.Period) (not
 		}
 
 		if i == 0 || nots[len(nots)-1].MostId != sn.MostId {
-			nots = append(nots, models.Notification{
+			nots = append(nots, &models.Notification{
 				MostId:    sn.MostId,
 				ChannelId: sn.ChannelId,
 				Type:      notType,
 				Status:    notStatus,
-				SI:        []models.SelectedSI{si},
+				SI:        []*models.SelectedSI{si},
 			})
 		} else {
 			nots[len(nots)-1].SI = append(nots[len(nots)-1].SI, si)

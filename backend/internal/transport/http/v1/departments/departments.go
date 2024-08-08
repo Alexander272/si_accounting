@@ -47,8 +47,8 @@ func (h *DepartmentHandlers) GetAll(c *gin.Context) {
 }
 
 func (h *DepartmentHandlers) Create(c *gin.Context) {
-	var dto models.Department
-	if err := c.BindJSON(&dto); err != nil {
+	dto := &models.Department{}
+	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
@@ -64,8 +64,8 @@ func (h *DepartmentHandlers) Create(c *gin.Context) {
 }
 
 func (h *DepartmentHandlers) Update(c *gin.Context) {
-	var dto models.Department
-	if err := c.BindJSON(&dto); err != nil {
+	dto := &models.Department{}
+	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}

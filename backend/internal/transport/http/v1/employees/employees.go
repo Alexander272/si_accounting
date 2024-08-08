@@ -44,7 +44,7 @@ func (h *EmployeeHandlers) GetAll(c *gin.Context) {
 		filter["department_id"] = departmentId
 	}
 
-	employees, err := h.service.GetAll(c, models.GetEmployeesDTO{Filters: filter})
+	employees, err := h.service.GetAll(c, &models.GetEmployeesDTO{Filters: filter})
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), filter)
@@ -72,8 +72,8 @@ func (h *EmployeeHandlers) GetByDepartment(c *gin.Context) {
 }
 
 func (h *EmployeeHandlers) Create(c *gin.Context) {
-	var dto models.WriteEmployeeDTO
-	if err := c.BindJSON(&dto); err != nil {
+	dto := &models.WriteEmployeeDTO{}
+	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
@@ -95,8 +95,8 @@ func (h *EmployeeHandlers) Update(c *gin.Context) {
 		return
 	}
 
-	var dto models.WriteEmployeeDTO
-	if err := c.BindJSON(&dto); err != nil {
+	dto := &models.WriteEmployeeDTO{}
+	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}

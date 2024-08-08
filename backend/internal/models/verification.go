@@ -48,8 +48,8 @@ type VerificationDataDTO struct {
 	Date     int64 `json:"date" db:"date"`
 	NextDate int64 `json:"nextDate" db:"next_date"`
 	// FileLink     string     `json:"fileLink" db:"file_link"`
-	RegisterLink string     `json:"registerLink" db:"register_link"`
-	Status       string     `json:"status" db:"status"`
-	Notes        string     `json:"notes" db:"notes"`
-	Documents    []Document `json:"documents"`
+	RegisterLink string      `json:"registerLink" db:"register_link"`
+	Status       string      `json:"status" db:"status"`
+	Notes        string      `json:"notes" db:"notes"`
+	Documents    []*Document `json:"documents"`
 }

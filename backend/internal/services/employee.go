@@ -22,22 +22,22 @@ func NewEmployeeService(repo repository.Employee, location Location) *EmployeeSe
 }
 
 type Employee interface {
-	GetAll(context.Context, models.GetEmployeesDTO) ([]models.Employee, error)
-	GetByDepartment(context.Context, string) ([]models.Employee, error)
+	GetAll(context.Context, *models.GetEmployeesDTO) ([]*models.Employee, error)
+	GetByDepartment(context.Context, string) ([]*models.Employee, error)
 	GetByMostId(context.Context, string) (*models.EmployeeData, error)
 	GetBySSOId(context.Context, string) (*models.Employee, error)
-	Create(context.Context, models.WriteEmployeeDTO) error
-	Update(context.Context, models.WriteEmployeeDTO) error
+	Create(context.Context, *models.WriteEmployeeDTO) error
+	Update(context.Context, *models.WriteEmployeeDTO) error
 	Delete(context.Context, string) error
 }
 
-func (s *EmployeeService) GetAll(ctx context.Context, req models.GetEmployeesDTO) ([]models.Employee, error) {
+func (s *EmployeeService) GetAll(ctx context.Context, req *models.GetEmployeesDTO) ([]*models.Employee, error) {
 	employees, err := s.repo.GetAll(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get employees. error: %w", err)
 	}
 	if employees == nil {
-		employees = []models.Employee{}
+		employees = []*models.Employee{}
 	}
 	return employees, nil
 }
@@ -53,7 +53,7 @@ func (s *EmployeeService) GetBySSOId(ctx context.Context, id string) (*models.Em
 	return employee, nil
 }
 
-func (s *EmployeeService) GetByDepartment(ctx context.Context, departmentId string) ([]models.Employee, error) {
+func (s *EmployeeService) GetByDepartment(ctx context.Context, departmentId string) ([]*models.Employee, error) {
 	users, err := s.repo.GetByDepartment(ctx, departmentId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get employees by department. error: %w", err)
@@ -69,14 +69,14 @@ func (s *EmployeeService) GetByMostId(ctx context.Context, mostId string) (*mode
 	return employee, nil
 }
 
-func (s *EmployeeService) Create(ctx context.Context, employee models.WriteEmployeeDTO) error {
+func (s *EmployeeService) Create(ctx context.Context, employee *models.WriteEmployeeDTO) error {
 	if err := s.repo.Create(ctx, employee); err != nil {
 		return fmt.Errorf("failed to create employee. error: %w", err)
 	}
 	return nil
 }
 
-func (s *EmployeeService) Update(ctx context.Context, employee models.WriteEmployeeDTO) error {
+func (s *EmployeeService) Update(ctx context.Context, employee *models.WriteEmployeeDTO) error {
 	if err := s.repo.Update(ctx, employee); err != nil {
 		return fmt.Errorf("failed to update employee. error: %w", err)
 	}

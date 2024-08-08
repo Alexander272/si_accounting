@@ -26,16 +26,16 @@ func NewMostService(url string) *MostService {
 }
 
 type Most interface {
-	Send(context.Context, models.Notification) error
-	Update(context.Context, models.UpdatePostData) error
+	Send(context.Context, *models.Notification) error
+	Update(context.Context, *models.UpdatePostData) error
 }
 
 // func (s *MostService) GetPost(ctx context.Context, id string) (model.Post, error) {
 
 // }
 
-func (s *MostService) Send(ctx context.Context, not models.Notification) error {
-	var post models.CreatePostDTO
+func (s *MostService) Send(ctx context.Context, not *models.Notification) error {
+	post := &models.CreatePostDTO{}
 	apiPath := "/api/posts"
 	apiDialogsPath := "/api/dialogs"
 
@@ -152,8 +152,8 @@ func (s *MostService) Send(ctx context.Context, not models.Notification) error {
 	return nil
 }
 
-func (s *MostService) Update(ctx context.Context, dto models.UpdatePostData) error {
-	var post models.UpdatePostDTO
+func (s *MostService) Update(ctx context.Context, dto *models.UpdatePostData) error {
+	post := &models.UpdatePostDTO{}
 	apiPath := fmt.Sprintf("/api/posts/%s", dto.PostID)
 
 	// if len(dto.Missing) != 0 {

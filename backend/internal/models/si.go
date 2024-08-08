@@ -1,9 +1,9 @@
 package models
 
 type SIParams struct {
-	Page    SIPage
-	Sort    []SISort
-	Filters []SIFilter
+	Page    *SIPage
+	Sort    []*SISort
+	Filters []*SIFilter
 	Status  string
 }
 
@@ -18,9 +18,9 @@ type SISort struct {
 }
 
 type SIFilter struct {
-	Field     string          `json:"field"`
-	FieldType string          `json:"fieldType"`
-	Values    []SIFilterValue `json:"values"`
+	Field     string           `json:"field"`
+	FieldType string           `json:"fieldType"`
+	Values    []*SIFilterValue `json:"values"`
 }
 type SIFilterValue struct {
 	CompareType string `json:"compareType"`
@@ -33,8 +33,8 @@ type Period struct {
 }
 
 type SIList struct {
-	Total int  `json:"total" db:"total"`
-	SI    []SI `json:"si"`
+	Total int   `json:"total" db:"total"`
+	SI    []*SI `json:"si"`
 }
 
 type SI struct {

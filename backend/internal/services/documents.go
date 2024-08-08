@@ -31,14 +31,14 @@ func NewDocumentsService(repo repository.Documents) *DocumentsService {
 }
 
 type Documents interface {
-	Get(context.Context, models.GetDocumentsDTO) ([]models.Document, error)
-	Upload(context.Context, models.DocumentsDTO) error
-	ChangePath(context.Context, models.PathParts) error
-	Delete(context.Context, models.DeleteDocumentsDTO) error
+	Get(context.Context, *models.GetDocumentsDTO) ([]*models.Document, error)
+	Upload(context.Context, *models.DocumentsDTO) error
+	ChangePath(context.Context, *models.PathParts) error
+	Delete(context.Context, *models.DeleteDocumentsDTO) error
 	DeleteByInstrumentId(context.Context, string) error
 }
 
-func (s *DocumentsService) Get(ctx context.Context, req models.GetDocumentsDTO) ([]models.Document, error) {
+func (s *DocumentsService) Get(ctx context.Context, req *models.GetDocumentsDTO) ([]*models.Document, error) {
 	docs, err := s.repo.Get(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get documents. error: %w", err)
@@ -48,8 +48,8 @@ func (s *DocumentsService) Get(ctx context.Context, req models.GetDocumentsDTO) 
 
 // TODO надо перемещать изображения при сохранении поверки и записывать ее Id
 
-func (s *DocumentsService) Upload(ctx context.Context, data models.DocumentsDTO) error {
-	docs := []models.Document{}
+func (s *DocumentsService) Upload(ctx context.Context, data *models.DocumentsDTO) error {
+	docs := []*models.Document{}
 
 	documentTypes := map[string]string{
 		"application/msword":          "doc",
@@ -68,7 +68,7 @@ func (s *DocumentsService) Upload(ctx context.Context, data models.DocumentsDTO)
 	}
 
 	for _, fh := range data.Files {
-		doc := models.Document{
+		doc := &models.Document{
 			Id:             uuid.NewString(),
 			Label:          fh.Filename,
 			Size:           fh.Size,
@@ -124,7 +124,7 @@ func (s *DocumentsService) SaveUploadedFile(file *multipart.FileHeader, dst stri
 	return err
 }
 
-func (s *DocumentsService) ChangePath(ctx context.Context, req models.PathParts) error {
+func (s *DocumentsService) ChangePath(ctx context.Context, req *models.PathParts) error {
 	count, err := s.repo.UpdatePath(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to update path documents. error: %w", err)
@@ -142,7 +142,7 @@ func (s *DocumentsService) ChangePath(ctx context.Context, req models.PathParts)
 	return nil
 }
 
-func (s *DocumentsService) Delete(ctx context.Context, req models.DeleteDocumentsDTO) error {
+func (s *DocumentsService) Delete(ctx context.Context, req *models.DeleteDocumentsDTO) error {
 	paths := []string{s.path, req.InstrumentId}
 	if req.VerificationId != "" {
 		paths = append(paths, req.VerificationId)

@@ -75,7 +75,7 @@ func (h *VerificationHandlers) GetByInstrumentId(c *gin.Context) {
 }
 
 func (h *VerificationHandlers) Create(c *gin.Context) {
-	var dto models.CreateVerificationDTO
+	dto := &models.CreateVerificationDTO{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
@@ -109,7 +109,7 @@ func (h *VerificationHandlers) Update(c *gin.Context) {
 		return
 	}
 
-	var dto models.UpdateVerificationDTO
+	dto := &models.UpdateVerificationDTO{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return

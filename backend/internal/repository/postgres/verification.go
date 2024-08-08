@@ -24,9 +24,9 @@ func NewVerificationRepo(db *sqlx.DB) *VerificationRepo {
 
 type Verification interface {
 	GetLast(context.Context, string) (*models.Verification, error)
-	GetByInstrumentId(context.Context, string) ([]models.VerificationDataDTO, error)
-	Create(context.Context, models.CreateVerificationDTO) (string, error)
-	Update(context.Context, models.UpdateVerificationDTO) error
+	GetByInstrumentId(context.Context, string) ([]*models.VerificationDataDTO, error)
+	Create(context.Context, *models.CreateVerificationDTO) (string, error)
+	Update(context.Context, *models.UpdateVerificationDTO) error
 }
 
 // func (r *VerificationRepo) GetById(ctx context.Context, id string) ([]models.Verification, error) {
@@ -77,7 +77,7 @@ func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*m
 // 	return verifications, nil
 // }
 
-func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) ([]models.VerificationDataDTO, error) {
+func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) ([]*models.VerificationDataDTO, error) {
 	var data []pq_models.VerificationFullData
 	query := fmt.Sprintf(`SELECT v.id, v.instrument_id, register_link, status, date, next_date, notes,
 		COALESCE(d.id::text, '') AS doc_id, COALESCE(d.label, '') AS label, COALESCE(d.size,0) AS size, COALESCE(d.path,'') AS path, COALESCE(d.type,'') AS type
@@ -89,14 +89,14 @@ func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId s
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
-	verifications := []models.VerificationDataDTO{}
+	verifications := []*models.VerificationDataDTO{}
 
 	for i, d := range data {
 		emptyDoc := false
 		if d.DocId == "" {
 			emptyDoc = true
 		}
-		doc := models.Document{
+		doc := &models.Document{
 			Id:           d.DocId,
 			Label:        d.Label,
 			Size:         d.Size,
@@ -105,12 +105,12 @@ func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId s
 		}
 
 		if i == 0 || verifications[len(verifications)-1].Id != d.Id {
-			docs := []models.Document{}
+			docs := []*models.Document{}
 			if !emptyDoc {
 				docs = append(docs, doc)
 			}
 
-			verifications = append(verifications, models.VerificationDataDTO{
+			verifications = append(verifications, &models.VerificationDataDTO{
 				Id:           d.Id,
 				InstrumentId: d.InstrumentId,
 				Date:         d.Date,
@@ -133,7 +133,7 @@ func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId s
 
 //TODO чтобы избавиться от разницы в 5 часов надо из значения вычесть 18000
 
-func (r *VerificationRepo) Create(ctx context.Context, v models.CreateVerificationDTO) (string, error) {
+func (r *VerificationRepo) Create(ctx context.Context, v *models.CreateVerificationDTO) (string, error) {
 	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date, next_date, register_link, status, notes)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		VerificationTable,
@@ -159,7 +159,7 @@ func (r *VerificationRepo) Create(ctx context.Context, v models.CreateVerificati
 	return id.String(), nil
 }
 
-func (r *VerificationRepo) Update(ctx context.Context, v models.UpdateVerificationDTO) error {
+func (r *VerificationRepo) Update(ctx context.Context, v *models.UpdateVerificationDTO) error {
 	query := fmt.Sprintf(`UPDATE %s SET date=$1, register_link=$2, status=$3, next_date=$4, notes=$5 WHERE id=$6`,
 		VerificationTable,
 	)

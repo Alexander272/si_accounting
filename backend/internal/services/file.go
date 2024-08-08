@@ -20,11 +20,11 @@ func NewFileService(si SI) *FileService {
 }
 
 type File interface {
-	Export(context.Context, models.SIParams) (*bytes.Buffer, error)
-	MakeVerificationSchedule(context.Context, models.SIParams) (*bytes.Buffer, error)
+	Export(context.Context, *models.SIParams) (*bytes.Buffer, error)
+	MakeVerificationSchedule(context.Context, *models.SIParams) (*bytes.Buffer, error)
 }
 
-func (s *FileService) Export(ctx context.Context, params models.SIParams) (*bytes.Buffer, error) {
+func (s *FileService) Export(ctx context.Context, params *models.SIParams) (*bytes.Buffer, error) {
 	data, err := s.si.GetAll(ctx, params)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (s *FileService) Export(ctx context.Context, params models.SIParams) (*byte
 	return buffer, nil
 }
 
-func (s *FileService) MakeVerificationSchedule(ctx context.Context, params models.SIParams) (*bytes.Buffer, error) {
+func (s *FileService) MakeVerificationSchedule(ctx context.Context, params *models.SIParams) (*bytes.Buffer, error) {
 	data, err := s.si.GetAll(ctx, params)
 	if err != nil {
 		return nil, err

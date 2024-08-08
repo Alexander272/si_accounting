@@ -36,7 +36,7 @@ type CreateLocationDTO struct {
 
 type CreateSeveralLocationDTO struct {
 	UserId    string
-	Locations []CreateLocationDTO `json:"locations"`
+	Locations []*CreateLocationDTO `json:"locations"`
 }
 
 type UpdateLocationDTO struct {

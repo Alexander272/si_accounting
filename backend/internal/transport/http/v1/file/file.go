@@ -38,10 +38,12 @@ func Register(api *gin.RouterGroup, service services.File, middleware *middlewar
 }
 
 func (h *FileHandlers) export(c *gin.Context) {
-	params := models.SIParams{
-		Page: models.SIPage{
+	params := &models.SIParams{
+		Page: &models.SIPage{
 			Limit: 999999,
 		},
+		Sort:    []*models.SISort{},
+		Filters: []*models.SIFilter{},
 	}
 
 	sortLine := c.Query("sort_by")
@@ -56,7 +58,7 @@ func (h *FileHandlers) export(c *gin.Context) {
 				t = "DESC"
 			}
 
-			params.Sort = append(params.Sort, models.SISort{
+			params.Sort = append(params.Sort, &models.SISort{
 				Field: field,
 				Type:  t,
 			})
@@ -66,15 +68,15 @@ func (h *FileHandlers) export(c *gin.Context) {
 	for k, v := range filters {
 		valueMap := c.QueryMap(k)
 
-		values := []models.SIFilterValue{}
+		values := []*models.SIFilterValue{}
 		for key, value := range valueMap {
-			values = append(values, models.SIFilterValue{
+			values = append(values, &models.SIFilterValue{
 				CompareType: key,
 				Value:       value,
 			})
 		}
 
-		f := models.SIFilter{
+		f := &models.SIFilter{
 			Field:     k,
 			FieldType: v,
 			Values:    values,
@@ -119,23 +121,23 @@ func (h *FileHandlers) export(c *gin.Context) {
 }
 
 func (h *FileHandlers) makeVerificationSchedule(c *gin.Context) {
-	params := models.SIParams{
-		Page: models.SIPage{
+	params := &models.SIParams{
+		Page: &models.SIPage{
 			Limit: 999999,
 		},
 		Status: constants.InstrumentStatusWork,
-		Sort: []models.SISort{{
+		Sort: []*models.SISort{{
 			Field: "nextVerificationDate", Type: "ASC",
 		}},
-		Filters: []models.SIFilter{{
+		Filters: []*models.SIFilter{{
 			Field:  "nextVerificationDate",
-			Values: []models.SIFilterValue{},
+			Values: []*models.SIFilterValue{},
 		}},
 	}
 
 	period := c.QueryMap("period")
 	for k, v := range period {
-		params.Filters[len(params.Filters)-1].Values = append(params.Filters[len(params.Filters)-1].Values, models.SIFilterValue{
+		params.Filters[len(params.Filters)-1].Values = append(params.Filters[len(params.Filters)-1].Values, &models.SIFilterValue{
 			CompareType: k,
 			Value:       v,
 		})

@@ -24,9 +24,9 @@ func NewInstrumentRepo(db *sqlx.DB) *InstrumentRepo {
 
 type Instrument interface {
 	GetById(context.Context, string) (*models.Instrument, error)
-	Create(context.Context, models.CreateInstrumentDTO) error
-	Update(context.Context, models.UpdateInstrumentDTO) error
-	ChangeStatus(context.Context, models.UpdateStatus) error
+	Create(context.Context, *models.CreateInstrumentDTO) error
+	Update(context.Context, *models.UpdateInstrumentDTO) error
+	ChangeStatus(context.Context, *models.UpdateStatus) error
 	Delete(context.Context, string) error
 }
 
@@ -49,7 +49,7 @@ func (r *InstrumentRepo) GetById(ctx context.Context, id string) (*models.Instru
 	return instrument, nil
 }
 
-func (r *InstrumentRepo) Create(ctx context.Context, in models.CreateInstrumentDTO) error {
+func (r *InstrumentRepo) Create(ctx context.Context, in *models.CreateInstrumentDTO) error {
 	query := fmt.Sprintf(`INSERT INTO %s(id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, 
 		year_of_issue, inter_verification_interval, notes, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
 		InstrumentTable,
@@ -65,7 +65,7 @@ func (r *InstrumentRepo) Create(ctx context.Context, in models.CreateInstrumentD
 	return nil
 }
 
-func (r *InstrumentRepo) Update(ctx context.Context, in models.UpdateInstrumentDTO) error {
+func (r *InstrumentRepo) Update(ctx context.Context, in *models.UpdateInstrumentDTO) error {
 	query := fmt.Sprintf(`UPDATE %s SET name=$1, type=$2, factory_number=$3, measurement_limits=$4, accuracy=$5, state_register=$6, manufacturer=$7, 
 		year_of_issue=$8, inter_verification_interval=$9, notes=$10 WHERE id=$11`,
 		InstrumentTable,
@@ -80,7 +80,7 @@ func (r *InstrumentRepo) Update(ctx context.Context, in models.UpdateInstrumentD
 	return nil
 }
 
-func (r *InstrumentRepo) ChangeStatus(ctx context.Context, status models.UpdateStatus) error {
+func (r *InstrumentRepo) ChangeStatus(ctx context.Context, status *models.UpdateStatus) error {
 	query := fmt.Sprintf(`UPDATE %s SET status=$1 WHERE id=$2`, InstrumentTable)
 
 	_, err := r.db.Exec(query, status.Status, status.Id)

@@ -68,7 +68,7 @@ func (h *ReceivingHandlers) Receiving(c *gin.Context) {
 }
 
 func (h *ReceivingHandlers) ReceivingDialog(c *gin.Context) {
-	var dto models.DialogResponse
+	dto := &models.DialogResponse{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return

@@ -8,6 +8,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/employees"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/file"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/filter"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/roles"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/instrument"
@@ -83,6 +84,7 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	verification.Register(siGroup, h.services.Verification, h.services.Documents, h.middleware)
 	location.Register(siGroup, h.services.Location, h.middleware)
 	receiving.Register(v1, h.services.Location, h.middleware)
+	filter.Register(secure, h.services.DefaultFilter, h.middleware)
 
 	file.Register(secure, h.services.File, h.middleware)
 

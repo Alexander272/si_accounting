@@ -25,9 +25,9 @@ func NewInstrumentService(repo repository.Instrument, documents Documents) *Inst
 
 type Instrument interface {
 	GetById(ctx context.Context, id string) (*models.Instrument, error)
-	Create(ctx context.Context, in models.CreateInstrumentDTO) error
-	Update(ctx context.Context, in models.UpdateInstrumentDTO) error
-	ChangeStatus(ctx context.Context, status models.UpdateStatus) error
+	Create(ctx context.Context, in *models.CreateInstrumentDTO) error
+	Update(ctx context.Context, in *models.UpdateInstrumentDTO) error
+	ChangeStatus(ctx context.Context, status *models.UpdateStatus) error
 	Delete(ctx context.Context, id string) error
 }
 
@@ -42,7 +42,7 @@ func (s *InstrumentService) GetById(ctx context.Context, id string) (*models.Ins
 	return instrument, nil
 }
 
-func (s *InstrumentService) Create(ctx context.Context, in models.CreateInstrumentDTO) error {
+func (s *InstrumentService) Create(ctx context.Context, in *models.CreateInstrumentDTO) error {
 	candidate, err := s.GetById(ctx, "")
 	if err != nil && !errors.Is(err, models.ErrNoRows) {
 		return err
@@ -62,14 +62,14 @@ func (s *InstrumentService) Create(ctx context.Context, in models.CreateInstrume
 	return nil
 }
 
-func (s *InstrumentService) Update(ctx context.Context, in models.UpdateInstrumentDTO) error {
+func (s *InstrumentService) Update(ctx context.Context, in *models.UpdateInstrumentDTO) error {
 	if err := s.repo.Update(ctx, in); err != nil {
 		return fmt.Errorf("failed to update instrument. error: %w", err)
 	}
 	return nil
 }
 
-func (s *InstrumentService) ChangeStatus(ctx context.Context, status models.UpdateStatus) error {
+func (s *InstrumentService) ChangeStatus(ctx context.Context, status *models.UpdateStatus) error {
 	if err := s.repo.ChangeStatus(ctx, status); err != nil {
 		return fmt.Errorf("failed to change instrument status. error: %w", err)
 	}
@@ -92,7 +92,7 @@ func (s *InstrumentService) Delete(ctx context.Context, id string) error {
 		}
 	}
 
-	if err := s.ChangeStatus(ctx, models.UpdateStatus{Id: id, Status: constants.InstrumentDeleted}); err != nil {
+	if err := s.ChangeStatus(ctx, &models.UpdateStatus{Id: id, Status: constants.InstrumentDeleted}); err != nil {
 		return err
 	}
 

@@ -20,17 +20,18 @@ func NewDocumentsRepo(db *sqlx.DB) *DocumentsRepo {
 }
 
 type Documents interface {
-	Get(context.Context, models.GetDocumentsDTO) ([]models.Document, error)
-	CreateSeveral(context.Context, []models.Document) error
-	UpdatePath(context.Context, models.PathParts) (int64, error)
+	Get(context.Context, *models.GetDocumentsDTO) ([]*models.Document, error)
+	CreateSeveral(context.Context, []*models.Document) error
+	UpdatePath(context.Context, *models.PathParts) (int64, error)
 	DeleteById(context.Context, string) error
 }
 
-func (r *DocumentsRepo) Get(ctx context.Context, req models.GetDocumentsDTO) (docs []models.Document, err error) {
+func (r *DocumentsRepo) Get(ctx context.Context, req *models.GetDocumentsDTO) ([]*models.Document, error) {
 	query := fmt.Sprintf(`SELECT id, label, size, path, COALESCE(verification_id::text,'') AS verification_id, type FROM %s 
 		WHERE verification_id::text=$1 OR (instrument_id=$2 AND verification_id IS NULL)`,
 		DocumentsTable,
 	)
+	docs := []*models.Document{}
 
 	if err := r.db.Select(&docs, query, req.VerificationId, req.InstrumentId); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
@@ -38,7 +39,7 @@ func (r *DocumentsRepo) Get(ctx context.Context, req models.GetDocumentsDTO) (do
 	return docs, nil
 }
 
-func (r *DocumentsRepo) CreateSeveral(ctx context.Context, docs []models.Document) error {
+func (r *DocumentsRepo) CreateSeveral(ctx context.Context, docs []*models.Document) error {
 	query := fmt.Sprintf(`INSERT INTO %s(id, label, size, path, verification_id, type, instrument_id) VALUES `, DocumentsTable)
 
 	args := make([]interface{}, 0)
@@ -72,7 +73,7 @@ func (r *DocumentsRepo) CreateSeveral(ctx context.Context, docs []models.Documen
 	return nil
 }
 
-func (r *DocumentsRepo) UpdatePath(ctx context.Context, req models.PathParts) (int64, error) {
+func (r *DocumentsRepo) UpdatePath(ctx context.Context, req *models.PathParts) (int64, error) {
 	query := fmt.Sprintf(`UPDATE %s SET verification_id=$1::uuid, path=REPLACE(path, 'temp', $1::text)
 		WHERE verification_id IS NULL AND instrument_id=$2`,
 		DocumentsTable,

@@ -26,12 +26,12 @@ type NotificationSubTime struct {
 }
 
 type Notification struct {
-	MostId    string       `json:"userId"`
-	ChannelId string       `json:"channelId"`
-	Type      string       `json:"type"`
-	Status    string       `json:"status"`
-	Message   string       `json:"message"`
-	SI        []SelectedSI `json:"si"`
+	MostId    string        `json:"userId"`
+	ChannelId string        `json:"channelId"`
+	Type      string        `json:"type"`
+	Status    string        `json:"status"`
+	Message   string        `json:"message"`
+	SI        []*SelectedSI `json:"si"`
 }
 
 type SelectedSI struct {
@@ -92,8 +92,8 @@ type UpdatePostDTO struct {
 type UpdatePostData struct {
 	PostID      string
 	Status      string
-	Missing     []SelectedSI
-	Instruments []SelectedSI
+	Missing     []*SelectedSI
+	Instruments []*SelectedSI
 }
 
 type Props struct {

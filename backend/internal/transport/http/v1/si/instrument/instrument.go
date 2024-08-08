@@ -58,8 +58,8 @@ func (h *InstrumentHandlers) GetById(c *gin.Context) {
 }
 
 func (h *InstrumentHandlers) Create(c *gin.Context) {
-	var dto models.CreateInstrumentDTO
-	if err := c.BindJSON(&dto); err != nil {
+	dto := &models.CreateInstrumentDTO{}
+	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
@@ -70,11 +70,12 @@ func (h *InstrumentHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	var user models.User
 	u, exists := c.Get(constants.CtxUser)
-	if exists {
-		user = u.(models.User)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "Сессия не найдена")
+		return
 	}
+	user := u.(models.User)
 
 	logger.Info("Создан инструмент",
 		logger.StringAttr("instrument_name", dto.Name),
@@ -92,8 +93,8 @@ func (h *InstrumentHandlers) Update(c *gin.Context) {
 		return
 	}
 
-	var dto models.UpdateInstrumentDTO
-	if err := c.BindJSON(&dto); err != nil {
+	dto := &models.UpdateInstrumentDTO{}
+	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}

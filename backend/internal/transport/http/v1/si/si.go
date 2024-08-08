@@ -33,7 +33,11 @@ func Register(api *gin.RouterGroup, service services.SI, middleware *middleware.
 }
 
 func (h *SIHandlers) GetAll(c *gin.Context) {
-	params := models.SIParams{}
+	params := &models.SIParams{
+		Page:    &models.SIPage{},
+		Sort:    []*models.SISort{},
+		Filters: []*models.SIFilter{},
+	}
 
 	page := c.Query("page")
 	size := c.Query("size")
@@ -64,7 +68,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 				t = "DESC"
 			}
 
-			params.Sort = append(params.Sort, models.SISort{
+			params.Sort = append(params.Sort, &models.SISort{
 				Field: field,
 				Type:  t,
 			})
@@ -86,15 +90,15 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 	for k, v := range filters {
 		valueMap := c.QueryMap(k)
 
-		values := []models.SIFilterValue{}
+		values := []*models.SIFilterValue{}
 		for key, value := range valueMap {
-			values = append(values, models.SIFilterValue{
+			values = append(values, &models.SIFilterValue{
 				CompareType: key,
 				Value:       value,
 			})
 		}
 
-		f := models.SIFilter{
+		f := &models.SIFilter{
 			Field:     k,
 			FieldType: v,
 			Values:    values,
@@ -132,7 +136,7 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 // }
 
 func (h *SIHandlers) Save(c *gin.Context) {
-	var dto models.UpdateStatus
+	dto := &models.UpdateStatus{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return

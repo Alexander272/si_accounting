@@ -53,7 +53,7 @@ func (h *DocumentsHandlers) getList(c *gin.Context) {
 		return
 	}
 
-	dto := models.GetDocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId}
+	dto := &models.GetDocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId}
 	docs, err := h.service.Get(c, dto)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
@@ -130,7 +130,7 @@ func (h *DocumentsHandlers) upload(c *gin.Context) {
 	}
 	// c.SaveUploadedFile()
 
-	dto := models.DocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId, Files: files}
+	dto := &models.DocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId, Files: files}
 	if err := h.service.Upload(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), dto)
@@ -157,7 +157,7 @@ func (h *DocumentsHandlers) delete(c *gin.Context) {
 	}
 	verificationId := c.Query("verificationId")
 
-	req := models.DeleteDocumentsDTO{
+	req := &models.DeleteDocumentsDTO{
 		Id:             id,
 		InstrumentId:   instrumentId,
 		VerificationId: verificationId,
