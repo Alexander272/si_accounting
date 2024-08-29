@@ -135,7 +135,7 @@ const VerificationForm: FC<FormProps> = ({ changeStep }) => {
 
 	if (!instrument || isLoading || isLoadingInstrument) return <Fallback marginTop={5} marginBottom={3} height={450} />
 
-	if (data?.data.id)
+	if (data?.data?.id)
 		return (
 			<UpdateVerificationForm
 				instrument={instrument?.data}

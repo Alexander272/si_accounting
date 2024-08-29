@@ -1,7 +1,8 @@
 import { toast } from 'react-toastify'
 
+import type { IBaseFetchError } from '@/app/types/error'
 import type { IDataItem, ISIParams } from './types/data'
-import type { IFetchError } from '@/app/types/error'
+import type { INewSI } from './types/si'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
 import { SIMessages } from '@/constants/messages/siMessage'
@@ -17,6 +18,15 @@ const SIApiSlice = apiSlice.injectEndpoints({
 				params: buildSiUrlParams(params),
 			}),
 			providesTags: [{ type: 'SI', id: 'ALL' }],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					console.error(fetchError)
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
 		}),
 
 		saveSI: builder.mutation<string, string>({
@@ -34,7 +44,30 @@ const SIApiSlice = apiSlice.injectEndpoints({
 					await api.queryFulfilled
 					toast.success(SIMessages.SUCCESSFULLY_CREATED)
 				} catch (error) {
-					const fetchError = error as IFetchError
+					const fetchError = (error as IBaseFetchError).error
+					console.error(fetchError)
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
+
+		createSI: builder.mutation<string, INewSI>({
+			query: data => ({
+				url: API.si.base,
+				method: 'POST',
+				body: data,
+			}),
+			invalidatesTags: [
+				{ type: 'SI', id: 'ALL' },
+				{ type: 'SI', id: 'DRAFT' },
+				{ type: 'Verification', id: 'documents' },
+			],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+					toast.success(SIMessages.SUCCESSFULLY_CREATED)
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
 					console.error(fetchError)
 					toast.error(fetchError.data.message, { autoClose: false })
 				}
@@ -43,4 +76,4 @@ const SIApiSlice = apiSlice.injectEndpoints({
 	}),
 })
 
-export const { useGetAllSIQuery, useLazyGetAllSIQuery, useSaveSIMutation } = SIApiSlice
+export const { useGetAllSIQuery, useLazyGetAllSIQuery, useSaveSIMutation, useCreateSIMutation } = SIApiSlice

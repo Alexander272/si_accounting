@@ -13,7 +13,7 @@ export const useGetAllSI = () => {
 
 	const query = useGetAllSIQuery(
 		{ status, page, size, sort, filter },
-		{ pollingInterval: 5 * 60000, skipPollingIfUnfocused: true, refetchOnFocus: true }
+		{ pollingInterval: 5 * 60000, skipPollingIfUnfocused: true /*refetchOnFocus: true*/ }
 	)
 
 	return query

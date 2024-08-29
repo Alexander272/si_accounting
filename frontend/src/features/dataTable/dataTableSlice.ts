@@ -124,7 +124,7 @@ const dataTableSlice = createSlice({
 			})
 			.addCase(setUser, (state, action) => {
 				//TODO учесть что могут быть сохраненные фильтры
-				if (action.payload.filters && action.payload.filters.length) {
+				if (action.payload.filters && action.payload.filters.length && !state.filter?.length) {
 					state.filter = action.payload.filters
 					// state.filter = action.payload.filters[0]
 					// state.filter = [

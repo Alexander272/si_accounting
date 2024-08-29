@@ -4,7 +4,8 @@ import type { TransitionProps } from '@mui/material/transitions'
 
 import { useAppSelector } from '@/hooks/redux'
 import { ModalTitles } from '@/constants/modalTitles'
-import { CreateSi } from '@/features/si/components/CreateSi'
+// import { CreateSi } from '@/features/si/components/CreateSi'
+import { LocalCreateSi } from '@/features/si/components/LocalCreateSi'
 import { UpdateSi } from '@/features/si/components/UpdateSi'
 import { CreateVerification } from '@/features/verification/components/CreateVerification'
 import { CreateLocation } from '@/features/location/components/CreateLocation'
@@ -71,7 +72,7 @@ export const Modal = () => {
 				</IconButton>
 			</Stack>
 			<DialogContent sx={{ pt: 0 }}>
-				{selector == 'CreateDataItem' && <CreateSi />}
+				{selector == 'CreateDataItem' && <LocalCreateSi />}
 				{selector == 'EditDataItem' && <UpdateSi />}
 				{selector == 'NewVerification' && <CreateVerification />}
 				{selector == 'NewLocation' && <CreateLocation />}

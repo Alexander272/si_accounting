@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { Stack, TextField } from '@mui/material'
-import { useFormContext } from 'react-hook-form'
+import { Controller, useFormContext } from 'react-hook-form'
 
 import type { Field } from '../type'
 import type { IInstrumentForm, KeysOfInstrument } from './type'
@@ -29,32 +29,41 @@ type Props = {
 }
 
 export const InstrumentInputs: FC<Props> = ({ disabled }) => {
-	const {
-		register,
-		formState: { errors },
-	} = useFormContext<IInstrumentForm>()
+	const { control } = useFormContext<IInstrumentForm>()
 
 	return (
 		<Stack spacing={2}>
 			{fields.map(f =>
 				f.type == 'String' ? (
-					<TextField
+					<Controller
 						key={f.key}
-						label={f.label}
-						multiline={f.multiline}
-						minRows={f.minRows}
-						disabled={disabled}
-						error={Boolean(errors[f.key])}
-						{...register(f.key)}
+						control={control}
+						name={f.key}
+						render={({ field, fieldState: { error } }) => (
+							<TextField
+								{...field}
+								label={f.label}
+								multiline={f.multiline}
+								minRows={f.minRows}
+								disabled={disabled}
+								error={Boolean(error)}
+							/>
+						)}
 					/>
 				) : (
-					<TextField
+					<Controller
 						key={f.key}
-						label={f.label}
-						type='number'
-						disabled={disabled}
-						error={Boolean(errors[f.key])}
-						{...register(f.key)}
+						control={control}
+						name={f.key}
+						render={({ field, fieldState: { error } }) => (
+							<TextField
+								{...field}
+								label={f.label}
+								type='number'
+								disabled={disabled}
+								error={Boolean(error)}
+							/>
+						)}
 					/>
 				)
 			)}

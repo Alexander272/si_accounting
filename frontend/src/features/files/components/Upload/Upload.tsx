@@ -48,8 +48,8 @@ export const Upload: FC<Props> = ({ verificationId, instrumentId }) => {
 	const { palette } = useTheme()
 
 	const { data } = useGetFileListQuery(
-		{ verificationId: verificationId || '', instrumentId: instrumentId },
-		{ skip: !instrumentId }
+		{ verificationId: verificationId || '', instrumentId: instrumentId }
+		// { skip: !instrumentId }
 	)
 
 	const [upload, { isSuccess, isError }] = useUploadFilesMutation()
@@ -151,6 +151,7 @@ export const Upload: FC<Props> = ({ verificationId, instrumentId }) => {
 					</Box>
 				</Tooltip>
 
+				{/* //TODO как-то файлы дергаются */}
 				<List dense disablePadding sx={{ mt: '0!important' }}>
 					{(data?.data || []).map(d => (
 						<ListItem key={d.id} sx={{ paddingY: 0, pl: 1 }}>

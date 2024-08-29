@@ -33,9 +33,8 @@ export const LocationInputs: FC<Props> = ({ hidden, disabled }) => {
 					control={control}
 					render={({ field }) => (
 						<FormControlLabel
-							control={<Checkbox checked={field.value} />}
+							control={<Checkbox checked={field.value} {...field} />}
 							label={Titles.Reserve}
-							onChange={field.onChange}
 							disabled={disabled}
 						/>
 					)}
@@ -47,9 +46,8 @@ export const LocationInputs: FC<Props> = ({ hidden, disabled }) => {
 					control={control}
 					render={({ field }) => (
 						<FormControlLabel
-							control={<Checkbox checked={field.value} />}
+							control={<Checkbox checked={field.value} {...field} />}
 							label={Titles.Confirmed}
-							onChange={field.onChange}
 							disabled={disabled}
 						/>
 					)}

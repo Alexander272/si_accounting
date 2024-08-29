@@ -10,7 +10,7 @@ import type { HiddenField, ILocationForm } from '@/components/Forms/NewLocationF
 import type { Location } from '../types/location'
 import { FormLoader } from '@/components/Loader/FormLoader'
 import { LocationForm } from '@/components/Forms/NewLocationForm/LocationForm'
-import { useCreateLocationMutation } from '../locationApiSlice'
+import { useCreateLocationMutation, useGetLastLocationQuery } from '../locationApiSlice'
 
 const defaultValues: ILocationForm = {
 	needConfirmed: false,
@@ -21,7 +21,6 @@ const defaultValues: ILocationForm = {
 }
 
 type Props = {
-	// data?: Location
 	status?: Status
 	hidden?: HiddenField
 	instrument: Instrument
@@ -33,7 +32,6 @@ type Props = {
 }
 
 export const CreateLocationForm: FC<Props> = ({
-	// data,
 	status,
 	hidden,
 	instrument,
@@ -44,9 +42,15 @@ export const CreateLocationForm: FC<Props> = ({
 	onCancel,
 }) => {
 	const [create, { isLoading }] = useCreateLocationMutation()
+	const { data } = useGetLastLocationQuery(instrument?.id || '', { skip: !instrument?.id })
 
 	const submitHandler = async (form: ILocationForm) => {
 		console.log('create location', form)
+
+		if (form.dateOfIssue < (data?.data?.dateOfIssue || 0)) {
+			toast.error('Текущая дата выдачи инструмента меньше предыдущей')
+			return
+		}
 
 		const location: Location = {
 			department: form.isToReserve ? '' : form.department,
@@ -54,13 +58,9 @@ export const CreateLocationForm: FC<Props> = ({
 			dateOfIssue: form.dateOfIssue,
 			needConfirmed: form.needConfirmed,
 			instrumentId: instrument.id || '',
-			// status: data?.status || '',
 			status: !form.needConfirmed ? (form.isToReserve ? 'reserve' : 'used') : 'moved',
-			// dateOfReceiving: data?.dateOfReceiving || 0,
 			dateOfReceiving: !form.needConfirmed || form.isToReserve ? form.dateOfIssue : 0,
 		}
-
-		// console.log(location)
 
 		try {
 			await create(location).unwrap()
@@ -78,7 +78,6 @@ export const CreateLocationForm: FC<Props> = ({
 	return (
 		<Stack mt={2}>
 			<LocationForm
-				// defaultValues={data || defaultValues}
 				defaultValues={defaultValues}
 				hidden={hidden}
 				disabled={isLoading || loading}

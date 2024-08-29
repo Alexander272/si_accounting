@@ -17,7 +17,7 @@ type Props = {
 }
 
 export const VerificationInputs: FC<Props> = ({ instrumentId, verificationId, stepMonth, disabled }) => {
-	const { control, register, watch, setValue } = useFormContext<IVerificationForm>()
+	const { control, watch, setValue } = useFormContext<IVerificationForm>()
 
 	const status = watch('status')
 
@@ -90,8 +90,18 @@ export const VerificationInputs: FC<Props> = ({ instrumentId, verificationId, st
 					</FormControl>
 				)}
 			/>
-			<TextField type='link' label={Titles.Link} disabled={disabled} {...register('registerLink')} />
-			<TextField label={Titles.Notes} multiline minRows={4} disabled={disabled} {...register('notes')} />
+			<Controller
+				control={control}
+				name='registerLink'
+				render={({ field }) => <TextField {...field} type='link' label={Titles.Link} disabled={disabled} />}
+			/>
+			<Controller
+				control={control}
+				name='notes'
+				render={({ field }) => (
+					<TextField {...field} label={Titles.Notes} multiline minRows={4} disabled={disabled} />
+				)}
+			/>
 
 			<Upload instrumentId={instrumentId} verificationId={verificationId} />
 		</Stack>

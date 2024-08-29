@@ -1,3 +1,6 @@
+import { toast } from 'react-toastify'
+
+import type { IBaseFetchError } from '@/app/types/error'
 import type { Instrument } from './types/instrument'
 import { apiSlice } from '@/app/apiSlice'
 import { API } from '@/app/api'
@@ -12,6 +15,14 @@ const instrumentApiSlice = apiSlice.injectEndpoints({
 				{ type: 'Instrument', id: 'ID' },
 				{ type: 'SI', id: 'DRAFT' },
 			],
+			onQueryStarted: (_arg, api) => {
+				try {
+					api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
 		}),
 
 		createInstrument: builder.mutation<string, Instrument>({

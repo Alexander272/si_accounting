@@ -99,7 +99,7 @@ export const SendToReserve = () => {
 				</TableHead>
 				<TableBody>
 					{data?.data.map(r => {
-						if (selectedItems.some(i => i.id == r.id) || active?.id == r.id)
+						if (selectedItems.some(i => i.id == r.id) || active?.id == r.id) {
 							return (
 								<TableRow key={r.id}>
 									<TableCell>{r.name}</TableCell>
@@ -107,6 +107,7 @@ export const SendToReserve = () => {
 									<TableCell>{r.place}</TableCell>
 								</TableRow>
 							)
+						}
 					})}
 				</TableBody>
 			</Table>

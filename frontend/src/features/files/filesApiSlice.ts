@@ -7,7 +7,7 @@ import type { IDocument } from './types/file'
 import { HttpCodes } from '@/constants/httpCodes'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
-import { IBaseFetchError } from '@/app/types/error'
+import { IBaseFetchError, IFetchError } from '@/app/types/error'
 import { saveAs } from '@/utils/saveAs'
 import { buildSiUrlParams } from '@/utils/buildUrlParams'
 
@@ -38,6 +38,14 @@ const filesApiSlice = apiSlice.injectEndpoints({
 				params: new URLSearchParams({ instrumentId: req.instrumentId, verificationId: req.verificationId }),
 			}),
 			providesTags: [{ type: 'Verification', id: 'documents' }],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
 		}),
 		downloadFile: builder.query<null, IDocument>({
 			queryFn: async (doc, _api, _, baseQuery) => {
@@ -50,7 +58,7 @@ const filesApiSlice = apiSlice.injectEndpoints({
 
 				if (result.error) {
 					console.log(result.error)
-					const fetchError = (result.error.data as IBaseFetchError).error
+					const fetchError = result.error as IFetchError
 					toast.error(fetchError.data.message, { autoClose: false })
 				}
 
@@ -66,6 +74,15 @@ const filesApiSlice = apiSlice.injectEndpoints({
 				validateStatus: response => response.status === HttpCodes.CREATED,
 			}),
 			invalidatesTags: [{ type: 'Verification', id: 'documents' }],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					console.log(error)
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
 		}),
 		deleteFile: builder.mutation<null, DeleteDocuments>({
 			query: data => ({
@@ -78,6 +95,15 @@ const filesApiSlice = apiSlice.injectEndpoints({
 				}),
 			}),
 			invalidatesTags: [{ type: 'Verification', id: 'documents' }],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					console.log(error)
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
 		}),
 
 		export: builder.query<null, ISIParams>({
