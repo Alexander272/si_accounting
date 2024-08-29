@@ -130,7 +130,7 @@ func (h *VerificationHandlers) Update(c *gin.Context) {
 
 	logger.Info("Поверка обновлена",
 		logger.StringAttr("instrument_id", dto.InstrumentId),
-		logger.StringAttr("verification_in", dto.Id),
+		logger.StringAttr("verification_id", dto.Id),
 		logger.StringAttr("status", dto.Status),
 		logger.StringAttr("user_id", user.Id),
 	)

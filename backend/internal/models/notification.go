@@ -37,6 +37,7 @@ type Notification struct {
 type SelectedSI struct {
 	Id            string `json:"id"`
 	Name          string `json:"name"`
+	Department    string `json:"department"`
 	FactoryNumber string `json:"factoryNumber"`
 	Person        string `json:"person"`
 }

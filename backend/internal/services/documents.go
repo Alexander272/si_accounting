@@ -77,9 +77,9 @@ func (s *DocumentsService) Upload(ctx context.Context, data *models.DocumentsDTO
 			DocumentType:   documentTypes[fh.Header.Get("Content-Type")],
 		}
 
-		paths := []string{s.path, data.InstrumentId}
-		if data.VerificationId != "" {
-			paths = append(paths, data.VerificationId)
+		paths := []string{s.path}
+		if data.InstrumentId != "" && data.VerificationId != "" {
+			paths = append(paths, data.InstrumentId, data.VerificationId)
 		} else {
 			paths = append(paths, "temp")
 		}
@@ -132,7 +132,11 @@ func (s *DocumentsService) ChangePath(ctx context.Context, req *models.PathParts
 
 	if count > 0 {
 		newPath := path.Join(s.path, req.InstrumentId, req.VerificationId)
-		srcPath := path.Join(s.path, req.InstrumentId, "temp")
+		srcPath := path.Join(s.path, "temp")
+
+		if err = os.MkdirAll(filepath.Dir(newPath), 0750); err != nil {
+			return err
+		}
 
 		if err := os.Rename(srcPath, newPath); err != nil {
 			return fmt.Errorf("failed to move files. error: %w", err)
@@ -143,9 +147,9 @@ func (s *DocumentsService) ChangePath(ctx context.Context, req *models.PathParts
 }
 
 func (s *DocumentsService) Delete(ctx context.Context, req *models.DeleteDocumentsDTO) error {
-	paths := []string{s.path, req.InstrumentId}
-	if req.VerificationId != "" {
-		paths = append(paths, req.VerificationId)
+	paths := []string{s.path}
+	if req.InstrumentId != "" && req.VerificationId != "" {
+		paths = append(paths, req.InstrumentId, req.VerificationId)
 	} else {
 		paths = append(paths, "temp")
 	}

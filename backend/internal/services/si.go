@@ -29,6 +29,7 @@ type SI interface {
 	GetAll(context.Context, *models.SIParams) (*models.SIList, error)
 	GetForNotification(context.Context, *models.Period) ([]*models.Notification, error)
 	Save(ctx context.Context, id string) error
+	Create(context.Context, *models.CreateSIDTO) error
 }
 
 func (s *SIService) GetAll(ctx context.Context, req *models.SIParams) (*models.SIList, error) {
@@ -50,6 +51,26 @@ func (s *SIService) GetForNotification(ctx context.Context, req *models.Period) 
 func (s *SIService) Save(ctx context.Context, id string) error {
 	if err := s.instrument.ChangeStatus(ctx, &models.UpdateStatus{Id: id, Status: constants.InstrumentStatusWork}); err != nil {
 		return fmt.Errorf("failed to save si. error: %w", err)
+	}
+	return nil
+}
+
+func (s *SIService) Create(ctx context.Context, dto *models.CreateSIDTO) error {
+	id, err := s.instrument.Create(ctx, dto.Instrument)
+	if err != nil {
+		return err
+	}
+
+	dto.Location.InstrumentId = id
+	dto.Verification.InstrumentId = id
+
+	if err := s.verification.Create(ctx, dto.Verification); err != nil {
+		s.instrument.Delete(ctx, id)
+		return err
+	}
+	if err := s.location.Create(ctx, dto.Location); err != nil {
+		s.instrument.Delete(ctx, id)
+		return err
 	}
 	return nil
 }

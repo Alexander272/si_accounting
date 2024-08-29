@@ -14,11 +14,11 @@ type Verification struct {
 }
 
 type CreateVerificationDTO struct {
-	InstrumentId string `form:"instrumentId" json:"instrumentId" db:"instrument_id" binding:"required"`
+	InstrumentId string `form:"instrumentId" json:"instrumentId" db:"instrument_id"`
 	// Date              string `form:"date" json:"date" db:"date" binding:"required"`
 	// NextDate          string `form:"nextDate" json:"nextDate" db:"next_date"`
-	Date     int64 `json:"date" db:"date" binding:"required"`
-	NextDate int64 `json:"nextDate" db:"next_date"`
+	Date     int64 `json:"date" db:"date" binding:"required,gte=1000000"`
+	NextDate int64 `json:"nextDate" db:"next_date,gte=1000000"`
 	// FileLink          string `form:"fileLink" json:"fileLink" db:"file_link"`
 	RegisterLink      string `form:"registerLink" json:"registerLink" db:"register_link"`
 	Status            string `form:"status" json:"status" db:"status"`

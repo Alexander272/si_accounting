@@ -25,7 +25,7 @@ func NewInstrumentService(repo repository.Instrument, documents Documents) *Inst
 
 type Instrument interface {
 	GetById(ctx context.Context, id string) (*models.Instrument, error)
-	Create(ctx context.Context, in *models.CreateInstrumentDTO) error
+	Create(ctx context.Context, in *models.CreateInstrumentDTO) (string, error)
 	Update(ctx context.Context, in *models.UpdateInstrumentDTO) error
 	ChangeStatus(ctx context.Context, status *models.UpdateStatus) error
 	Delete(ctx context.Context, id string) error
@@ -42,24 +42,26 @@ func (s *InstrumentService) GetById(ctx context.Context, id string) (*models.Ins
 	return instrument, nil
 }
 
-func (s *InstrumentService) Create(ctx context.Context, in *models.CreateInstrumentDTO) error {
+func (s *InstrumentService) Create(ctx context.Context, in *models.CreateInstrumentDTO) (string, error) {
 	candidate, err := s.GetById(ctx, "")
 	if err != nil && !errors.Is(err, models.ErrNoRows) {
-		return err
+		return "", err
 	}
 
-	if err = s.repo.Create(ctx, in); err != nil {
-		return fmt.Errorf("failed to create instrument. error: %w", err)
+	id, err := s.repo.Create(ctx, in)
+	if err != nil {
+		return "", fmt.Errorf("failed to create instrument. error: %w", err)
 	}
 
+	// удаление предыдущего черновика
 	if candidate != nil {
 		logger.Debug("delete instrument")
 		if err := s.Delete(ctx, candidate.Id); err != nil {
-			return err
+			return id, err
 		}
 	}
 
-	return nil
+	return id, nil
 }
 
 func (s *InstrumentService) Update(ctx context.Context, in *models.UpdateInstrumentDTO) error {

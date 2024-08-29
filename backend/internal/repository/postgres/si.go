@@ -72,11 +72,11 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 	params = append(params, req.Status, req.Page.Limit, req.Page.Offset)
 
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, year_of_issue, 
-		inter_verification_interval, notes, i.status, v.date, v.next_date, m.place, COUNT(*) OVER() as total_count
+		inter_verification_interval, notes, i.status, v.date, v.next_date, m.place, COUNT(*) OVER() AS total_count
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
-		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) as place, department_id 
-			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) as m ON TRUE
+		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) AS place, department_id 
+			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
 		WHERE i.status=$%d%s%s LIMIT $%d OFFSET $%d`,
 		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable,
 		count, filter, order, count+1, count+2,
@@ -129,7 +129,7 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 
 	data := []*models.SIFromNotification{}
 	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, COALESCE(e.name, '') AS person, COALESCE(d.name, '') AS department,
-		COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id, l.channel_id
+		COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id, COALESCE(l.channel_id, '') AS channel_id
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT person_id, department_id, status FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
@@ -162,6 +162,7 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 		si := &models.SelectedSI{
 			Id:            sn.Id,
 			Name:          sn.Name,
+			Department:    sn.Department,
 			FactoryNumber: sn.FactoryNumber,
 			Person:        sn.Person,
 		}

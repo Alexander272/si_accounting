@@ -3,11 +3,11 @@
 CREATE TABLE IF NOT EXISTS public.documents
 (
     id uuid NOT NULL,
-    instrument_id uuid NOT NULL,
+    instrument_id uuid,
+    verification_id uuid,
     label text COLLATE pg_catalog."default" NOT NULL,
     size integer NOT NULL,
     path text COLLATE pg_catalog."default" NOT NULL,
-    verification_id uuid,
     type text COLLATE pg_catalog."default" NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
     CONSTRAINT files_pkey PRIMARY KEY (id),

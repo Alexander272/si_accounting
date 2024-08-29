@@ -28,7 +28,7 @@ type Documents interface {
 
 func (r *DocumentsRepo) Get(ctx context.Context, req *models.GetDocumentsDTO) ([]*models.Document, error) {
 	query := fmt.Sprintf(`SELECT id, label, size, path, COALESCE(verification_id::text,'') AS verification_id, type FROM %s 
-		WHERE verification_id::text=$1 OR (instrument_id=$2 AND verification_id IS NULL)`,
+		WHERE verification_id::text=$1 OR (COALESCE(instrument_id::text,'')=$2 AND verification_id IS NULL)`,
 		DocumentsTable,
 	)
 	docs := []*models.Document{}
@@ -52,9 +52,13 @@ func (r *DocumentsRepo) CreateSeveral(ctx context.Context, docs []*models.Docume
 		if d.VerificationId != "" {
 			verificationId = d.VerificationId
 		}
+		var instrumentId *string
+		if d.InstrumentId != "" {
+			instrumentId = &d.InstrumentId
+		}
 
 		temp := make([]interface{}, 0)
-		temp = append(temp, d.Id, d.Label, d.Size, d.Path, verificationId, d.DocumentType, d.InstrumentId)
+		temp = append(temp, d.Id, d.Label, d.Size, d.Path, verificationId, d.DocumentType, instrumentId)
 		line := make([]string, 0, len(temp))
 
 		for j := range temp {
@@ -74,8 +78,8 @@ func (r *DocumentsRepo) CreateSeveral(ctx context.Context, docs []*models.Docume
 }
 
 func (r *DocumentsRepo) UpdatePath(ctx context.Context, req *models.PathParts) (int64, error) {
-	query := fmt.Sprintf(`UPDATE %s SET verification_id=$1::uuid, path=REPLACE(path, 'temp', $1::text)
-		WHERE verification_id IS NULL AND instrument_id=$2`,
+	query := fmt.Sprintf(`UPDATE %s SET instrument_id=$2::uuid, verification_id=$1::uuid, path=REPLACE(path, 'temp', $2::text || '/' || $1::text)
+		WHERE verification_id IS NULL AND (instrument_id IS NULL OR instrument_id=$2)`,
 		DocumentsTable,
 	)
 

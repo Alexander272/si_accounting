@@ -108,7 +108,11 @@ func (s *NotificationService) CheckSendSI() {
 			continue
 		}
 
-		n.Message = "Подтвердите получение инструментов"
+		if n.SI[0].Department != "" {
+			n.Message = fmt.Sprintf("Подтвердите получение инструментов (%s)", n.SI[0].Department)
+		} else {
+			n.Message = "Подтвердите получение инструментов"
+		}
 		if n.Status == constants.LocationStatusReserve && n.ChannelId != "" {
 			n.MostId = ""
 		}

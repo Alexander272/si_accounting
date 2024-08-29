@@ -30,6 +30,7 @@ func Register(api *gin.RouterGroup, service services.SI, middleware *middleware.
 
 	api.GET("", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetAll)
 	api.POST("/save", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Save)
+	api.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Create)
 }
 
 func (h *SIHandlers) GetAll(c *gin.Context) {
@@ -157,6 +158,35 @@ func (h *SIHandlers) Save(c *gin.Context) {
 	logger.Info("СИ сохранено (перемещено из черновиков)", logger.StringAttr("instrument_id", dto.Id), logger.StringAttr("user_id", user.Id))
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о си успешно сохранены"})
+}
+
+func (h *SIHandlers) Create(c *gin.Context) {
+	dto := &models.CreateSIDTO{}
+	if err := c.BindJSON(dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные. error: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+
+	if err := h.service.Create(c, dto); err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+
+	user := models.User{}
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	logger.Info("СИ сохранено",
+		logger.AnyAttr("instrument-dto", dto.Instrument),
+		logger.AnyAttr("verification-dto", dto.Verification),
+		logger.AnyAttr("location-dto", dto.Location),
+		logger.StringAttr("user_id", user.Id),
+	)
+	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные о си успешно сохранены"})
 }
 
 // func (h *SIHandlers) GetForNotification(c *gin.Context) {

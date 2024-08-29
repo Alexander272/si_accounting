@@ -64,7 +64,8 @@ func (h *InstrumentHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Create(c, dto); err != nil {
+	id, err := h.service.Create(c, dto)
+	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), dto)
 		return
@@ -78,6 +79,7 @@ func (h *InstrumentHandlers) Create(c *gin.Context) {
 	user := u.(models.User)
 
 	logger.Info("Создан инструмент",
+		logger.StringAttr("id", id),
 		logger.StringAttr("instrument_name", dto.Name),
 		logger.StringAttr("instrument_number", dto.FactoryNumber),
 		logger.StringAttr("user_id", user.Id),

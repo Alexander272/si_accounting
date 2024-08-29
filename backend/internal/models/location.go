@@ -19,7 +19,7 @@ type Location struct {
 }
 
 type CreateLocationDTO struct {
-	InstrumentId string `json:"instrumentId" db:"instrument_id" binding:"required"`
+	InstrumentId string `json:"instrumentId" db:"instrument_id"`
 	// Person       string `json:"person" db:"person"`
 	// Department   string `json:"department" db:"department"`
 	PersonId     string `json:"person" db:"person_id"`
@@ -28,8 +28,8 @@ type CreateLocationDTO struct {
 	// DeliveryDate    string `json:"deliveryDate" db:"delivery_date"`
 	// DateOfIssue     string `json:"dateOfIssue" db:"date_of_issue"`
 	// DateOfReceiving string `json:"dateOfReceiving" db:"date_of_receiving"`
-	DateOfIssue     int64  `json:"dateOfIssue" db:"date_of_issue"`
-	DateOfReceiving int64  `json:"dateOfReceiving" db:"date_of_receiving"`
+	DateOfIssue     int64  `json:"dateOfIssue" db:"date_of_issue" binding:"required,gte=1000000"`
+	DateOfReceiving int64  `json:"dateOfReceiving" db:"date_of_receiving" binding:"gte=0"`
 	NeedConfirmed   bool   `json:"needConfirmed" db:"need_confirmed"`
 	Status          string `json:"status" db:"status"`
 }

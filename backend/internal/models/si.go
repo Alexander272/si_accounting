@@ -56,6 +56,12 @@ type SI struct {
 	Total                     int    `json:"-" db:"total_count"`
 }
 
+type CreateSIDTO struct {
+	Instrument   *CreateInstrumentDTO   `json:"instrument"`
+	Verification *CreateVerificationDTO `json:"verification"`
+	Location     *CreateLocationDTO     `json:"location"`
+}
+
 type SIFromNotification struct {
 	Id            string `db:"id"`
 	Name          string `db:"name"`

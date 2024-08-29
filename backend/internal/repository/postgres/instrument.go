@@ -24,7 +24,7 @@ func NewInstrumentRepo(db *sqlx.DB) *InstrumentRepo {
 
 type Instrument interface {
 	GetById(context.Context, string) (*models.Instrument, error)
-	Create(context.Context, *models.CreateInstrumentDTO) error
+	Create(context.Context, *models.CreateInstrumentDTO) (string, error)
 	Update(context.Context, *models.UpdateInstrumentDTO) error
 	ChangeStatus(context.Context, *models.UpdateStatus) error
 	Delete(context.Context, string) error
@@ -49,7 +49,7 @@ func (r *InstrumentRepo) GetById(ctx context.Context, id string) (*models.Instru
 	return instrument, nil
 }
 
-func (r *InstrumentRepo) Create(ctx context.Context, in *models.CreateInstrumentDTO) error {
+func (r *InstrumentRepo) Create(ctx context.Context, in *models.CreateInstrumentDTO) (string, error) {
 	query := fmt.Sprintf(`INSERT INTO %s(id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, 
 		year_of_issue, inter_verification_interval, notes, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
 		InstrumentTable,
@@ -60,9 +60,9 @@ func (r *InstrumentRepo) Create(ctx context.Context, in *models.CreateInstrument
 		in.YearOfIssue, in.InterVerificationInterval, in.Notes, constants.InstrumentDraft,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to execute query. error: %w", err)
+		return "", fmt.Errorf("failed to execute query. error: %w", err)
 	}
-	return nil
+	return id.String(), nil
 }
 
 func (r *InstrumentRepo) Update(ctx context.Context, in *models.UpdateInstrumentDTO) error {

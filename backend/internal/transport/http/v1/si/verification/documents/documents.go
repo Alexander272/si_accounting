@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
@@ -48,10 +49,10 @@ func (h *DocumentsHandlers) getList(c *gin.Context) {
 	// }
 
 	instrumentId := c.Query("instrumentId")
-	if instrumentId == "" {
-		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id инструмента не задан")
-		return
-	}
+	// if instrumentId == "" {
+	// 	response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id инструмента не задан")
+	// 	return
+	// }
 
 	dto := &models.GetDocumentsDTO{VerificationId: verificationId, InstrumentId: instrumentId}
 	docs, err := h.service.Get(c, dto)
@@ -77,6 +78,10 @@ func (h *DocumentsHandlers) download(c *gin.Context) {
 
 	fileStat, err := os.Stat(filePath)
 	if err != nil {
+		if strings.Contains(err.Error(), "no such file or directory") {
+			response.NewErrorResponse(c, http.StatusNotFound, err.Error(), "Файл не найден")
+			return
+		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Файл не найден")
 		error_bot.Send(c, err.Error(), filePath)
 		return
@@ -113,10 +118,10 @@ func (h *DocumentsHandlers) upload(c *gin.Context) {
 	// logger.Debug(dto)
 
 	instrumentId := form.Value["instrumentId"][0]
-	if instrumentId == "" {
-		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id инструмента не задан")
-		return
-	}
+	// if instrumentId == "" {
+	// 	response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id инструмента не задан")
+	// 	return
+	// }
 	verificationId := form.Value["verificationId"][0]
 	// if verificationId == "" {
 	// 	response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id инструмента не задан")
@@ -147,10 +152,10 @@ func (h *DocumentsHandlers) delete(c *gin.Context) {
 	}
 
 	instrumentId := c.Query("instrumentId")
-	if instrumentId == "" {
-		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id инструмента не задан")
-		return
-	}
+	// if instrumentId == "" {
+	// 	response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id инструмента не задан")
+	// 	return
+	// }
 	filename := c.Query("filename")
 	if filename == "" {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Имя файла не задано")
