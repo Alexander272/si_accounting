@@ -54,7 +54,7 @@ func (s *NotificationService) Start(conf *config.NotificationConfig) error {
 	if now.Hour() >= conf.StartTime {
 		jobStart = jobStart.Add(24 * time.Hour)
 	}
-	// //  вернуть нормальное время запуска
+	// // TODO вернуть нормальное время запуска
 	// jobStart := now.Add(1 * time.Minute)
 	logger.Info("starting jobs time " + jobStart.Format("02.01.2006 15:04:05"))
 

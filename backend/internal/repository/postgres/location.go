@@ -214,7 +214,10 @@ func (r *LocationRepo) ReceivingFromBot(ctx context.Context) error {
 }
 
 func (r *LocationRepo) Delete(ctx context.Context, id string) error {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id=$1`, SIMovementTable)
+	query := fmt.Sprintf(`DELETE FROM %s AS m WHERE id=$1 
+		AND (SELECT COUNT(id) FROM %s WHERE instrument_id=m.instrument_id)>1`,
+		SIMovementTable, SIMovementTable,
+	)
 
 	_, err := r.db.Exec(query, id)
 	if err != nil {

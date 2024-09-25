@@ -16,7 +16,6 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mattermost/mattermost-server/v6 v6.7.2
 	github.com/sirupsen/logrus v1.9.3
-	github.com/subosito/gotenv v1.2.0
 	github.com/xuri/excelize/v2 v2.8.1
 	go.uber.org/zap v1.27.0
 	go.uber.org/zap/exp v0.2.0

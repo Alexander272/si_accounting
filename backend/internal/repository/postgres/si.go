@@ -72,7 +72,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 	params = append(params, req.Status, req.Page.Limit, req.Page.Offset)
 
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, year_of_issue, 
-		inter_verification_interval, notes, i.status, v.date, v.next_date, m.place, COUNT(*) OVER() AS total_count
+		inter_verification_interval, notes, i.status, v.date, v.next_date, COALESCE(m.place,'') AS place, COUNT(*) OVER() AS total_count
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) AS place, department_id 
@@ -137,7 +137,7 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 		LEFT JOIN %s AS d ON d.id=m.department_id
 		LEFT JOIN LATERAL (SELECT most_id, channel_id FROM %s WHERE department_id=m.department_id AND is_lead=true LIMIT 1) AS l ON true
 		WHERE m.status=$1 %s
-		ORDER BY most_id, next_date`,
+		ORDER BY most_id, channel_id, department, next_date`,
 		InstrumentTable, VerificationTable, SIMovementTable, EmployeeTable, DepartmentTable, EmployeeTable, periodCond,
 	)
 
@@ -174,7 +174,9 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 			notStatus = constants.LocationStatusReserve
 		}
 
-		if i == 0 || nots[len(nots)-1].MostId != sn.MostId {
+		notEqualDeps := len(nots) > 0 && len(nots[len(nots)-1].SI) == 0 && nots[len(nots)-1].SI[0].Department != sn.Department
+		//TODO почему не все инструменты прилетают в мост, хотя в запросе из бд они есть, возможно, исправление строчки ниже помогло
+		if i == 0 || nots[len(nots)-1].MostId != sn.MostId || nots[len(nots)-1].ChannelId != sn.ChannelId || notEqualDeps {
 			nots = append(nots, &models.Notification{
 				MostId:    sn.MostId,
 				ChannelId: sn.ChannelId,

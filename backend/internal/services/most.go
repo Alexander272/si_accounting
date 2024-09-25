@@ -44,11 +44,11 @@ func (s *MostService) Send(ctx context.Context, not *models.Notification) error 
 		"|:--|:--|:--|",
 	}
 
-	// instrumentIds := []string{}
+	instrumentIds := []string{}
 	fields := []models.FormField{}
 
 	for _, si := range not.SI {
-		// instrumentIds = append(instrumentIds, si.Id)
+		instrumentIds = append(instrumentIds, si.Id)
 		table = append(table, fmt.Sprintf("|%s|%s|%s|", si.Name, si.FactoryNumber, si.Person))
 
 		fields = append(fields, models.FormField{
@@ -67,8 +67,10 @@ func (s *MostService) Send(ctx context.Context, not *models.Notification) error 
 	}
 	post.UserId = not.MostId
 	post.ChannelId = not.ChannelId
+	post.IsPinned = true
 	post.Props = []*models.Props{
 		{Key: "service", Value: "sia"},
+		{Key: "data_id", Value: strings.Join(instrumentIds, ",")},
 	}
 
 	if not.Type == constants.StatusReceiving {
