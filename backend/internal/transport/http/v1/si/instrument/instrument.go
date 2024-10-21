@@ -114,7 +114,12 @@ func (h *InstrumentHandlers) Update(c *gin.Context) {
 		user = u.(models.User)
 	}
 
-	logger.Info("Инструмент обновлен", logger.StringAttr("instrument_id", dto.Id), logger.StringAttr("user_id", user.Id))
+	logger.Info("Инструмент обновлен",
+		logger.StringAttr("instrument_id", dto.Id),
+		logger.StringAttr("instrument_name", dto.Name),
+		logger.StringAttr("instrument_number", dto.FactoryNumber),
+		logger.StringAttr("user_id", user.Id),
+	)
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные об инструменте успешно обновлены"})
 }

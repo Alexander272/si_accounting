@@ -33,6 +33,8 @@ func NewSIRepo(db *sqlx.DB) *SIRepo {
 	format["verificationDate"] = "date"
 	format["nextVerificationDate"] = "next_date"
 	format["place"] = "department_id"
+	format["person"] = "person"
+	format["status"] = "m.status"
 
 	return &SIRepo{
 		db:           db,
@@ -69,14 +71,21 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 		}
 	}
 
+	/*
+		С помощью этой функции можно обрезать местонахождение до скобок и удалить пробелы
+		SELECT TRIM(split_part(place, '(', 1))
+		FROM public.si_movement_history
+	*/
+
 	params = append(params, req.Status, req.Page.Limit, req.Page.Offset)
 
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, year_of_issue, 
-		inter_verification_interval, notes, i.status, v.date, v.next_date, COALESCE(m.place,'') AS place, COUNT(*) OVER() AS total_count
+		inter_verification_interval, notes, i.status, v.date, v.next_date, COALESCE(m.place,'') AS place, COALESCE(m.person,'') AS person, 
+		COUNT(*) OVER() AS total_count
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
-		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) AS place, department_id 
-			FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
+		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) AS place, status,
+			person, department_id FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
 		WHERE i.status=$%d%s%s LIMIT $%d OFFSET $%d`,
 		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable,
 		count, filter, order, count+1, count+2,

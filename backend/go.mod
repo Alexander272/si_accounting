@@ -1,6 +1,6 @@
 module github.com/Alexander272/si_accounting/backend
 
-go 1.20
+go 1.22
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
@@ -16,9 +16,8 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mattermost/mattermost-server/v6 v6.7.2
 	github.com/sirupsen/logrus v1.9.3
+	github.com/subosito/gotenv v1.2.0
 	github.com/xuri/excelize/v2 v2.8.1
-	go.uber.org/zap v1.27.0
-	go.uber.org/zap/exp v0.2.0
 	golang.org/x/net v0.21.0
 	golang.org/x/time v0.5.0
 )
@@ -83,7 +82,6 @@ require (
 	github.com/wiggin77/srslog v1.0.1 // indirect
 	github.com/xuri/efp v0.0.0-20231025114914-d1ff6096ae53 // indirect
 	github.com/xuri/nfp v0.0.0-20230919160717-d98342af3f05 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a // indirect

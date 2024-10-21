@@ -31,10 +31,10 @@ func Register(api *gin.RouterGroup, service services.Documents, middleware *midd
 
 	documents := api.Group("/documents")
 	{
-		documents.GET("list", middleware.CheckPermissions(constants.SI, constants.Read), handlers.getList)
-		documents.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.upload)
-		documents.GET("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.download)
-		documents.DELETE("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.delete)
+		documents.GET("list", middleware.CheckPermissions(constants.Verification, constants.Read), handlers.getList)
+		documents.POST("", middleware.CheckPermissions(constants.Documents, constants.Write), handlers.upload)
+		documents.GET("", middleware.CheckPermissions(constants.Documents, constants.Write), handlers.download)
+		documents.DELETE("/:id", middleware.CheckPermissions(constants.Documents, constants.Write), handlers.delete)
 	}
 }
 

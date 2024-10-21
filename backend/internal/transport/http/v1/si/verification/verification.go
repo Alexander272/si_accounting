@@ -30,10 +30,10 @@ func Register(api *gin.RouterGroup, service services.Verification, docs services
 
 	verifications := api.Group("/verifications")
 	{
-		verifications.GET("/:instrumentId", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetLast)
-		verifications.GET("/all/:instrumentId", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetByInstrumentId)
-		verifications.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Create)
-		verifications.PUT("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Update)
+		verifications.GET("/:instrumentId", middleware.CheckPermissions(constants.Verification, constants.Read), handlers.GetLast)
+		verifications.GET("/all/:instrumentId", middleware.CheckPermissions(constants.Verification, constants.Read), handlers.GetByInstrumentId)
+		verifications.POST("", middleware.CheckPermissions(constants.Verification, constants.Write), handlers.Create)
+		verifications.PUT("/:id", middleware.CheckPermissions(constants.Verification, constants.Write), handlers.Update)
 	}
 	documents.Register(verifications, docs, middleware)
 }

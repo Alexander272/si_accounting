@@ -35,6 +35,7 @@ type Location interface {
 	Create(context.Context, *models.CreateLocationDTO) error
 	Update(context.Context, *models.UpdateLocationDTO) error
 	UpdatePlace(context.Context, *models.UpdatePlaceDTO) error
+	UpdatePerson(context.Context, *models.UpdatePlaceDTO) error
 	Receiving(context.Context, *models.DialogResponse) error
 	Delete(context.Context, string) error
 }
@@ -131,6 +132,12 @@ func (s *LocationService) Update(ctx context.Context, location *models.UpdateLoc
 func (s *LocationService) UpdatePlace(ctx context.Context, dto *models.UpdatePlaceDTO) error {
 	if err := s.repo.UpdatePlace(ctx, dto); err != nil {
 		return fmt.Errorf("failed to update place. error: %w", err)
+	}
+	return nil
+}
+func (s *LocationService) UpdatePerson(ctx context.Context, dto *models.UpdatePlaceDTO) error {
+	if err := s.repo.UpdatePerson(ctx, dto); err != nil {
+		return fmt.Errorf("failed to update person. error: %w", err)
 	}
 	return nil
 }

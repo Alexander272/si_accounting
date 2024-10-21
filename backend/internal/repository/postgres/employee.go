@@ -24,6 +24,7 @@ func NewEmployeeRepo(db *sqlx.DB) *EmployeeRepo {
 
 type Employee interface {
 	GetAll(context.Context, *models.GetEmployeesDTO) ([]*models.Employee, error)
+	GetUnique(context.Context) ([]*models.Employee, error)
 	GetByDepartment(context.Context, string) ([]*models.Employee, error)
 	GetByMostId(context.Context, string) (*models.EmployeeData, error)
 	GetBySSOId(context.Context, string) (*models.Employee, error)
@@ -54,6 +55,16 @@ func (r *EmployeeRepo) GetAll(ctx context.Context, req *models.GetEmployeesDTO) 
 
 	employees := []*models.Employee{}
 	if err := r.db.Select(&employees, query, params...); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return employees, nil
+}
+
+func (r *EmployeeRepo) GetUnique(ctx context.Context) ([]*models.Employee, error) {
+	query := fmt.Sprintf(`SELECT name FROM %s GROUP BY name ORDER BY name`, EmployeeTable)
+	employees := []*models.Employee{}
+
+	if err := r.db.Select(&employees, query); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return employees, nil

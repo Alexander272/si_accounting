@@ -52,6 +52,7 @@ type SI struct {
 	Date                      string `json:"verificationDate" db:"date"`
 	NextDate                  string `json:"nextVerificationDate" db:"next_date"`
 	Place                     string `json:"place" db:"place"`
+	Person                    string `json:"person" db:"person"`
 	Status                    string `json:"status" db:"status"`
 	Total                     int    `json:"-" db:"total_count"`
 }

@@ -29,6 +29,7 @@ func Register(api *gin.RouterGroup, service services.Employee, middleware *middl
 	employees := api.Group("/employees")
 	{
 		employees.GET("", middleware.CheckPermissions(constants.Employee, constants.Read), handlers.GetAll)
+		employees.GET("/unique", middleware.CheckPermissions(constants.Employee, constants.Read), handlers.GetUnique)
 		employees.GET("/:departmentId", middleware.CheckPermissions(constants.Employee, constants.Read), handlers.GetByDepartment)
 		employees.POST("", middleware.CheckPermissions(constants.Employee, constants.Write), handlers.Create)
 		employees.PUT("/:id", middleware.CheckPermissions(constants.Employee, constants.Write), handlers.Update)
@@ -52,6 +53,17 @@ func (h *EmployeeHandlers) GetAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.DataResponse{Data: employees})
+}
+
+func (h *EmployeeHandlers) GetUnique(c *gin.Context) {
+	employees, err := h.service.GetUnique(c)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), nil)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DataResponse{Data: employees, Total: len(employees)})
 }
 
 func (h *EmployeeHandlers) GetByDepartment(c *gin.Context) {

@@ -93,10 +93,30 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 
 		values := []*models.SIFilterValue{}
 		for key, value := range valueMap {
+			if k == "place" {
+				statusFilter := &models.SIFilter{Field: "status", FieldType: "list", Values: []*models.SIFilterValue{{CompareType: "in"}}}
+				tmp := []string{}
+				if strings.Contains(value, "_reserve") {
+					tmp = append(tmp, "reserve")
+				}
+				if strings.Contains(value, "_moved") {
+					tmp = append(tmp, "moved")
+				}
+				statusFilter.Values[0].Value = strings.Join(tmp, ",")
+				params.Filters = append(params.Filters, statusFilter)
+
+				value = strings.Replace(value, "_reserve", "", -1)
+				value = strings.Replace(value, "_moved", "", -1)
+				value = strings.Trim(value, ",")
+			}
+
 			values = append(values, &models.SIFilterValue{
 				CompareType: key,
 				Value:       value,
 			})
+		}
+		if values[0].Value == "" {
+			continue
 		}
 
 		f := &models.SIFilter{
@@ -181,10 +201,10 @@ func (h *SIHandlers) Create(c *gin.Context) {
 	}
 
 	logger.Info("СИ сохранено",
+		logger.StringAttr("user_id", user.Id),
 		logger.AnyAttr("instrument-dto", dto.Instrument),
 		logger.AnyAttr("verification-dto", dto.Verification),
 		logger.AnyAttr("location-dto", dto.Location),
-		logger.StringAttr("user_id", user.Id),
 	)
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные о си успешно сохранены"})
 }

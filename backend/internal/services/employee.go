@@ -23,6 +23,7 @@ func NewEmployeeService(repo repository.Employee, location Location) *EmployeeSe
 
 type Employee interface {
 	GetAll(context.Context, *models.GetEmployeesDTO) ([]*models.Employee, error)
+	GetUnique(context.Context) ([]*models.Employee, error)
 	GetByDepartment(context.Context, string) ([]*models.Employee, error)
 	GetByMostId(context.Context, string) (*models.EmployeeData, error)
 	GetBySSOId(context.Context, string) (*models.Employee, error)
@@ -35,6 +36,17 @@ func (s *EmployeeService) GetAll(ctx context.Context, req *models.GetEmployeesDT
 	employees, err := s.repo.GetAll(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get employees. error: %w", err)
+	}
+	if employees == nil {
+		employees = []*models.Employee{}
+	}
+	return employees, nil
+}
+
+func (s *EmployeeService) GetUnique(ctx context.Context) ([]*models.Employee, error) {
+	employees, err := s.repo.GetUnique(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get unique employees. error: %w", err)
 	}
 	if employees == nil {
 		employees = []*models.Employee{}
@@ -81,10 +93,9 @@ func (s *EmployeeService) Update(ctx context.Context, employee *models.WriteEmpl
 		return fmt.Errorf("failed to update employee. error: %w", err)
 	}
 
-	if err := s.location.UpdatePlace(ctx, &models.UpdatePlaceDTO{PersonId: employee.Id}); err != nil {
+	if err := s.location.UpdatePerson(ctx, &models.UpdatePlaceDTO{PersonId: employee.Id}); err != nil {
 		return err
 	}
-
 	return nil
 }
 
