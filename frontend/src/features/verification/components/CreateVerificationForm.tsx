@@ -45,7 +45,7 @@ export const CreateVerificationForm: FC<Props> = ({
 
 		const verification: IVerification = {
 			...data,
-			nextDate: data.status != VerificationStatuses.Decommissioning ? data.nextDate : 0,
+			nextDate: data.status != VerificationStatuses.Work ? 0 : data.nextDate,
 			instrumentId: instrument.id || '',
 			isDraftInstrument: instrument.status == DraftKey,
 		}

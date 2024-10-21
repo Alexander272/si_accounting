@@ -66,7 +66,7 @@ export const EmployeeForm = () => {
 	const saveHandler = async (data: IEmployeeForm) => {
 		const emp: IEmployee = {
 			id: employee?.id || '',
-			name: `${data.lastName} ${data.firstName} ${data.surname}`.trim(),
+			name: `${data.lastName.trim()} ${data.firstName.trim()} ${data.surname.trim()}`.trim(),
 			departmentId: data.departmentId,
 			isLead: data.isLead,
 			mattermostId: '',

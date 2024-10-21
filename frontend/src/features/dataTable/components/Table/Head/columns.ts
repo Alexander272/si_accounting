@@ -1,13 +1,26 @@
+import { FC } from 'react'
+
+import type { IDataItem } from '@/features/dataTable/types/data'
 import { ColumnNames } from '@/constants/columns'
-import { IDataItem } from '@/features/dataTable/types/data'
+import { PersonFilter } from '../../Filter/PersonFilter'
+import { PlaceFilter } from '../../Filter/PlaceFilter'
 
 const initWidth = 200
+
+export type FilterType = 'string' | 'date' | 'number' | 'list'
+export interface IFullFilter {
+	type: FilterType
+	options?: unknown
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	getOptions?: (arg: any) => any
+}
 
 export interface IHeadCell {
 	id: keyof IDataItem
 	label: string
 	width: number
-	type?: 'string' | 'date' | 'number' | 'list'
+	type?: FilterType | IFullFilter
+	filterComponent?: FC<unknown>
 	// sorting?: 'none' | 'DESC' | 'ASC'
 }
 
@@ -54,7 +67,14 @@ export const HeadCells: readonly IHeadCell[] = [
 		id: 'place',
 		label: ColumnNames.PLACE,
 		width: initWidth,
-		type: 'list',
+		// type: 'list',
+		filterComponent: PlaceFilter,
+	},
+	{
+		id: 'person',
+		label: ColumnNames.PERSON,
+		width: initWidth,
+		filterComponent: PersonFilter,
 	},
 	{
 		id: 'measurementLimits',

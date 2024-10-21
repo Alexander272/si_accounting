@@ -137,7 +137,14 @@ export const Filter: FC<Props> = ({ cell }) => {
 				{cell.type == 'number' && (
 					<NumberFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
 				)}
-				{!cell.type || cell.type == 'string' ? (
+				{cell.filterComponent &&
+					cell.filterComponent({
+						field: cell.id,
+						values: filter?.values[0].value.split(','),
+						onSubmit: submitHandler,
+						onCancel: clearHandler,
+					})}
+				{(!cell.type && !cell.filterComponent) || cell.type == 'string' ? (
 					<TextFilter
 						field={cell.id}
 						values={

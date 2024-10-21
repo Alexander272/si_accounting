@@ -11,5 +11,6 @@ export const ColumnNames = {
 	INTER_VERIFICATION_INTERVAL: 'Межповерочный интервал',
 	NEXT_VERIFICATION_DATE: 'Следующая поверка (калибровка)',
 	PLACE: 'Место нахождения',
+	PERSON: 'ФИО сотрудника',
 	NOTES: 'Примечание',
 }

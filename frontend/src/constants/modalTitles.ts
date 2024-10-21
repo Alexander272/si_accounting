@@ -13,6 +13,7 @@ export const ModalTitles = Object.freeze({
 
 	MOVEMENT_HISTORY: 'История перемещений',
 	VERIFICATION_HISTORY: 'История поверок',
+	CREATE_DOCUMENT: 'Добавить документ',
 
 	PERIOD: 'Укажите период',
 })

@@ -15,6 +15,7 @@ import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
 import { CopyIcon } from '@/components/Icons/CopyIcon'
 import { LocHistoryIcon } from '@/components/Icons/LocHistoryIcon'
 import { VerHistoryIcon } from '@/components/Icons/VerHistoryIcon'
+import { UploadIcon } from '@/components/Icons/UploadIcon'
 import { CancelMove } from './CancelMove'
 
 type Props = {
@@ -55,18 +56,20 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 			</ListItemIcon>
 			Редактировать
 		</MenuItem>,
-		<MenuItem key='verification' onClick={contextHandler('NewVerification')}>
-			<ListItemIcon>
-				<VerifyIcon fontSize={18} fill={'#757575'} />
-			</ListItemIcon>
-			Добавить поверку
-		</MenuItem>,
 		// <MenuItem key='testEdit' onClick={contextHandler('Test')}>
 		// 	<ListItemIcon>
 		// 		<EditIcon fontSize={16} fill={'#757575'} />
 		// 	</ListItemIcon>
 		// 	Тестирование
 		// </MenuItem>,
+	]
+	const VerificationMenuItem = [
+		<MenuItem key='verification' onClick={contextHandler('NewVerification')}>
+			<ListItemIcon>
+				<VerifyIcon fontSize={18} fill={'#757575'} />
+			</ListItemIcon>
+			Добавить поверку
+		</MenuItem>,
 	]
 	const LocMenuItems = [
 		<MenuItem key='location' disabled={status == 'moved'} onClick={contextHandler('NewLocation')}>
@@ -88,6 +91,18 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 		<CancelMove key='cancel-location' itemId={itemId} onClick={contextHandler('DeleteLocation')} />,
 	]
 
+	const DocumentMenuItem = [
+		<MenuItem key='documents' onClick={contextHandler('Documents')}>
+			<ListItemIcon>
+				<UploadIcon fontSize={18} color={'#757575'} />
+			</ListItemIcon>
+			Добавить документ к поверке
+		</MenuItem>,
+	]
+
+	const VerWrite = useCheckPermission(PermRules.Verification.Write)
+	const DocWrite = useCheckPermission(PermRules.Documents.Write)
+
 	return (
 		<Menu
 			open={Boolean(coordinates)}
@@ -96,8 +111,10 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 			anchorPosition={coordinates ? { top: coordinates.mouseY, left: coordinates.mouseX } : undefined}
 		>
 			{useCheckPermission(PermRules.SI.Write) ? SiMenuItemsWriter : null}
+			{useCheckPermission(PermRules.Verification.Write) ? VerificationMenuItem : null}
 			{useCheckPermission(PermRules.Location.Write) ? LocMenuItems : null}
 			{useCheckPermission(PermRules.Reserve.Write) ? ResMenuItems : null}
+			{!VerWrite && DocWrite ? DocumentMenuItem : null}
 
 			<MenuItem onClick={contextHandler('ViewVerificationHistory')}>
 				<ListItemIcon>

@@ -24,6 +24,7 @@ export const Table: FC<Props> = () => {
 		<Stack sx={{ maxWidth: '100%', overflowY: 'hidden', overflowX: 'auto', position: 'relative' }}>
 			<Header />
 
+			{/* //TODO что-то мне кажется что этот loader лишний */}
 			{isFetching && (
 				<Box width={'100%'} zIndex={5} marginY={'-2px'} height={4}>
 					<LinearProgress />

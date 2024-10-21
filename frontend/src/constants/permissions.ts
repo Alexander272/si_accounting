@@ -7,6 +7,13 @@ export const PermRules = {
 		Read: 'location:read',
 		Write: 'location:write',
 	},
+	Verification: {
+		Read: 'verification:read',
+		Write: 'verification:write',
+	},
+	Documents: {
+		Write: 'documents:write',
+	},
 	Employee: {
 		Read: 'employee:read',
 		Write: 'employee:write',
@@ -16,7 +23,7 @@ export const PermRules = {
 		Write: 'department:write',
 	},
 	Reserve: {
-		Read: 'reserve:read',
+		// Read: 'reserve:read',
 		Write: 'reserve:write',
 	},
 }

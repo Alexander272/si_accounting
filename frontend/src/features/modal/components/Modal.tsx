@@ -16,6 +16,7 @@ import { LocationHistory } from '@/features/location/components/LocationHistory'
 import { VerificationHistory } from '@/features/verification/components/VerificationHistory'
 import { Schedule } from '@/features/dataTable/components/Schedule/Schedule'
 import { DeleteLocation } from '@/features/location/components/DeleteLocation'
+import { DocumentsForm } from '@/features/files/components/Form/Form'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
 
@@ -61,6 +62,7 @@ export const Modal = () => {
 
 					{selector == 'ViewLocationHistory' && ModalTitles.MOVEMENT_HISTORY}
 					{selector == 'ViewVerificationHistory' && ModalTitles.VERIFICATION_HISTORY}
+					{selector == 'Documents' && ModalTitles.CREATE_DOCUMENT}
 
 					{selector == 'Period' && ModalTitles.PERIOD}
 
@@ -84,6 +86,7 @@ export const Modal = () => {
 
 				{selector == 'ViewLocationHistory' && <LocationHistory />}
 				{selector == 'ViewVerificationHistory' && <VerificationHistory />}
+				{selector == 'Documents' && <DocumentsForm />}
 
 				{selector == 'Period' && <Schedule />}
 

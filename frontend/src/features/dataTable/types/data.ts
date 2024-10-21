@@ -12,6 +12,7 @@ export type IDataItem = {
 	interVerificationInterval: string
 	nextVerificationDate: string
 	place: string
+	person: string
 	notes: string
 }
 

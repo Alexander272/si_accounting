@@ -5,9 +5,9 @@ import { Controller, useFormContext } from 'react-hook-form'
 import dayjs, { type Dayjs } from 'dayjs'
 
 import type { IVerificationForm } from './type'
-import { Titles } from './titles'
 import { Upload } from '@/features/files/components/Upload/Upload'
 import { VerificationStatuses } from '@/constants/verification'
+import { Titles } from './titles'
 
 type Props = {
 	instrumentId: string
@@ -52,7 +52,7 @@ export const VerificationInputs: FC<Props> = ({ instrumentId, verificationId, st
 					/>
 				)}
 			/>
-			{status != 'decommissioning' && (
+			{status == 'work' && (
 				<Controller
 					control={control}
 					name={'nextDate'}

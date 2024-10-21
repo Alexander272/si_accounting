@@ -40,7 +40,7 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 	if (!data) return null
 
 	return (
-		<Stack position={'relative'}>
+		<Stack position={'relative'} height={'100%'}>
 			{!data.total && <NoRowsOverlay />}
 
 			{isFetching && (

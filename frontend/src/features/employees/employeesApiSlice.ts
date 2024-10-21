@@ -23,6 +23,18 @@ const employeesApiSlice = apiSlice.injectEndpoints({
 				}
 			},
 		}),
+		getUniqueEmployee: builder.query<{ data: IEmployee[] }, null>({
+			query: () => `${API.employees}/unique`,
+			providesTags: [{ type: 'Employees', id: 'unique' }],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
 		createEmployee: builder.mutation<null, IEmployee>({
 			query: data => ({
 				url: `${API.employees}`,
@@ -31,6 +43,7 @@ const employeesApiSlice = apiSlice.injectEndpoints({
 			}),
 			invalidatesTags: (_result, _error, arg) => [
 				{ type: 'Employees', id: 'all' },
+				{ type: 'Employees', id: 'unique' },
 				{ type: 'Employees', id: arg.departmentId },
 			],
 		}),
@@ -42,6 +55,7 @@ const employeesApiSlice = apiSlice.injectEndpoints({
 			}),
 			invalidatesTags: (_result, _error, arg) => [
 				{ type: 'Employees', id: 'all' },
+				{ type: 'Employees', id: 'unique' },
 				{ type: 'Employees', id: arg.departmentId },
 			],
 		}),
@@ -52,6 +66,7 @@ const employeesApiSlice = apiSlice.injectEndpoints({
 			}),
 			invalidatesTags: (_result, _error, arg) => [
 				{ type: 'Employees', id: 'all' },
+				{ type: 'Employees', id: 'unique' },
 				{ type: 'Employees', id: arg.departmentId },
 			],
 		}),
@@ -96,6 +111,7 @@ const employeesApiSlice = apiSlice.injectEndpoints({
 
 export const {
 	useGetEmployeesQuery,
+	useGetUniqueEmployeeQuery,
 	useCreateEmployeeMutation,
 	useUpdateEmployeeMutation,
 	useDeleteEmployeeMutation,

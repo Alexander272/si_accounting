@@ -4,7 +4,7 @@ import { Controller, FormProvider, useForm } from 'react-hook-form'
 
 import type { IDataItem, ISIFilter } from '../../types/data'
 
-type ListFilter = {
+export type ListFilter = {
 	[x: string]: boolean
 }
 
