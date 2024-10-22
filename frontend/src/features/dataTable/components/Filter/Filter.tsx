@@ -4,11 +4,9 @@ import { Divider, IconButton, Menu, Stack, Tooltip, Typography } from '@mui/mate
 import type { IHeadCell } from '../Table/Head/columns'
 import type { ISIFilter } from '../../types/data'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
 import { FilterIcon } from '@/components/Icons/FilterIcon'
 import { getTableFilter, setFilters, setPage } from '../../dataTableSlice'
 import { DateFilter } from './DateFilter'
-import { ListFilter } from './ListFilter'
 import { NumberFilter } from './NumberFilter'
 import { TextFilter } from './TextFilter'
 import { HeadBadge } from '../Table/Head/HeadBadge'
@@ -24,7 +22,7 @@ export const Filter: FC<Props> = ({ cell }) => {
 
 	const dispatch = useAppDispatch()
 
-	const { data: departments } = useGetDepartmentsQuery(null)
+	// const { data: departments } = useGetDepartmentsQuery(null)
 
 	const anchor = useRef<HTMLButtonElement>(null)
 	const [open, setOpen] = useState(false)
@@ -125,7 +123,7 @@ export const Filter: FC<Props> = ({ cell }) => {
 				{cell.type == 'date' && (
 					<DateFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
 				)}
-				{cell.type == 'list' && (
+				{/* {cell.type == 'list' && (
 					<ListFilter
 						field={cell.id}
 						values={filter?.values[0].value.split(',')}
@@ -133,7 +131,7 @@ export const Filter: FC<Props> = ({ cell }) => {
 						onCancel={clearHandler}
 						onSubmit={submitHandler}
 					/>
-				)}
+				)} */}
 				{cell.type == 'number' && (
 					<NumberFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
 				)}

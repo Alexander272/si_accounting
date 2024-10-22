@@ -27,7 +27,7 @@ export const PlaceFilter: FC<unknown> = props => {
 
 	const { data, isFetching } = useGetDepartmentsQuery(null)
 
-	const list = data?.data.reduce((a, v) => ({ ...a, [v.id]: false }), {})
+	const list = data?.data.reduce((a, v) => ({ ...a, [v.id]: false }), { _moved: false, _reserve: false })
 	Object.assign(
 		list || {},
 		values?.reduce((a, v) => ({ ...a, [v]: true }), {})
@@ -40,8 +40,6 @@ export const PlaceFilter: FC<unknown> = props => {
 	const debouncedSearch = useDebounce(search, 600) as string
 
 	const submitHandler = handleSubmit(data => {
-		console.log('data', data)
-
 		const value = Object.keys(data.list).reduce((ac: string[], k) => {
 			if (data.list[k]) ac.push(k)
 			return ac
@@ -50,8 +48,6 @@ export const PlaceFilter: FC<unknown> = props => {
 			onCancel()
 			return
 		}
-
-		//TODO если я создам еще один обЪект фильтра, то потом я не смогу его получить
 
 		const filter: ISIFilter = {
 			field: field,
