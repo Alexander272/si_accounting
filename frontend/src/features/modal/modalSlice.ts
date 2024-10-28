@@ -18,6 +18,7 @@ export type ModalSelectors =
 	| 'ViewVerificationHistory'
 	| 'Period'
 	| 'Documents'
+	| 'Receive'
 	| 'Test'
 
 interface IModalState {

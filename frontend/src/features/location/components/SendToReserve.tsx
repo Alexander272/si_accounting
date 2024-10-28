@@ -48,7 +48,7 @@ export const SendToReserve = () => {
 			status: 'moved',
 		}
 
-		if (active?.id) {
+		if (active?.id && !selectedItems.some(s => s.id == active.id)) {
 			locations.push({
 				instrumentId: active.id,
 				...location,

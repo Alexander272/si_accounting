@@ -15,6 +15,7 @@ import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
 import { FileDownloadIcon } from '@/components/Icons/FileDownloadIcon'
 import { EditEmployeeIcon } from '@/components/Icons/EditEmployeeIcon'
 import { DocumentCheckIcon } from '@/components/Icons/DocumentCheckIcon'
+import { FileSyncIcon } from '@/components/Icons/FileSyncIcon'
 
 export const Tools = () => {
 	const anchor = useRef<HTMLButtonElement>(null)
@@ -37,7 +38,7 @@ export const Tools = () => {
 		(selector: ModalSelectors, notEmpty = true) =>
 		() => {
 			toggleHandler()
-			if (notEmpty && !selected.length) toast.error('Инструменты не выбраны')
+			if (selector != 'Receive' && notEmpty && !selected.length) toast.error('Инструменты не выбраны')
 			else openModal(selector)
 		}
 
@@ -56,6 +57,12 @@ export const Tools = () => {
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>
 			Добавить перемещение
+		</MenuItem>,
+		<MenuItem key='receive' onClick={modalHandler('Receive')}>
+			<ListItemIcon>
+				<FileSyncIcon fontSize={18} fill={'#757575'} />
+			</ListItemIcon>
+			Получить инструменты
 		</MenuItem>,
 	]
 	const SIMenuItems = [
@@ -90,6 +97,12 @@ export const Tools = () => {
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>
 			Вернуть инструменты
+		</MenuItem>,
+		<MenuItem key='receive' onClick={modalHandler('Receive')}>
+			<ListItemIcon>
+				<FileSyncIcon fontSize={18} fill={'#757575'} />
+			</ListItemIcon>
+			Получить инструменты
 		</MenuItem>,
 	]
 

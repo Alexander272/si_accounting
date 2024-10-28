@@ -2,7 +2,7 @@ import { FC, memo, useCallback } from 'react'
 import { Stack } from '@mui/material'
 import { FixedSizeList } from 'react-window'
 
-import type { ISelected, Status } from '@/features/dataTable/types/data'
+import type { IDataItem, ISelected } from '@/features/dataTable/types/data'
 import { RowHeight, Size } from '@/constants/defaultValues'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { addSelected, getSelectedItems, getTableSize, removeSelected } from '@/features/dataTable/dataTableSlice'
@@ -15,7 +15,7 @@ import { Row } from './Row'
 
 type Props = {
 	itemId?: string
-	positionHandler: (coordinates?: Coordinates, itemId?: string, status?: Status, isSelected?: boolean) => void
+	positionHandler: (coordinates?: Coordinates, item?: IDataItem, isSelected?: boolean) => void
 }
 
 export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {

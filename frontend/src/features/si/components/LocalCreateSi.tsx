@@ -43,6 +43,7 @@ const VerificationData: IVerificationForm = {
 	nextDate: dayjs().startOf('d').add(12, 'M').subtract(1, 'd').unix(),
 	registerLink: '',
 	status: 'work',
+	notVerified: false,
 	notes: '',
 }
 const LocationData: ILocationForm = {
@@ -175,6 +176,7 @@ export const LocalCreateSi = () => {
 					nextDate: verification.status != VerificationStatuses.Decommissioning ? verification.nextDate : 0,
 					registerLink: verification.registerLink.trim(),
 					status: verification.status,
+					notVerified: verification.notVerified,
 					notes: verification.notes.trim(),
 				},
 				location: {

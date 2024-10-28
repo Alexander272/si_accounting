@@ -1,7 +1,7 @@
 import { toast } from 'react-toastify'
 
 import type { IBaseFetchError } from '@/app/types/error'
-import type { Location } from './types/location'
+import type { Location, Receiving } from './types/location'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
 
@@ -47,6 +47,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				{ type: 'Location', id: 'ALL' },
 				{ type: 'Location', id: 'LAST' },
 				{ type: 'SI', id: 'ALL' },
+				{ type: 'SI', id: 'MOVED' },
 			],
 		}),
 		createSeveralLocation: builder.mutation<{ message: string }, Location[]>({
@@ -59,6 +60,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				{ type: 'Location', id: 'ALL' },
 				{ type: 'Location', id: 'LAST' },
 				{ type: 'SI', id: 'ALL' },
+				{ type: 'SI', id: 'MOVED' },
 			],
 		}),
 
@@ -72,6 +74,20 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				{ type: 'Location', id: 'LAST' },
 				{ type: 'Location', id: 'ALL' },
 				{ type: 'SI', id: 'ALL' },
+				{ type: 'SI', id: 'MOVED' },
+			],
+		}),
+		receiving: builder.mutation<string, Receiving>({
+			query: data => ({
+				url: `${API.si.location.base}/receiving`,
+				method: 'POST',
+				body: data,
+			}),
+			invalidatesTags: [
+				{ type: 'Location', id: 'LAST' },
+				{ type: 'Location', id: 'ALL' },
+				{ type: 'SI', id: 'ALL' },
+				{ type: 'SI', id: 'MOVED' },
 			],
 		}),
 
@@ -84,6 +100,7 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				{ type: 'Location', id: 'LAST' },
 				{ type: 'Location', id: 'ALL' },
 				{ type: 'SI', id: 'ALL' },
+				{ type: 'SI', id: 'MOVED' },
 			],
 		}),
 	}),
@@ -95,5 +112,6 @@ export const {
 	useCreateLocationMutation,
 	useCreateSeveralLocationMutation,
 	useUpdateLocationMutation,
+	useReceivingMutation,
 	useDeleteLocationMutation,
 } = locationApiSlice

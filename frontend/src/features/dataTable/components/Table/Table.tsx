@@ -18,7 +18,7 @@ type Props = {
 export const Table: FC<Props> = () => {
 	const { isFetching } = useGetAllSI()
 
-	const { coordinates, isSelected, itemId, status, positionHandler } = useContextMenu()
+	const { coordinates, isSelected, item, positionHandler } = useContextMenu()
 
 	return (
 		<Stack sx={{ maxWidth: '100%', overflowY: 'hidden', overflowX: 'auto', position: 'relative' }}>
@@ -31,13 +31,12 @@ export const Table: FC<Props> = () => {
 				</Box>
 			)}
 			{/* //TODO из-за того что я прокидываю функцию (насколько я понимаю) при клике все таблица перерисовывается */}
-			<Body itemId={itemId} positionHandler={positionHandler} />
+			<Body itemId={item?.id} positionHandler={positionHandler} />
 
 			<ContextMenu
 				coordinates={coordinates}
 				isSelected={isSelected}
-				itemId={itemId}
-				status={status}
+				item={item}
 				positionHandler={positionHandler}
 			/>
 		</Stack>

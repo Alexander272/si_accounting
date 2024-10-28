@@ -86,8 +86,12 @@ export const VerificationHistory = () => {
 				<TableBody>
 					{data?.data.map(d => (
 						<TableRow key={d.id}>
-							<TableCell align='center'>{dayjs(d.date * 1000).format(DayjsFormat)}</TableCell>
-							<TableCell align='center'>{dayjs(d.nextDate * 1000).format(DayjsFormat)}</TableCell>
+							<TableCell align='center'>
+								{d.date ? dayjs(d.date * 1000).format(DayjsFormat) : '-'}
+							</TableCell>
+							<TableCell align='center'>
+								{d.date ? dayjs(d.nextDate * 1000).format(DayjsFormat) : '-'}
+							</TableCell>
 							<TableCell align='center'>{d.registerLink}</TableCell>
 							<TableCell align='center'>{Statuses[d.status as 'work']}</TableCell>
 							<TableCell>

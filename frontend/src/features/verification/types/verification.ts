@@ -10,6 +10,7 @@ export interface IVerification {
 	// fileLink: string
 	registerLink: string
 	status: string
+	notVerified: boolean
 	notes: string
 	// files?: File[]
 	documents?: IDocument[]

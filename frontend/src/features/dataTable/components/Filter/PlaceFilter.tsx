@@ -39,15 +39,27 @@ export const PlaceFilter: FC<unknown> = props => {
 	const search = watch('search')
 	const debouncedSearch = useDebounce(search, 600) as string
 
-	const submitHandler = handleSubmit(data => {
-		const value = Object.keys(data.list).reduce((ac: string[], k) => {
-			if (data.list[k]) ac.push(k)
+	const submitHandler = handleSubmit(form => {
+		const value = Object.keys(form.list).reduce((ac: string[], k) => {
+			if (form.list[k]) ac.push(k)
 			return ac
 		}, [])
 		if (value.length == 0) {
 			onCancel()
 			return
 		}
+
+		// const values = data?.data.reduce((a, v) => {
+		// 	if (form.list[v.id]) a.push(v.name)
+		// 	return a
+		// }, [] as string[])
+		// if (form.list._moved) values?.push('_moved')
+		// if (form.list._reserve) values?.push('_reserve')
+		// console.log(values)
+		// if (!values || values?.length == 0) {
+		// 	onCancel()
+		// 	return
+		// }
 
 		const filter: ISIFilter = {
 			field: field,

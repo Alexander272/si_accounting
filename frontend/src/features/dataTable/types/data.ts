@@ -12,8 +12,10 @@ export type IDataItem = {
 	interVerificationInterval: string
 	nextVerificationDate: string
 	place: string
+	lastPlace: string
 	person: string
 	notes: string
+	status: Status
 }
 
 export type SIStatus = 'work' | 'repair' | 'decommissioning'
@@ -36,7 +38,7 @@ export interface ISISort {
 	type: 'DESC' | 'ASC'
 }
 
-export type CompareTypes = 'con' | 'start' | 'end' | 'like' | 'in' | 'eq' | 'gte' | 'lte' | 'range'
+export type CompareTypes = 'con' | 'start' | 'end' | 'like' | 'in' | 'eq' | 'gte' | 'lte' | 'range' | 'null'
 export interface ISIFilterOld {
 	field: keyof IDataItem
 	fieldType: string
@@ -46,7 +48,7 @@ export interface ISIFilterOld {
 }
 export interface ISIFilter {
 	field: keyof IDataItem
-	fieldType: string
+	fieldType?: string
 	values: ISIFilterValue[]
 }
 export interface ISIFilterValue {

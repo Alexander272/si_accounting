@@ -2,8 +2,7 @@ import { FC } from 'react'
 import { Button, Stack } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 
-import type { IVerificationForm } from './type'
-import type { HiddenField } from '../NewLocationForm/type'
+import type { IVerificationForm, HiddenField } from './type'
 import { VerificationInputs } from './VerificationInputs'
 
 type Props = {
@@ -23,6 +22,7 @@ export const VerificationForm: FC<Props> = ({
 	instrumentId,
 	stepMonth,
 	disabled,
+	hidden,
 	submitLabel,
 	cancelLabel,
 	onSubmit,
@@ -45,6 +45,7 @@ export const VerificationForm: FC<Props> = ({
 					stepMonth={stepMonth}
 					instrumentId={instrumentId}
 					verificationId={defaultValues.id || ''}
+					hidden={hidden}
 				/>
 			</FormProvider>
 

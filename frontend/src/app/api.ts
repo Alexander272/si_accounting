@@ -22,6 +22,7 @@ export const API = {
 		export: 'files',
 		schedule: 'files/schedule',
 		base: 'si',
+		moved: 'si/moved',
 		save: 'si/save',
 	},
 	departments: '/departments',

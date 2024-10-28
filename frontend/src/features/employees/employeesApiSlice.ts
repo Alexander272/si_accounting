@@ -83,6 +83,18 @@ const employeesApiSlice = apiSlice.injectEndpoints({
 				}
 			},
 		}),
+		getDepartmentsByUser: builder.query<{ data: IDepartment[] }, null>({
+			query: () => `${API.departments}/sso`,
+			providesTags: [{ type: 'Departments', id: 'all' }],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
 		createDepartment: builder.mutation<null, IDepartment>({
 			query: data => ({
 				url: `${API.departments}`,
@@ -116,6 +128,7 @@ export const {
 	useUpdateEmployeeMutation,
 	useDeleteEmployeeMutation,
 	useGetDepartmentsQuery,
+	useGetDepartmentsByUserQuery,
 	useCreateDepartmentMutation,
 	useUpdateDepartmentMutation,
 	useDeleteDepartmentMutation,

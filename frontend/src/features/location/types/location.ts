@@ -11,3 +11,8 @@ export type Location = {
 	needConfirmed: boolean
 	status: string
 }
+
+export type Receiving = {
+	status: string
+	instrumentId: string[]
+}

@@ -17,6 +17,7 @@ import { VerificationHistory } from '@/features/verification/components/Verifica
 import { Schedule } from '@/features/dataTable/components/Schedule/Schedule'
 import { DeleteLocation } from '@/features/location/components/DeleteLocation'
 import { DocumentsForm } from '@/features/files/components/Form/Form'
+import { ReceivingForm } from '@/features/location/components/ReceivingForm'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
 
@@ -54,6 +55,7 @@ export const Modal = () => {
 					{selector == 'NewLocation' && ModalTitles.NEW_MOVEMENT}
 					{selector == 'DeleteLocation' && ModalTitles.DEL_MOVEMENT}
 					{selector == 'SendToReserve' && ModalTitles.SEND_TO_RESERVE}
+					{selector == 'Receive' && ModalTitles.RECEIVE}
 
 					{selector == 'EditEmployee' && ModalTitles.EDIT_EMPLOYEE}
 					{selector == 'CreateEmployee' && ModalTitles.CREATE_EMPLOYEE}
@@ -80,6 +82,7 @@ export const Modal = () => {
 				{selector == 'NewLocation' && <CreateLocation />}
 				{selector == 'DeleteLocation' && <DeleteLocation />}
 				{selector == 'SendToReserve' && <SendToReserve />}
+				{selector == 'Receive' && <ReceivingForm />}
 
 				{selector == 'EditEmployee' || selector == 'CreateEmployee' ? <EmployeeForm /> : null}
 				{selector == 'EditDepartment' || selector == 'CreateDepartment' ? <DepartmentForm /> : null}

@@ -29,6 +29,24 @@ const SIApiSlice = apiSlice.injectEndpoints({
 			},
 		}),
 
+		getMovedSI: builder.query<{ data: IDataItem[]; total: number }, ISIParams>({
+			query: params => ({
+				url: API.si.moved,
+				method: 'GET',
+				params: buildSiUrlParams(params),
+			}),
+			providesTags: [{ type: 'SI', id: 'MOVED' }],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					console.error(fetchError)
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
+
 		saveSI: builder.mutation<string, string>({
 			query: id => ({
 				url: API.si.save,
@@ -76,4 +94,5 @@ const SIApiSlice = apiSlice.injectEndpoints({
 	}),
 })
 
-export const { useGetAllSIQuery, useLazyGetAllSIQuery, useSaveSIMutation, useCreateSIMutation } = SIApiSlice
+export const { useGetAllSIQuery, useLazyGetAllSIQuery, useGetMovedSIQuery, useSaveSIMutation, useCreateSIMutation } =
+	SIApiSlice

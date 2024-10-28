@@ -17,6 +17,7 @@ const defaultValues: IVerificationForm = {
 	date: dayjs().startOf('d').unix(),
 	nextDate: dayjs().startOf('d').unix(),
 	registerLink: '',
+	notVerified: false,
 	status: 'work',
 	notes: '',
 }

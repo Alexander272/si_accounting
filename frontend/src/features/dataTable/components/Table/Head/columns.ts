@@ -66,7 +66,7 @@ export const HeadCells: readonly IHeadCell[] = [
 	{
 		id: 'place',
 		label: ColumnNames.PLACE,
-		width: initWidth,
+		width: initWidth + 50,
 		// type: 'list',
 		filterComponent: PlaceFilter,
 	},

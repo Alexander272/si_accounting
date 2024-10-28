@@ -20,6 +20,8 @@ export const CreateVerification = () => {
 
 	if (!instrument || isLoading || isLoadingInstrument) return <Fallback marginTop={5} marginBottom={3} height={450} />
 
+	if (data?.data.notVerified) return <Typography>Инструмент отмечен как не нуждающийся в поверках</Typography>
+
 	return (
 		<Stack>
 			<Typography fontSize={'1.2rem'} fontWeight={'bold'} textAlign={'center'}>

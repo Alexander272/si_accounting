@@ -18,6 +18,7 @@ const defaultValues: IVerificationForm = {
 	nextDate: dayjs().startOf('d').add(12, 'M').subtract(1, 'd').unix(),
 	registerLink: '',
 	status: 'work',
+	notVerified: false,
 	notes: '',
 }
 
@@ -77,6 +78,7 @@ export const CreateVerificationForm: FC<Props> = ({
 				submitLabel={submitLabel}
 				cancelLabel={cancelLabel}
 				onCancel={onCancel}
+				hidden={{ notVerified: true }}
 			/>
 
 			{isLoading && <FormLoader />}

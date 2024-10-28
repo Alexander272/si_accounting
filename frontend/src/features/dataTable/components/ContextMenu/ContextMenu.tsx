@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { ListItemIcon, Menu, MenuItem } from '@mui/material'
 
 import type { Coordinates } from '@/features/dataTable/hooks/useContextMenu'
-import type { Status } from '../../types/data'
+import type { IDataItem } from '../../types/data'
 import { useAppDispatch } from '@/hooks/redux'
 import { PermRules } from '@/constants/permissions'
 import { useModal } from '@/features/modal/hooks/useModal'
@@ -16,17 +16,17 @@ import { CopyIcon } from '@/components/Icons/CopyIcon'
 import { LocHistoryIcon } from '@/components/Icons/LocHistoryIcon'
 import { VerHistoryIcon } from '@/components/Icons/VerHistoryIcon'
 import { UploadIcon } from '@/components/Icons/UploadIcon'
+import { FileSyncIcon } from '@/components/Icons/FileSyncIcon'
 import { CancelMove } from './CancelMove'
 
 type Props = {
 	coordinates?: Coordinates
 	isSelected: boolean
-	itemId?: string
-	status: Status
-	positionHandler: (coordinates?: Coordinates, itemId?: string, status?: Status, isSelected?: boolean) => void
+	item?: IDataItem
+	positionHandler: (coordinates?: Coordinates, item?: IDataItem, isSelected?: boolean) => void
 }
 
-export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHandler }) => {
+export const ContextMenu: FC<Props> = ({ coordinates, item, positionHandler }) => {
 	const { openModal } = useModal()
 
 	const dispatch = useAppDispatch()
@@ -36,8 +36,8 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 	}
 
 	const contextHandler = (selector: ModalSelectors) => () => {
-		if (itemId) {
-			dispatch(setActive({ id: itemId, status }))
+		if (item) {
+			dispatch(setActive({ id: item.id, status: item.status }))
 			closeHandler()
 			openModal(selector)
 		}
@@ -72,23 +72,43 @@ export const ContextMenu: FC<Props> = ({ coordinates, itemId, status, positionHa
 		</MenuItem>,
 	]
 	const LocMenuItems = [
-		<MenuItem key='location' disabled={status == 'moved'} onClick={contextHandler('NewLocation')}>
+		<MenuItem key='location' disabled={item?.status == 'moved'} onClick={contextHandler('NewLocation')}>
 			<ListItemIcon>
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>
 			Добавить перемещение
 		</MenuItem>,
-		<CancelMove key='cancel-location' itemId={itemId} onClick={contextHandler('DeleteLocation')} />,
+		item?.status == 'moved' ? (
+			<MenuItem key='receive' disabled={item?.lastPlace == ''} onClick={contextHandler('Receive')}>
+				<ListItemIcon>
+					<FileSyncIcon fontSize={18} fill={'#757575'} />
+				</ListItemIcon>
+				Получить инструмент
+			</MenuItem>
+		) : null,
+		item?.lastPlace == '' ? (
+			<CancelMove key='cancel-location' itemId={item?.id} onClick={contextHandler('DeleteLocation')} />
+		) : null,
 	]
 
 	const ResMenuItems = [
-		<MenuItem key='location' disabled={status == 'moved'} onClick={contextHandler('SendToReserve')}>
+		<MenuItem key='location' disabled={item?.status == 'moved'} onClick={contextHandler('SendToReserve')}>
 			<ListItemIcon>
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>
 			Вернуть инструмент
 		</MenuItem>,
-		<CancelMove key='cancel-location' itemId={itemId} onClick={contextHandler('DeleteLocation')} />,
+		item?.status == 'moved' ? (
+			<MenuItem key='receive' disabled={item?.lastPlace != ''} onClick={contextHandler('Receive')}>
+				<ListItemIcon>
+					<FileSyncIcon fontSize={18} fill={'#757575'} />
+				</ListItemIcon>
+				Получить инструмент
+			</MenuItem>
+		) : null,
+		item?.lastPlace != '' ? (
+			<CancelMove key='cancel-location' itemId={item?.id} onClick={contextHandler('DeleteLocation')} />
+		) : null,
 	]
 
 	const DocumentMenuItem = [

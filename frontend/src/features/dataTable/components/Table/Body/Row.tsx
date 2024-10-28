@@ -3,7 +3,7 @@ import { Stack } from '@mui/material'
 import dayjs from 'dayjs'
 
 import type { Coordinates } from '@/features/dataTable/hooks/useContextMenu'
-import type { IDataItem, ISelected, Status } from '@/features/dataTable/types/data'
+import type { IDataItem, ISelected } from '@/features/dataTable/types/data'
 import { DayjsFormat } from '@/constants/dateFormat'
 import { HeadCells } from '../Head/columns'
 import { Cell } from './Cell'
@@ -23,30 +23,30 @@ type Props = {
 	selected: boolean
 	itemId?: string
 	onSelect: (item: ISelected, selected: boolean) => void
-	positionHandler: (coordinates?: Coordinates, itemId?: string, status?: Status, isSelected?: boolean) => void
+	positionHandler: (coordinates?: Coordinates, item?: IDataItem, isSelected?: boolean) => void
 }
 
 export const Row: FC<Props> = memo(({ style, data, selected, itemId, onSelect, positionHandler }) => {
 	// TODO по какой-то причине data бывает undefined
 	if (!data) return
 
-	let status: Status = 'used'
-	switch (data.place) {
-		case 'Перемещение':
-			status = 'moved'
-			break
-		case 'Резерв':
-			status = 'reserve'
-			break
-	}
+	// let status: Status = 'used'
+	// switch (data.place) {
+	// 	case 'Перемещение':
+	// 		status = 'moved'
+	// 		break
+	// 	case 'Резерв':
+	// 		status = 'reserve'
+	// 		break
+	// }
 
 	const selectHandler = () => {
-		onSelect({ id: data.id, status: status }, selected)
+		onSelect({ id: data.id, status: data.status }, selected)
 	}
 
 	const openHandler = (event: MouseEvent<HTMLTableRowElement>) => {
 		event.preventDefault()
-		positionHandler({ mouseX: event.clientX + 2, mouseY: event.clientY - 6 }, data.id, status, selected)
+		positionHandler({ mouseX: event.clientX + 2, mouseY: event.clientY - 6 }, data, selected)
 	}
 
 	//TODO подумать как выделять строки (цвета когда надо сдать, просроченные, то что закреплено за текущим пользователем и тд)
@@ -61,8 +61,10 @@ export const Row: FC<Props> = memo(({ style, data, selected, itemId, onSelect, p
 		const deadline = dayjs().add(15, 'd').isAfter(dayjs(data.nextVerificationDate, DayjsFormat))
 		if (deadline) return RowColors['deadline']
 
-		if (data.place == 'Перемещение') return RowColors['moved']
-		if (data.place == 'Резерв') return RowColors['reverse']
+		if (data.status == 'moved') return RowColors['moved']
+		if (data.status == 'reserve') return RowColors['reverse']
+		// if (data.place == 'Перемещение') return RowColors['moved']
+		// if (data.place == 'Резерв') return RowColors['reverse']
 
 		return 'transparent'
 	}
