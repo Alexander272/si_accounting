@@ -36,6 +36,7 @@ type Location interface {
 	Update(context.Context, *models.UpdateLocationDTO) error
 	UpdatePlace(context.Context, *models.UpdatePlaceDTO) error
 	UpdatePerson(context.Context, *models.UpdatePlaceDTO) error
+	ReceivingFromApp(context.Context, *models.ReceivingDTO) error
 	Receiving(context.Context, *models.DialogResponse) error
 	Delete(context.Context, string) error
 }
@@ -142,18 +143,28 @@ func (s *LocationService) UpdatePerson(ctx context.Context, dto *models.UpdatePl
 	return nil
 }
 
-// Получение инструментов. Запрос прилетает из канала mattermost
-func (s *LocationService) ReceivingOld(ctx context.Context, location *models.ReceivingDTO) error {
-	if err := s.repo.Receiving(ctx, location); err != nil {
-		return fmt.Errorf("failed to receiving si location. error: %w", err)
+func (s *LocationService) ReceivingFromApp(ctx context.Context, dto *models.ReceivingDTO) error {
+	// location := &models.ReceivingDTO{
+	// 	Status: dto[0].Status,
+	// }
+	// ids := []string{}
+
+	// for _, d := range dto {
+	// 	ids = append(ids, d.Id)
+	// }
+	// location.InstrumentIds = ids
+
+	if len(dto.InstrumentIds) == 0 {
+		return nil
 	}
 
-	// Обновление сообщения в канале (чтобы там хоть что-то менялось и пользователь видел реакцию на его действия)
-	// if err := s.most.Update(ctx, location); err != nil {
-	// 	return err
-	// }
+	if err := s.repo.Receiving(ctx, dto); err != nil {
+		return fmt.Errorf("failed to receiving si location. error: %w", err)
+	}
 	return nil
 }
+
+// Получение инструментов. Запрос прилетает из канала mattermost
 func (s *LocationService) Receiving(ctx context.Context, dto *models.DialogResponse) error {
 	post := &models.UpdatePostData{}
 	InstrumentIds := []string{}

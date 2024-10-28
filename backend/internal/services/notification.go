@@ -54,7 +54,7 @@ func (s *NotificationService) Start(conf *config.NotificationConfig) error {
 	if now.Hour() >= conf.StartTime {
 		jobStart = jobStart.Add(24 * time.Hour)
 	}
-	// // TODO вернуть нормальное время запуска
+	// // вернуть нормальное время запуска
 	// jobStart := now.Add(1 * time.Minute)
 	logger.Info("starting jobs time " + jobStart.Format("02.01.2006 15:04:05"))
 
@@ -137,8 +137,10 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 
 	now := time.Now()
 	// возможно часы надо все-таки обнулить (как бы ошибок не было из-за часов)
+	// monthEnd := time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, now.Location())
 	monthEnd := time.Date(now.Year(), now.Month()+1, 0, now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
 	if s.iterationNumber >= len(times) {
+		// monthEnd = time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
 		monthEnd = time.Date(now.Year(), now.Month()+2, 0, now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
 	}
 
@@ -187,8 +189,6 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 		FinishAt: finishAt.Unix(),
 	}
 
-	// logger.Debug("period ", period)
-
 	si, err := s.si.GetForNotification(context.Background(), period)
 	if err != nil {
 		logger.Error("notification error:", logger.ErrAttr(err))
@@ -197,12 +197,13 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 	}
 
 	for _, n := range si {
-		if n.MostId == "" {
+		if n.MostId == "" && n.ChannelId == "" {
 			continue
 		}
 
 		term := monday.Format(monthEnd.Add(-notificationTime.Time), "Mon 2 Jan 2006", monday.LocaleRuRU)
 		if now.Equal(monthEnd.Add(-notificationTime.Time)) {
+			// это перестанет работать, если я уберу время из monthEnd
 			term += " (Сегодня)"
 		}
 		n.Message = "Необходимо сдать инструменты до `" + term + "`"
@@ -226,7 +227,7 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 	notificationTime := times[index]
 
 	now := time.Now()
-	monthEnd := time.Date(now.Year(), now.Month()+1, 0, now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
+	monthEnd := time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, now.Location())
 
 	//? задача в cron запускается 1 раз в сутки. текущая дата сравнивается с расчетной и если текущая дата >=, то индекс переключается.
 	// поскольку следующая дата высчитывается на основе предыдущей сделан массив в который записывается все рассчитанные даты.

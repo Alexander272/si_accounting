@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/repository"
 )
@@ -50,6 +51,15 @@ func (s *VerificationService) GetByInstrumentId(ctx context.Context, instrumentI
 }
 
 func (s *VerificationService) Create(ctx context.Context, v *models.CreateVerificationDTO) error {
+	if v.NotVerified {
+		v = &models.CreateVerificationDTO{
+			InstrumentId: v.InstrumentId,
+			NotVerified:  v.NotVerified,
+			Notes:        v.Notes,
+			Status:       constants.InstrumentStatusWork,
+		}
+	}
+
 	id, err := s.repo.Create(ctx, v)
 	if err != nil {
 		return fmt.Errorf("failed to create verification. error: %w", err)
@@ -69,6 +79,16 @@ func (s *VerificationService) Create(ctx context.Context, v *models.CreateVerifi
 }
 
 func (s *VerificationService) Update(ctx context.Context, v *models.UpdateVerificationDTO) error {
+	if v.NotVerified {
+		v = &models.UpdateVerificationDTO{
+			Id:           v.Id,
+			InstrumentId: v.InstrumentId,
+			NotVerified:  v.NotVerified,
+			Notes:        v.Notes,
+			Status:       constants.InstrumentStatusWork,
+		}
+	}
+
 	if err := s.repo.Update(ctx, v); err != nil {
 		return fmt.Errorf("failed to update verification. error: %w", err)
 	}

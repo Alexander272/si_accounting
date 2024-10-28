@@ -29,12 +29,8 @@ type Verification interface {
 	Update(context.Context, *models.UpdateVerificationDTO) error
 }
 
-// func (r *VerificationRepo) GetById(ctx context.Context, id string) ([]models.Verification, error) {
-// query :=
-// }
-
 func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*models.Verification, error) {
-	query := fmt.Sprintf(`SELECT id, instrument_id, date, next_date, register_link, status, notes FROM %s
+	query := fmt.Sprintf(`SELECT id, instrument_id, date, next_date, register_link, status, not_verified, notes FROM %s
 		WHERE instrument_id=$1 ORDER BY date DESC LIMIT 1`,
 		VerificationTable,
 	)
@@ -47,39 +43,12 @@ func (r *VerificationRepo) GetLast(ctx context.Context, instrumentId string) (*m
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
-	// date, err := strconv.ParseInt(verification.Date, 10, 64)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to parse date. error: %w", err)
-	// }
-	// verification.Date = time.Unix(date, 0).Format(constants.DateFormat)
-
-	// nextDate, err := strconv.ParseInt(verification.NextDate, 10, 64)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to parse date. error: %w", err)
-	// }
-	// if nextDate > 0 {
-	// 	verification.NextDate = time.Unix(nextDate, 0).Format(constants.DateFormat)
-	// }
-
 	return verification, nil
 }
 
-// func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) (verifications []models.Verification, err error) {
-// 	query := fmt.Sprintf(`SELECT id, instrument_id, register_link, status, date, next_date, notes FROM %s
-// 	 	WHERE instrument_id=$1 ORDER BY created_at, id`,
-// 		VerificationTable,
-// 	)
-// 	// TODO мне еще нужны файлы (документы)
-
-// 	if err := r.db.Select(&verifications, query, instrumentId); err != nil {
-// 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
-// 	}
-// 	return verifications, nil
-// }
-
 func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) ([]*models.VerificationDataDTO, error) {
 	var data []pq_models.VerificationFullData
-	query := fmt.Sprintf(`SELECT v.id, v.instrument_id, register_link, status, date, next_date, notes,
+	query := fmt.Sprintf(`SELECT v.id, v.instrument_id, register_link, status, date, next_date, notes, not_verified,
 		COALESCE(d.id::text, '') AS doc_id, COALESCE(d.label, '') AS label, COALESCE(d.size,0) AS size, COALESCE(d.path,'') AS path, COALESCE(d.type,'') AS type
 		FROM %s AS v LEFT JOIN %s AS d ON verification_id=v.id WHERE v.instrument_id=$1 ORDER BY date DESC, v.created_at DESC, id`,
 		VerificationTable, DocumentsTable,
@@ -115,10 +84,8 @@ func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId s
 				InstrumentId: d.InstrumentId,
 				Date:         d.Date,
 				NextDate:     d.NextDate,
-				// Date:         time.Unix(d.Date, 0).Format(constants.DateFormat),
-				// NextDate:     time.Unix(d.NextDate, 0).Format(constants.DateFormat),
-				// FileLink:     d.FileLink,
 				RegisterLink: d.RegisterLink,
+				NotVerified:  d.NotVerified,
 				Status:       d.Status,
 				Notes:        d.Notes,
 				Documents:    docs,
@@ -131,28 +98,14 @@ func (r *VerificationRepo) GetByInstrumentId(ctx context.Context, instrumentId s
 	return verifications, nil
 }
 
-//TODO чтобы избавиться от разницы в 5 часов надо из значения вычесть 18000
-
 func (r *VerificationRepo) Create(ctx context.Context, v *models.CreateVerificationDTO) (string, error) {
-	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date, next_date, register_link, status, notes)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date, next_date, register_link, status, not_verified, notes)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		VerificationTable,
 	)
 	id := uuid.New()
 
-	// date, err := time.Parse(constants.DateFormat, v.Date)
-	// if err != nil {
-	// 	return "", fmt.Errorf("failed to parse date. error: %w", err)
-	// }
-	// nextDate := time.Unix(0, 0)
-	// if v.NextDate != "" {
-	// 	nextDate, err = time.Parse(constants.DateFormat, v.NextDate)
-	// 	if err != nil {
-	// 		return "", fmt.Errorf("failed to parse date. error: %w", err)
-	// 	}
-	// }
-
-	_, err := r.db.Exec(query, id, v.InstrumentId, v.Date, v.NextDate, v.RegisterLink, v.Status, v.Notes)
+	_, err := r.db.ExecContext(ctx, query, id, v.InstrumentId, v.Date, v.NextDate, v.RegisterLink, v.Status, v.NotVerified, v.Notes)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute query. error: %w", err)
 	}
@@ -160,23 +113,11 @@ func (r *VerificationRepo) Create(ctx context.Context, v *models.CreateVerificat
 }
 
 func (r *VerificationRepo) Update(ctx context.Context, v *models.UpdateVerificationDTO) error {
-	query := fmt.Sprintf(`UPDATE %s SET date=$1, register_link=$2, status=$3, next_date=$4, notes=$5 WHERE id=$6`,
+	query := fmt.Sprintf(`UPDATE %s SET date=$1, register_link=$2, status=$3, next_date=$4, notes=$5, not_verified=$6 WHERE id=$7`,
 		VerificationTable,
 	)
 
-	// date, err := time.Parse(constants.DateFormat, v.Date)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to parse date. error: %w", err)
-	// }
-	// nextDate := time.Unix(0, 0)
-	// if v.NextDate != "" {
-	// 	nextDate, err = time.Parse(constants.DateFormat, v.NextDate)
-	// 	if err != nil {
-	// 		return fmt.Errorf("failed to parse date. error: %w", err)
-	// 	}
-	// }
-
-	_, err := r.db.Exec(query, v.Date, v.RegisterLink, v.Status, v.NextDate, v.Notes, v.Id)
+	_, err := r.db.Exec(query, v.Date, v.RegisterLink, v.Status, v.NextDate, v.Notes, v.NotVerified, v.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

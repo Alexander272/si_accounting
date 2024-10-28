@@ -29,6 +29,7 @@ func Register(api *gin.RouterGroup, service services.Department, middleware *mid
 	departments := api.Group("/departments")
 	{
 		departments.GET("", middleware.CheckPermissions(constants.Department, constants.Read), handlers.GetAll)
+		departments.GET("/sso", middleware.CheckPermissions(constants.Department, constants.Read), handlers.GetBySSOId)
 		departments.POST("", middleware.CheckPermissions(constants.Department, constants.Write), handlers.Create)
 		departments.PUT("/:id", middleware.CheckPermissions(constants.Department, constants.Write), handlers.Update)
 		departments.DELETE("/:id", middleware.CheckPermissions(constants.Department, constants.Write), handlers.Delete)
@@ -37,6 +38,23 @@ func Register(api *gin.RouterGroup, service services.Department, middleware *mid
 
 func (h *DepartmentHandlers) GetAll(c *gin.Context) {
 	departments, err := h.service.GetAll(c)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), nil)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DataResponse{Data: departments})
+}
+
+func (h *DepartmentHandlers) GetBySSOId(c *gin.Context) {
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
+	}
+
+	departments, err := h.service.GetBySSOId(c, user.Id)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), nil)

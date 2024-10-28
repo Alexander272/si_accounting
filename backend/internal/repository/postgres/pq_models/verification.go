@@ -8,6 +8,7 @@ type VerificationFullData struct {
 	FileLink     string `db:"file_link"`
 	RegisterLink string `db:"register_link"`
 	Status       string `db:"status"`
+	NotVerified  bool   `db:"not_verified"`
 	Notes        string `db:"notes"`
 	DocId        string `db:"doc_id"`
 	Label        string `db:"label"`

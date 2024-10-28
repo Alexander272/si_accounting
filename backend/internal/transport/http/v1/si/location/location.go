@@ -168,39 +168,6 @@ func (h *LocationHandlers) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
 }
 
-// // TODO можно это вынести в отдельный пакет notification и там уже можно будет сделать подтверждение из почты и с защитой будет проще
-// func (h *LocationHandlers) Receiving(c *gin.Context) {
-// 	// если я буду делать подтверждение по почте там нельзя будет отправлять пост запрос и все нужные данные надо будет передавать в query
-
-// 	//TODO есть проблема инструменты приходят одной кучей, как их принимать если пришла только часть?
-// 	// похоже надо как-то делить все что приходит + надо наверное выводить держателя для метролога, чтобы она понимала у кого был инструмент
-
-// 	var dto models.Confirmation
-// 	if err := c.BindJSON(&dto); err != nil {
-// 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
-// 		return
-// 	}
-
-// 	data := models.ReceivingDTO{
-// 		InstrumentIds: dto.Context.InstrumentIds,
-// 		Status:        dto.Context.Status,
-// 	}
-
-// 	if err := h.service.Receiving(c, data); err != nil {
-// 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-// 		error_bot.Send(c, err.Error(), dto)
-// 		return
-// 	}
-
-// 	logger.Info("Получено инструменты",
-// 		logger.StringAttr("user_id", dto.UserID),
-// 		logger.StringAttr("user", dto.UserName),
-// 		logger.StringAttr("instrument_ids", strings.Join(dto.Context.InstrumentIds, ",")),
-// 	)
-
-// 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
-// }
-
 func (h *LocationHandlers) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -220,7 +187,7 @@ func (h *LocationHandlers) Delete(c *gin.Context) {
 		user = u.(models.User)
 	}
 
-	logger.Info("Место нахождение инструмента удалено", logger.StringAttr("user_id", user.Id))
+	logger.Info("Место нахождение инструмента удалено", logger.StringAttr("user_id", user.Id), logger.StringAttr("location_id", id))
 
 	c.JSON(http.StatusNoContent, response.IdResponse{})
 }

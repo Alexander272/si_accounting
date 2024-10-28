@@ -9,6 +9,7 @@ type Verification struct {
 	NextDate int64 `json:"nextDate" db:"next_date"`
 	// FileLink     string `json:"fileLink" db:"file_link"`
 	RegisterLink string `json:"registerLink" db:"register_link"`
+	NotVerified  bool   `json:"notVerified" db:"not_verified"`
 	Status       string `json:"status" db:"status"`
 	Notes        string `json:"notes" db:"notes"`
 }
@@ -21,6 +22,7 @@ type CreateVerificationDTO struct {
 	NextDate int64 `json:"nextDate" db:"next_date,gte=1000000"`
 	// FileLink          string `form:"fileLink" json:"fileLink" db:"file_link"`
 	RegisterLink      string `form:"registerLink" json:"registerLink" db:"register_link"`
+	NotVerified       bool   `json:"notVerified" db:"not_verified"`
 	Status            string `form:"status" json:"status" db:"status"`
 	Notes             string `form:"notes" json:"notes" db:"notes"`
 	IsDraftInstrument bool   `form:"isDraftInstrument" json:"isDraftInstrument"`
@@ -32,10 +34,11 @@ type UpdateVerificationDTO struct {
 	InstrumentId string `json:"instrumentId" db:"instrument_id" binding:"required"`
 	// Date         string `json:"date" db:"date" binding:"required"`
 	// NextDate     string `json:"nextDate" db:"next_date"`
-	Date     int64 `json:"date" db:"date" binding:"required"`
+	Date     int64 `json:"date" db:"date"`
 	NextDate int64 `json:"nextDate" db:"next_date"`
 	// FileLink     string `json:"fileLink" db:"file_link"`
 	RegisterLink string `json:"registerLink" db:"register_link"`
+	NotVerified  bool   `json:"notVerified" db:"not_verified"`
 	Status       string `json:"status" db:"status"`
 	Notes        string `json:"notes" db:"notes"`
 }
@@ -49,6 +52,7 @@ type VerificationDataDTO struct {
 	NextDate int64 `json:"nextDate" db:"next_date"`
 	// FileLink     string     `json:"fileLink" db:"file_link"`
 	RegisterLink string      `json:"registerLink" db:"register_link"`
+	NotVerified  bool        `json:"notVerified" db:"not_verified"`
 	Status       string      `json:"status" db:"status"`
 	Notes        string      `json:"notes" db:"notes"`
 	Documents    []*Document `json:"documents"`

@@ -94,6 +94,7 @@ func (r *EmployeeRepo) GetByMostId(ctx context.Context, mostId string) (*models.
 }
 
 func (r *EmployeeRepo) GetBySSOId(ctx context.Context, id string) (*models.Employee, error) {
+	//TODO тут может быть несколько строк и тогда запрос выдаст ошибку
 	query := fmt.Sprintf(`SELECT id, name, department_id, most_id, is_lead FROM %s WHERE sso_id=$1`, EmployeeTable)
 
 	employee := &models.Employee{}

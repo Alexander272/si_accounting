@@ -72,6 +72,19 @@ func (s *EmployeeService) GetByDepartment(ctx context.Context, departmentId stri
 	}
 	return users, nil
 }
+func (s *EmployeeService) GetDepartments(ctx context.Context, req *models.GetDepartmentsDTO) ([]string, error) {
+	// employee, err := s.repo.GetBySSOId(ctx, req.UserId)
+	// if err != nil {
+	// 	if errors.Is(err, models.ErrNoRows) {
+	// 		return nil, err
+	// 	}
+	// 	return nil, fmt.Errorf("failed to get employee by sso id. error: %w", err)
+	// }
+	// departments := []string{}
+	// // employee
+	// return employee, nil
+	return nil, fmt.Errorf("not implemented")
+}
 
 func (s *EmployeeService) GetByMostId(ctx context.Context, mostId string) (*models.EmployeeData, error) {
 	employee, err := s.repo.GetByMostId(ctx, mostId)

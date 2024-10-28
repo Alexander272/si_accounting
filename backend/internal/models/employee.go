@@ -5,6 +5,10 @@ type GetEmployeesDTO struct {
 	// DepartmentId string `json:"departmentId"`
 }
 
+type GetDepartmentsDTO struct {
+	UserId string `json:"userId" binding:"required"`
+}
+
 type Employee struct {
 	Id           string `json:"id" db:"id"`
 	Name         string `json:"name" db:"name"`

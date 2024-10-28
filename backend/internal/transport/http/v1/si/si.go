@@ -29,6 +29,8 @@ func Register(api *gin.RouterGroup, service services.SI, middleware *middleware.
 	handlers := NewSIHandlers(service)
 
 	api.GET("", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetAll)
+	api.GET("/moved", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetMoved)
+	api.GET("/notification", middleware.CheckPermissions(constants.SI, constants.Write), handlers.GetForNotification)
 	api.POST("/save", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Save)
 	api.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Create)
 }
@@ -108,6 +110,12 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 				value = strings.Replace(value, "_reserve", "", -1)
 				value = strings.Replace(value, "_moved", "", -1)
 				value = strings.Trim(value, ",")
+				k = "department"
+
+				if value != "" {
+					// params.Filters = append(params.Filters, &models.SIFilter{Field: "last_place", Values: []*models.SIFilterValue{}})
+					values = append(values, &models.SIFilterValue{CompareType: key, Value: value})
+				}
 			}
 
 			values = append(values, &models.SIFilterValue{
@@ -150,6 +158,71 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.DataResponse{Data: si.SI, Total: si.Total})
+}
+
+func (h *SIHandlers) GetMoved(c *gin.Context) {
+	params := &models.SIParams{
+		// Page:    &models.SIPage{},
+		// Sort:    []*models.SISort{},
+		Filters: []*models.SIFilter{},
+	}
+
+	filters := c.QueryMap("filters")
+	for k, v := range filters {
+		valueMap := c.QueryMap(k)
+
+		values := []*models.SIFilterValue{}
+		for key, value := range valueMap {
+			values = append(values, &models.SIFilterValue{
+				CompareType: key,
+				Value:       value,
+			})
+		}
+
+		if k == "place" {
+			k = "department"
+		}
+
+		f := &models.SIFilter{
+			Field:     k,
+			FieldType: v,
+			Values:    values,
+		}
+		params.Filters = append(params.Filters, f)
+	}
+
+	si, err := h.service.GetMoved(c, params)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), params)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DataResponse{Data: si.SI, Total: si.Total})
+}
+
+func (h *SIHandlers) GetForNotification(c *gin.Context) {
+	period := &models.Period{}
+	start := c.Query("start")
+	end := c.Query("end")
+
+	period.StartAt, _ = strconv.ParseInt(start, 10, 64)
+	period.FinishAt, _ = strconv.ParseInt(end, 10, 64)
+	// now := time.Now()
+	// startAt := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
+	// finishAt := time.Date(now.Year(), now.Month()+2, 0, 0, 0, 0, 0, now.Location())
+
+	// period := &models.Period{
+	// 	StartAt:  startAt.Unix(),
+	// 	FinishAt: finishAt.Unix(),
+	// }
+
+	si, err := h.service.GetForNotification(c, period)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: si})
 }
 
 // func (h *SIHandlers) GetIdentifiers(c *gin.Context) {

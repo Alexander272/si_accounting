@@ -27,6 +27,7 @@ func NewSIService(repo repository.SI, instrument Instrument, verification Verifi
 
 type SI interface {
 	GetAll(context.Context, *models.SIParams) (*models.SIList, error)
+	GetMoved(context.Context, *models.SIParams) (*models.SIList, error)
 	GetForNotification(context.Context, *models.Period) ([]*models.Notification, error)
 	Save(ctx context.Context, id string) error
 	Create(context.Context, *models.CreateSIDTO) error
@@ -36,6 +37,14 @@ func (s *SIService) GetAll(ctx context.Context, req *models.SIParams) (*models.S
 	list, err := s.repo.GetAll(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all si. error: %w", err)
+	}
+	return list, err
+}
+
+func (s *SIService) GetMoved(ctx context.Context, req *models.SIParams) (*models.SIList, error) {
+	list, err := s.repo.GetMoved(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get moved si. error: %w", err)
 	}
 	return list, err
 }

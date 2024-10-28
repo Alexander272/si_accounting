@@ -10,6 +10,7 @@ import (
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -98,9 +99,21 @@ func (r *LocationRepo) Create(ctx context.Context, l *models.CreateLocationDTO) 
 	// 	), '')), COALESCE((SELECT name FROM %s WHERE id=$7 , ''))`,
 	// 	SIMovementTable, EmployeeTable, DepartmentTable,
 	// )
-	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, person_id, department_id, place, person)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, COALESCE((SELECT name FROM %s WHERE id=$8), '')), COALESCE((SELECT name FROM %s WHERE id=$7 , ''))`,
-		SIMovementTable, DepartmentTable, EmployeeTable,
+	// query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, person_id, department_id, place,
+	// 	person, last_place)
+	// 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, COALESCE((SELECT name FROM %s WHERE id=$8), ''), COALESCE((SELECT name FROM %s WHERE id=$7), ''),
+	// 	COALESCE((SELECT place FROM %s WHERE instrument_id=$2 ORDER BY created_at DESC LIMIT 1), ''))`,
+	// 	SIMovementTable, DepartmentTable, EmployeeTable, SIMovementTable,
+	// )
+	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, 
+		person_id, department_id, place, person, last_place, last_place_id)
+		SELECT $1, $2, $3, $4, $5, $6, $7, $8,
+		COALESCE(d.name, ''), COALESCE(e.name, ''), COALESCE(m.place, ''), COALESCE(m.department_id::text, '')
+		FROM %s AS m
+		LEFT JOIN LATERAL (SELECT name FROM %s WHERE id=$7) AS e ON true
+		LEFT JOIN LATERAL (SELECT name FROM %s WHERE id=$8) AS d ON true
+		WHERE instrument_id=$2 ORDER BY m.created_at DESC LIMIT 1`,
+		SIMovementTable, SIMovementTable, EmployeeTable, DepartmentTable,
 	)
 	id := uuid.New()
 
@@ -126,14 +139,16 @@ func (r *LocationRepo) Create(ctx context.Context, l *models.CreateLocationDTO) 
 }
 
 func (r *LocationRepo) CreateSeveral(ctx context.Context, locations []*models.CreateLocationDTO) error {
-	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, person_id, department_id, place) VALUES `,
-		SIMovementTable,
-	)
+	// query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, person_id,
+	// 	department_id, place, person, last_place) VALUES `,
+	// 	SIMovementTable,
+	// )
 	// subQuery := fmt.Sprintf(`SELECT d.name || ' ('|| e.name || ')' FROM %s AS e LEFT JOIN %s AS d ON department_id=d.id WHERE e.id=$`,
 	// 	EmployeeTable, DepartmentTable,
 	// )
-	subDepQuery := fmt.Sprintf(`SELECT name FROM %s WHERE id=$`, DepartmentTable)
-	subEmpQuery := fmt.Sprintf(`SELECT name FROM %s WHERE id=$`, EmployeeTable)
+	// subDepQuery := fmt.Sprintf(`SELECT name FROM %s WHERE id=$`, DepartmentTable)
+	// subEmpQuery := fmt.Sprintf(`SELECT name FROM %s WHERE id=$`, EmployeeTable)
+	// subPlaceQuery := fmt.Sprintf(`SELECT place FROM %s WHERE instrument_id=$`, SIMovementTable)
 
 	args := make([]interface{}, 0)
 	values := make([]string, 0, len(locations))
@@ -141,9 +156,10 @@ func (r *LocationRepo) CreateSeveral(ctx context.Context, locations []*models.Cr
 	c := 8
 	for i, l := range locations {
 		id := uuid.New()
-		values = append(values, fmt.Sprintf(" ($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, COALESCE((%s%d), ''), COALESCE((%s%d), ''))",
-			i*c+1, i*c+2, i*c+3, i*c+4, i*c+5, i*c+6, i*c+7, i*c+8, subDepQuery, i*c+8, subEmpQuery, i*c+7),
-		)
+		// values = append(values, fmt.Sprintf(" ($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, COALESCE((%s%d), ''), COALESCE((%s%d), ''), COALESCE((%s%d ORDER BY created_at DESC LIMIT 1), ''))",
+		// 	i*c+1, i*c+2, i*c+3, i*c+4, i*c+5, i*c+6, i*c+7, i*c+8, subDepQuery, i*c+8, subEmpQuery, i*c+7, subPlaceQuery, i*c+2),
+		// )
+		values = append(values, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)", i*c+1, i*c+2, i*c+3, i*c+4, i*c+5, i*c+6, i*c+7, i*c+8))
 
 		status := l.Status
 		if status == "" {
@@ -160,7 +176,21 @@ func (r *LocationRepo) CreateSeveral(ctx context.Context, locations []*models.Cr
 
 		args = append(args, id, l.InstrumentId, l.DateOfIssue, l.DateOfReceiving, status, l.NeedConfirmed, personId, departmentId)
 	}
-	query += strings.Join(values, ", ")
+
+	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, 
+		person_id, department_id, place, person, last_place, last_place_id)
+		SELECT id::uuid, instrument_id::uuid, date_of_issue::integer, date_of_receiving::integer, status, need_confirmed::boolean, 
+			person_id::uuid, s.department_id::uuid, COALESCE(d.name, ''), COALESCE(e.name, ''), COALESCE(m.place, ''), COALESCE(m.department_id::text, '')
+		FROM (VALUES %s) AS s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, person_id, department_id)
+		LEFT JOIN LATERAL (SELECT name FROM %s WHERE id=s.person_id::uuid) AS e ON true
+		LEFT JOIN LATERAL (SELECT name FROM %s WHERE id=s.department_id::uuid) AS d ON true
+		LEFT JOIN LATERAL (SELECT place, department_id FROM %s WHERE instrument_id=s.instrument_id::uuid ORDER BY created_at DESC LIMIT 1) AS m ON true`,
+		SIMovementTable, strings.Join(values, ", "), EmployeeTable, DepartmentTable, SIMovementTable,
+	)
+
+	logger.Debug("create several", logger.StringAttr("query", query), logger.AnyAttr("args", args))
+
+	// query += strings.Join(values, ", ")
 
 	_, err := r.db.Exec(query, args...)
 	if err != nil {

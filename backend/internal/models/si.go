@@ -28,8 +28,8 @@ type SIFilterValue struct {
 }
 
 type Period struct {
-	StartAt  int64
-	FinishAt int64
+	StartAt  int64 `json:"startAt"`
+	FinishAt int64 `json:"finishAt"`
 }
 
 type SIList struct {
@@ -52,6 +52,7 @@ type SI struct {
 	Date                      string `json:"verificationDate" db:"date"`
 	NextDate                  string `json:"nextVerificationDate" db:"next_date"`
 	Place                     string `json:"place" db:"place"`
+	LastPlace                 string `json:"lastPlace" db:"last_place"`
 	Person                    string `json:"person" db:"person"`
 	Status                    string `json:"status" db:"status"`
 	Total                     int    `json:"-" db:"total_count"`

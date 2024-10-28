@@ -15,6 +15,7 @@ type Location struct {
 	DateOfIssue     int64  `json:"dateOfIssue" db:"date_of_issue"`
 	DateOfReceiving int64  `json:"dateOfReceiving" db:"date_of_receiving"`
 	NeedConfirmed   bool   `json:"needConfirmed" db:"need_confirmed"`
+	LastPlace       string `json:"lastPlace" db:"last_place"`
 	Status          string `json:"status" db:"status"`
 }
 

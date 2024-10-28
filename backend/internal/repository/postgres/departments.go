@@ -21,6 +21,7 @@ func NewDepartmentRepo(db *sqlx.DB) *DepartmentRepo {
 
 type Department interface {
 	GetAll(context.Context) ([]*models.Department, error)
+	GetBySSOId(context.Context, string) ([]*models.Department, error)
 	Create(context.Context, *models.Department) error
 	Update(context.Context, *models.Department) error
 	Delete(context.Context, string) error
@@ -35,6 +36,18 @@ func (r *DepartmentRepo) GetAll(ctx context.Context) ([]*models.Department, erro
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return departments, nil
+}
+
+func (r *DepartmentRepo) GetBySSOId(ctx context.Context, id string) ([]*models.Department, error) {
+	query := fmt.Sprintf(`SELECT d.id, d.name FROM %s AS d INNER JOIN %s AS e ON e.department_id=d.id WHERE e.is_lead=true AND sso_id=$1`,
+		DepartmentTable, EmployeeTable,
+	)
+	data := []*models.Department{}
+
+	if err := r.db.Select(&data, query, id); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return data, nil
 }
 
 func (r *DepartmentRepo) Create(ctx context.Context, department *models.Department) error {

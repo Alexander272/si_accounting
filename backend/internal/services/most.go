@@ -39,6 +39,8 @@ func (s *MostService) Send(ctx context.Context, not *models.Notification) error 
 	apiPath := "/api/posts"
 	apiDialogsPath := "/api/dialogs"
 
+	//TODO может разделить на несколько функций для каждого варианта использования
+
 	table := []string{
 		"| Наименование СИ | зав.№ | Держатель |",
 		"|:--|:--|:--|",
@@ -67,14 +69,16 @@ func (s *MostService) Send(ctx context.Context, not *models.Notification) error 
 	}
 	post.UserId = not.MostId
 	post.ChannelId = not.ChannelId
-	post.IsPinned = true
+	// post.IsPinned = true
+	post.IsPinned = not.Type == constants.StatusReceiving
+	//TODO возможно в data_id стоит не только id инструментов передавать, но и тип функции (сообщения)
 	post.Props = []*models.Props{
 		{Key: "service", Value: "sia"},
 		{Key: "data_id", Value: strings.Join(instrumentIds, ",")},
 	}
 
 	if not.Type == constants.StatusReceiving {
-		url := os.Getenv("HOST_URL") + "/api/v1/si/locations/receiving"
+		url := os.Getenv("HOST_URL") + "/api/v1/si/locations/receiving/dialog"
 
 		// action := &model.PostAction{
 		// 	Id:    "all",
@@ -102,7 +106,7 @@ func (s *MostService) Send(ctx context.Context, not *models.Notification) error 
 			Integration: &model.PostActionIntegration{
 				URL: s.url + apiDialogsPath,
 				Context: map[string]interface{}{
-					"url":         url + "/dialog",
+					"url":         url,
 					"title":       "Получение инструментов",
 					"description": "#### Отметьте полученные инструменты",
 					"callbackId":  "receiving_form",

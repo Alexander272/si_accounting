@@ -32,7 +32,9 @@ func NewSIRepo(db *sqlx.DB) *SIRepo {
 	format["notes"] = "notes"
 	format["verificationDate"] = "date"
 	format["nextVerificationDate"] = "next_date"
-	format["place"] = "department_id"
+	// format["place"] = "department_id"
+	format["department"] = "department_id"
+	format["place"] = "place"
 	format["person"] = "person"
 	format["status"] = "m.status"
 
@@ -44,6 +46,7 @@ func NewSIRepo(db *sqlx.DB) *SIRepo {
 
 type SI interface {
 	GetAll(context.Context, *models.SIParams) (*models.SIList, error)
+	GetMoved(context.Context, *models.SIParams) (*models.SIList, error)
 	GetForNotification(context.Context, *models.Period) ([]*models.Notification, error)
 }
 
@@ -61,6 +64,15 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 
 	filter := ""
 	for _, ns := range req.Filters {
+		if ns.Field == "department" {
+			filter += " AND (" + getFilterLine(ns.Values[0].CompareType, r.formatFields[ns.Field], count) + " OR (" +
+				getFilterLine(ns.Values[0].CompareType, "last_place_id", count) + "AND m.status='moved'))"
+
+			ns.Values[0].Value = strings.ReplaceAll(ns.Values[0].Value, ",", "|")
+			params = append(params, ns.Values[0].Value)
+			count++
+			continue
+		}
 		for _, sv := range ns.Values {
 			filter += " AND " + getFilterLine(sv.CompareType, r.formatFields[ns.Field], count)
 			if sv.CompareType == "in" {
@@ -71,20 +83,15 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 		}
 	}
 
-	/*
-		С помощью этой функции можно обрезать местонахождение до скобок и удалить пробелы
-		SELECT TRIM(split_part(place, '(', 1))
-		FROM public.si_movement_history
-	*/
-
 	params = append(params, req.Status, req.Page.Limit, req.Page.Offset)
 
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, year_of_issue, 
-		inter_verification_interval, notes, i.status, v.date, v.next_date, COALESCE(m.place,'') AS place, COALESCE(m.person,'') AS person, 
-		COUNT(*) OVER() AS total_count
+		inter_verification_interval, notes, m.status, v.date, v.next_date, COALESCE(m.place,'') AS place, COALESCE(m.person,'') AS person, 
+		COALESCE(m.last_place,'') AS last_place, COUNT(*) OVER() AS total_count
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
-		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE 'Перемещение' END) AS place, status,
+		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE
+			(CASE WHEN last_place!='' THEN 'Перемещение из «'||last_place||'»' ELSE 'Перемещение' END) END) AS place, last_place, last_place_id, status,
 			person, department_id FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
 		WHERE i.status=$%d%s%s LIMIT $%d OFFSET $%d`,
 		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable,
@@ -102,7 +109,10 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse date. error: %w", err)
 		}
-		list.SI[i].Date = time.Unix(date, 0).Format(constants.DateFormat)
+		list.SI[i].Date = ""
+		if date > 0 {
+			list.SI[i].Date = time.Unix(date, 0).Format(constants.DateFormat)
+		}
 
 		nextDate, err := strconv.ParseInt(s.NextDate, 10, 64)
 		if err != nil {
@@ -123,17 +133,62 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 	return list, nil
 }
 
+func (r *SIRepo) GetMoved(ctx context.Context, req *models.SIParams) (*models.SIList, error) {
+	// для метролога фильтр по подразделению будет ComType null, для других пользователей ComType in
+
+	// еще нужно при получении данных о пользователе смотреть в каких подразделениях он лидер, либо я могу запрашивать эти данные при открытии окна
+	// тогда можно на клиенте показывать список подразделений где по умолчанию будут отмечены, те где он лидер
+	// а ниже список инструментов сгруппированных по подразделениям и кнопка для подтверждения получения
+
+	params := []interface{}{constants.LocationStatusMoved}
+	filter := ""
+	count := 2
+	for _, f := range req.Filters {
+		for _, sv := range f.Values {
+			filter += " AND " + getFilterLine(sv.CompareType, r.formatFields[f.Field], count)
+			if sv.CompareType == "in" {
+				sv.Value = strings.ReplaceAll(sv.Value, ",", "|")
+			}
+			if sv.CompareType != "null" {
+				params = append(params, sv.Value)
+				count++
+			}
+		}
+	}
+
+	query := fmt.Sprintf(`SELECT id, name, factory_number, v.date, v.next_date, COALESCE(m.place,'') AS place, COALESCE(m.person,'') AS person, 
+		COALESCE(m.last_place,'') AS last_place
+		FROM %s AS i
+		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
+		LEFT JOIN LATERAL (SELECT place, person, last_place, department_id, status FROM %s WHERE instrument_id=i.id 
+			ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
+		WHERE m.status=$1 %s ORDER BY place, last_place`,
+		InstrumentTable, VerificationTable, SIMovementTable, filter,
+	)
+	data := []*models.SI{}
+
+	if err := r.db.Select(&data, query, params...); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+
+	list := &models.SIList{
+		SI:    data,
+		Total: len(data),
+	}
+	return list, nil
+}
+
 func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (nots []*models.Notification, err error) {
-	var params []interface{}
+
 	periodCond := ""
 	status := constants.LocationStatusMoved
 	notType := "receiving"
-	params = append(params, status)
+	params := []interface{}{status}
 	if req.StartAt != 0 {
 		status = constants.LocationStatusUsed
 		periodCond = "AND next_date>=$2 AND next_date<=$3"
 		notType = ""
-		params = append(params, req.StartAt, req.FinishAt)
+		params = []interface{}{status, req.StartAt, req.FinishAt}
 	}
 
 	data := []*models.SIFromNotification{}
@@ -183,8 +238,7 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 			notStatus = constants.LocationStatusReserve
 		}
 
-		notEqualDeps := len(nots) > 0 && len(nots[len(nots)-1].SI) == 0 && nots[len(nots)-1].SI[0].Department != sn.Department
-		//TODO почему не все инструменты прилетают в мост, хотя в запросе из бд они есть, возможно, исправление строчки ниже помогло
+		notEqualDeps := len(nots) > 0 && len(nots[len(nots)-1].SI) > 0 && nots[len(nots)-1].SI[0].Department != sn.Department
 		if i == 0 || nots[len(nots)-1].MostId != sn.MostId || nots[len(nots)-1].ChannelId != sn.ChannelId || notEqualDeps {
 			nots = append(nots, &models.Notification{
 				MostId:    sn.MostId,

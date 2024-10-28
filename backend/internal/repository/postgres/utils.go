@@ -26,6 +26,9 @@ func getFilterLine(compare string, fieldName string, count int) string {
 		return fmt.Sprintf("%s >= $%d", fieldName, count)
 	case "lte":
 		return fmt.Sprintf("%s <= $%d", fieldName, count)
+
+	case "null":
+		return fmt.Sprintf("%s IS NULL", fieldName)
 	}
 
 	return ""

@@ -22,6 +22,7 @@ func NewDepartmentService(repo repository.Department, location Location) *Depart
 
 type Department interface {
 	GetAll(context.Context) ([]*models.Department, error)
+	GetBySSOId(context.Context, string) ([]*models.Department, error)
 	Create(context.Context, *models.Department) error
 	Update(context.Context, *models.Department) error
 	Delete(context.Context, string) error
@@ -34,6 +35,14 @@ func (s *DepartmentService) GetAll(ctx context.Context) ([]*models.Department, e
 	}
 	if departments == nil {
 		departments = []*models.Department{}
+	}
+	return departments, nil
+}
+
+func (s *DepartmentService) GetBySSOId(ctx context.Context, id string) ([]*models.Department, error) {
+	departments, err := s.repo.GetBySSOId(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get departments by sso id. error: %w", err)
 	}
 	return departments, nil
 }
