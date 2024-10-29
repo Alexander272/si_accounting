@@ -107,12 +107,13 @@ func (r *LocationRepo) Create(ctx context.Context, l *models.CreateLocationDTO) 
 	// )
 	query := fmt.Sprintf(`INSERT INTO %s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, 
 		person_id, department_id, place, person, last_place, last_place_id)
-		SELECT $1, $2, $3, $4, $5, $6, $7, $8,
-		COALESCE(d.name, ''), COALESCE(e.name, ''), COALESCE(m.place, ''), COALESCE(m.department_id::text, '')
-		FROM %s AS m
-		LEFT JOIN LATERAL (SELECT name FROM %s WHERE id=$7) AS e ON true
-		LEFT JOIN LATERAL (SELECT name FROM %s WHERE id=$8) AS d ON true
-		WHERE instrument_id=$2 ORDER BY m.created_at DESC LIMIT 1`,
+		SELECT id::uuid, instrument_id::uuid, date_of_issue::integer, date_of_receiving::integer, status, need_confirmed::boolean, person_id::uuid, 
+			s.department_id::uuid,	COALESCE(d.name, ''), COALESCE(e.name, ''), COALESCE(m.place, ''), COALESCE(m.department_id::text, '')
+		FROM (VALUES ($1, $2, $3, $4, $5, $6, $7, $8))
+		AS s(id, instrument_id, date_of_issue, date_of_receiving, status, need_confirmed, person_id, department_id) 
+		LEFT JOIN LATERAL (SELECT place, department_id FROM %s WHERE instrument_id=s.instrument_id::uuid ORDER BY created_at DESC LIMIT 1) AS m ON true
+		LEFT JOIN LATERAL (SELECT name FROM %s WHERE id=s.person_id::uuid) AS e ON true
+		LEFT JOIN LATERAL (SELECT name FROM %s WHERE id=s.department_id::uuid) AS d ON true`,
 		SIMovementTable, SIMovementTable, EmployeeTable, DepartmentTable,
 	)
 	id := uuid.New()

@@ -25,7 +25,7 @@ func NewRoleHandlers(service services.Role) *RoleHandlers {
 func Register(api *gin.RouterGroup, service services.Role, middleware *middleware.Middleware) {
 	handlers := NewRoleHandlers(service)
 
-	roles := api.Group("/roles", middleware.VerifyToken)
+	roles := api.Group("/roles")
 	{
 		roles.GET("", middleware.CheckPermissions(constants.Roles, constants.Read), handlers.getAll)
 		roles.GET("/:name", middleware.CheckPermissions(constants.Roles, constants.Write), handlers.get)
