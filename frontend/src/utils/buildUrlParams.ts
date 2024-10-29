@@ -19,7 +19,7 @@ export const buildSiUrlParams = (req: ISIParams): URLSearchParams => {
 
 	if (req.filter) {
 		req.filter.forEach(f => {
-			params.push([`filters[${f.field}]`, f.fieldType])
+			params.push([`filters[${f.field}]`, f.fieldType || ''])
 			f.values.forEach(v => {
 				params.push([`${f.field}[${v.compareType}]`, v.value])
 			})
