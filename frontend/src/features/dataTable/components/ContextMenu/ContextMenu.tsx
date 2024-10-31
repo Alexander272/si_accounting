@@ -92,7 +92,7 @@ export const ContextMenu: FC<Props> = ({ coordinates, item, positionHandler }) =
 	]
 
 	const ResMenuItems = [
-		<MenuItem key='location' disabled={item?.status == 'moved'} onClick={contextHandler('SendToReserve')}>
+		<MenuItem key='location' disabled={item?.status != 'used'} onClick={contextHandler('SendToReserve')}>
 			<ListItemIcon>
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>

@@ -52,7 +52,7 @@ export const Tools = () => {
 	}
 
 	const LocMenuItems = [
-		<MenuItem key='location' onClick={modalHandler('NewLocation')}>
+		<MenuItem key='location' onClick={modalHandler('SeveralLocations')}>
 			<ListItemIcon>
 				<ExchangeIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>
@@ -66,7 +66,7 @@ export const Tools = () => {
 		</MenuItem>,
 	]
 	const SIMenuItems = [
-		<MenuItem key='verification' onClick={modalHandler('NewVerification')}>
+		<MenuItem key='verification' onClick={modalHandler('SeveralVerifications')}>
 			<ListItemIcon>
 				<VerifyIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>

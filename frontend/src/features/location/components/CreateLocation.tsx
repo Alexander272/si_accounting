@@ -21,8 +21,11 @@ export const CreateLocation = () => {
 		skip: !active?.id,
 	})
 
-	if (!instrument || isLoadingInstrument) return <Fallback marginTop={5} marginBottom={3} height={450} />
+	console.log('active', active)
+	//TODO если инструменты выделены и нажата кнопка в меню инструменты, это форма не работает
 
+	if (isLoadingInstrument) return <Fallback marginTop={5} marginBottom={3} height={250} />
+	if (!instrument) return <Typography>Не удалось загрузить данные</Typography>
 	return (
 		<Stack>
 			<Typography fontSize={'1.2rem'} fontWeight={'bold'} textAlign={'center'}>

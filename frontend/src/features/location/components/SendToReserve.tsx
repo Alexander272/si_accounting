@@ -8,22 +8,12 @@ import { ColumnNames } from '@/constants/columns'
 import { useAppSelector } from '@/hooks/redux'
 import { useModal } from '@/features/modal/hooks/useModal'
 import { useGetAllSIQuery } from '@/features/dataTable/siApiSlice'
-import {
-	getActiveItem,
-	getSelectedItems,
-	getTableFilter,
-	getTablePage,
-	getTableSize,
-	getTableSort,
-} from '@/features/dataTable/dataTableSlice'
+import { getActiveItem, getSelectedItems, getTableFilter, getTableSort } from '@/features/dataTable/dataTableSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { useCreateSeveralLocationMutation } from '../locationApiSlice'
 
 export const SendToReserve = () => {
 	const active = useAppSelector(getActiveItem)
-
-	const page = useAppSelector(getTablePage)
-	const size = useAppSelector(getTableSize)
 
 	const sort = useAppSelector(getTableSort)
 	const filter = useAppSelector(getTableFilter)
@@ -32,7 +22,7 @@ export const SendToReserve = () => {
 
 	const { closeModal } = useModal()
 
-	const { data, isFetching } = useGetAllSIQuery({ page, size, sort, filter })
+	const { data, isFetching } = useGetAllSIQuery({ page: 0, size: 9999999, sort, filter })
 	const [create] = useCreateSeveralLocationMutation()
 
 	const saveHandler = async () => {
@@ -48,7 +38,7 @@ export const SendToReserve = () => {
 			status: 'moved',
 		}
 
-		if (active?.id && !selectedItems.some(s => s.id == active.id)) {
+		if (active?.id && active.status == 'used' && !selectedItems.some(s => s.id == active.id)) {
 			locations.push({
 				instrumentId: active.id,
 				...location,
@@ -72,6 +62,8 @@ export const SendToReserve = () => {
 			console.log(error)
 		}
 	}
+
+	const items = selectedItems.filter(i => i.status == 'used')
 
 	return (
 		<Stack position={'relative'}>
@@ -99,7 +91,7 @@ export const SendToReserve = () => {
 				</TableHead>
 				<TableBody>
 					{data?.data.map(r => {
-						if (selectedItems.some(i => i.id == r.id) || active?.id == r.id) {
+						if (items.some(i => i.id == r.id) || (active?.id == r.id && active.status == 'used')) {
 							return (
 								<TableRow key={r.id}>
 									<TableCell>{r.name}</TableCell>

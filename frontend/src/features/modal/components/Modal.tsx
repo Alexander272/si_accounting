@@ -8,7 +8,9 @@ import { ModalTitles } from '@/constants/modalTitles'
 import { LocalCreateSi } from '@/features/si/components/LocalCreateSi'
 import { UpdateSi } from '@/features/si/components/UpdateSi'
 import { CreateVerification } from '@/features/verification/components/CreateVerification'
+import { CreateSeveralVerification } from '@/features/verification/components/CreateSeveralVerification'
 import { CreateLocation } from '@/features/location/components/CreateLocation'
+import { CreateSeveralLocation } from '@/features/location/components/CreateSeveralLocation'
 import { SendToReserve } from '@/features/location/components/SendToReserve'
 import { EmployeeForm } from '@/features/employees/components/EmployeeForm'
 import { DepartmentForm } from '@/features/employees/components/DepartmentForm'
@@ -52,7 +54,9 @@ export const Modal = () => {
 					{selector == 'CreateDataItem' && ModalTitles.ADD_ITEM}
 					{selector == 'EditDataItem' && ModalTitles.EDIT_ITEM}
 					{selector == 'NewVerification' && ModalTitles.NEW_VERIFICATION}
+					{selector == 'SeveralVerifications' && ModalTitles.NEW_VERIFICATION}
 					{selector == 'NewLocation' && ModalTitles.NEW_MOVEMENT}
+					{selector == 'SeveralLocations' && ModalTitles.NEW_MOVEMENT}
 					{selector == 'DeleteLocation' && ModalTitles.DEL_MOVEMENT}
 					{selector == 'SendToReserve' && ModalTitles.SEND_TO_RESERVE}
 					{selector == 'Receive' && ModalTitles.RECEIVE}
@@ -79,7 +83,9 @@ export const Modal = () => {
 				{selector == 'CreateDataItem' && <LocalCreateSi />}
 				{selector == 'EditDataItem' && <UpdateSi />}
 				{selector == 'NewVerification' && <CreateVerification />}
+				{selector == 'SeveralVerifications' && <CreateSeveralVerification />}
 				{selector == 'NewLocation' && <CreateLocation />}
+				{selector == 'SeveralLocations' && <CreateSeveralLocation />}
 				{selector == 'DeleteLocation' && <DeleteLocation />}
 				{selector == 'SendToReserve' && <SendToReserve />}
 				{selector == 'Receive' && <ReceivingForm />}

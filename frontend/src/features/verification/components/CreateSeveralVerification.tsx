@@ -1,24 +1,36 @@
 import { Stack, Typography } from '@mui/material'
 
-import { useAppSelector } from '@/hooks/redux'
-import { useModal } from '@/features/modal/hooks/useModal'
-import { getActiveItem } from '@/features/dataTable/dataTableSlice'
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { getSelectedItems, removeSelected } from '@/features/dataTable/dataTableSlice'
 import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
-import { Fallback } from '@/components/Fallback/Fallback'
 import { useGetLastVerificationQuery } from '../verificationApiSlice'
+import { Fallback } from '@/components/Fallback/Fallback'
 import { CreateVerificationForm } from './CreateVerificationForm'
+import { useModal } from '@/features/modal/hooks/useModal'
 
-export const CreateVerification = () => {
-	const active = useAppSelector(getActiveItem)
+export const CreateSeveralVerification = () => {
+	const selectedItems = useAppSelector(getSelectedItems)
+	const dispatch = useAppDispatch()
 
 	const { closeModal } = useModal()
 
-	const { data: instrument, isLoading: isLoadingInstrument } = useGetInstrumentByIdQuery(active?.id || '', {
-		skip: !active?.id,
-	})
-	const { data, isLoading } = useGetLastVerificationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
+	const { data: instrument, isFetching: isLoadingInstrument } = useGetInstrumentByIdQuery(
+		selectedItems[0]?.id || '',
+		{
+			skip: !selectedItems[0]?.id,
+		}
+	)
+	const { data, isFetching } = useGetLastVerificationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
 
-	if (isLoading || isLoadingInstrument) return <Fallback marginTop={5} marginBottom={3} height={250} />
+	const submitHandler = () => {
+		dispatch(removeSelected(selectedItems[0].id))
+		if (selectedItems.length == 1) {
+			closeModal()
+			return
+		}
+	}
+
+	if (isFetching || isLoadingInstrument) return <Fallback marginTop={5} marginBottom={3} height={250} />
 	if (!instrument) return <Typography>Не удалось загрузить данные</Typography>
 	if (data?.data.notVerified) return <Typography>Инструмент отмечен как не нуждающийся в поверках</Typography>
 	return (
@@ -31,7 +43,7 @@ export const CreateVerification = () => {
 			<CreateVerificationForm
 				instrument={instrument?.data}
 				initDate={data?.data.nextDate}
-				onSubmit={closeModal}
+				onSubmit={submitHandler}
 				onCancel={closeModal}
 			/>
 		</Stack>

@@ -20,7 +20,7 @@ import type { IFetchError } from '@/app/types/error'
 import type { ISIFilter } from '../../types/data'
 import { FilterIcon } from '@/components/Icons/FilterIcon'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { getTableFilter, setFilters } from '../../dataTableSlice'
+import { getTableFilter, setFilters, setPage } from '../../dataTableSlice'
 import { useSaveFiltersMutation } from '../../filterApiSlice'
 
 const months = [
@@ -90,6 +90,7 @@ export const FastFilter = () => {
 				// filter.valueStart = date.startOf('month').unix().toString()
 				// filter.valueEnd = date.endOf('month').unix().toString()
 			}
+			dispatch(setPage(1))
 			dispatch(setFilters(filter))
 		}
 	}, [active, month, dispatch])
