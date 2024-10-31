@@ -10,7 +10,6 @@ import (
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
-	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -189,7 +188,7 @@ func (r *LocationRepo) CreateSeveral(ctx context.Context, locations []*models.Cr
 		SIMovementTable, strings.Join(values, ", "), EmployeeTable, DepartmentTable, SIMovementTable,
 	)
 
-	logger.Debug("create several", logger.StringAttr("query", query), logger.AnyAttr("args", args))
+	// logger.Debug("create several", logger.StringAttr("query", query), logger.AnyAttr("args", args))
 
 	// query += strings.Join(values, ", ")
 

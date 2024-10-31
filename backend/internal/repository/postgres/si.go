@@ -193,7 +193,8 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 
 	data := []*models.SIFromNotification{}
 	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, COALESCE(e.name, '') AS person, COALESCE(d.name, '') AS department,
-		COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id, COALESCE(l.channel_id, '') AS channel_id
+		COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id, 
+		COALESCE(CASE WHEN e.most_id != '' THEN '' ELSE l.channel_id END, '') AS channel_id
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
 		LEFT JOIN LATERAL (SELECT person_id, department_id, status FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE

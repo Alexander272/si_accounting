@@ -37,7 +37,7 @@ func Register(api *gin.RouterGroup, service services.Location, ware *middleware.
 		locations.GET("/:instrumentId", ware.CheckPermissions(constants.Location, constants.Read), handlers.GetLast)
 		locations.GET("/all/:instrumentId", ware.CheckPermissions(constants.Location, constants.Read), handlers.GetByInstrumentId)
 		locations.POST("", ware.CheckPermissions(constants.Location, constants.Write), handlers.Create)
-		locations.POST("/several", ware.CheckPermissions(constants.Reserve, constants.Write), handlers.CreateSeveral)
+		locations.POST("/several", ware.CheckPermissionsArray(delPerm), handlers.CreateSeveral)
 		locations.PUT("/:id", ware.CheckPermissions(constants.Location, constants.Write), handlers.Update)
 		// locations.POST("/receiving", handlers.Receiving)
 		locations.DELETE("/:id", ware.CheckPermissionsArray(delPerm), handlers.Delete)
