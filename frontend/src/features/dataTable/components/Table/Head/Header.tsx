@@ -21,6 +21,8 @@ export const Header = () => {
 		dispatch(setSort(fieldId))
 	}
 
+	// const width = HeadCells.reduce((ac, cur) => ac + (hidden[cur.key] ? 0 : cur.width || ColWidth), 12)
+
 	return (
 		<Stack direction={'row'}>
 			{HeadCells.map((c, i) => (

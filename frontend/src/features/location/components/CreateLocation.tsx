@@ -1,4 +1,4 @@
-import { Button, Stack, Typography, useTheme } from '@mui/material'
+import { Button, Stack, Typography } from '@mui/material'
 import { toast } from 'react-toastify'
 
 import type { IFetchError } from '@/app/types/error'
@@ -8,9 +8,8 @@ import { getActiveItem } from '@/features/dataTable/dataTableSlice'
 import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { Confirm } from '@/components/Confirm/Confirm'
-import { WarningIcon } from '@/components/Icons/WarningIcon'
-import { useDeleteLocationMutation, useGetLastLocationQuery } from '../locationApiSlice'
 import { CreateLocationForm } from './CreateLocationForm'
+import { useDeleteLocationMutation, useGetLastLocationQuery } from '../locationApiSlice'
 
 export const CreateLocation = () => {
 	const active = useAppSelector(getActiveItem)
@@ -70,7 +69,6 @@ type DeleteProps = {
 
 const DeleteForm = ({ instrumentId }: DeleteProps) => {
 	const { closeModal } = useModal()
-	const { palette } = useTheme()
 
 	const [deleteLocation] = useDeleteLocationMutation()
 	const { data, isLoading } = useGetLastLocationQuery(instrumentId || '', { skip: !instrumentId })
@@ -107,15 +105,16 @@ const DeleteForm = ({ instrumentId }: DeleteProps) => {
 					Отменить
 				</Button>
 				<Confirm
+					width='100%'
 					onClick={deleteHandler}
-					fullWidth
+					confirmText={'Вы уверены, что хотите удалить перемещение?'}
 					buttonComponent={
 						<Button variant='contained' fullWidth>
 							Да
 						</Button>
 					}
-				>
-					<Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
+				/>
+				{/* <Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
 						<WarningIcon fill={palette.error.main} />
 						<Typography fontSize={'1.1rem'} fontWeight={'bold'} align='center'>
 							Удаление
@@ -125,7 +124,7 @@ const DeleteForm = ({ instrumentId }: DeleteProps) => {
 					<Typography maxWidth={260} align='center'>
 						Вы уверены, что хотите удалить перемещение?
 					</Typography>
-				</Confirm>
+				</Confirm> */}
 			</Stack>
 		</>
 	)

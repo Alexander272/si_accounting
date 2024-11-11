@@ -3,6 +3,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 
 import { dataTablePath, dataTableReducer } from '@/features/dataTable/dataTableSlice'
 import { modalPath, modalReducer } from '@/features/modal/modalSlice'
+import { dialogPath, dialogReducer } from '@/features/dialog/dialogSlice'
 import { employeesPath, employeesReducer } from '@/features/employees/employeeSlice'
 import { userPath, userReducer } from '@/features/user/userSlice'
 import { resetStoreListener } from './middlewares/resetStore'
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
 	[apiSlice.reducerPath]: apiSlice.reducer,
 	[dataTablePath]: dataTableReducer,
 	[modalPath]: modalReducer,
+	[dialogPath]: dialogReducer,
 	[employeesPath]: employeesReducer,
 	[userPath]: userReducer,
 })

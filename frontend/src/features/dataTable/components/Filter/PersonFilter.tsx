@@ -25,7 +25,7 @@ export const PersonFilter: FC<unknown> = props => {
 	const list = data?.data?.reduce((a, v) => ({ ...a, [v.name.replaceAll('.', '_')]: false }), {})
 	Object.assign(
 		list || {},
-		values?.reduce((a, v) => ({ ...a, [v]: true }), {})
+		values?.reduce((a, v) => ({ ...a, [v.replaceAll('.', '_')]: true }), {})
 	)
 
 	const { control, watch, handleSubmit } = useForm<{ search: string; list: ListFilter }>({

@@ -9,7 +9,8 @@ export interface IEmployee {
 	name: string
 	departmentId: string
 	isLead?: boolean
-	mattermostId: string
+	mattermostId?: string
+	notes: string
 }
 
 export interface IEmployeeForm {

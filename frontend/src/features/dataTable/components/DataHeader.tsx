@@ -22,7 +22,7 @@ export const DataHeader = () => {
 			<Stack direction={'row'} spacing={2} paddingX={3} paddingY={2} justifyContent={'space-between'}>
 				<Stack direction={'row'}>
 					<Typography color={'primary'} variant='h5'>
-						Средства измерения
+						Средства измерений
 					</Typography>
 
 					{useCheckPermission(PermRules.SI.Write) ? (
@@ -33,7 +33,7 @@ export const DataHeader = () => {
 								variant='outlined'
 								sx={{ borderWidth: 2, minWidth: 54, ml: 2, ':hover': { borderWidth: 2 } }}
 							>
-								<PlusIcon fontSize={14} color={palette.primary.main} />
+								<PlusIcon fontSize={14} fill={palette.primary.main} />
 							</Button>
 						</>
 					) : null}

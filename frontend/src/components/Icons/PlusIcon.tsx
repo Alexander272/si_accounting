@@ -1,14 +1,9 @@
-import { SvgIcon } from '@mui/material'
+import { SvgIcon, SxProps, Theme } from '@mui/material'
 import { FC } from 'react'
 
-type Props = {
-	fontSize?: number | string
-	color?: string
-}
-
-export const PlusIcon: FC<Props> = ({ fontSize, color }) => {
+export const PlusIcon: FC<SxProps<Theme>> = style => {
 	return (
-		<SvgIcon sx={{ fontSize: fontSize, fill: color }}>
+		<SvgIcon sx={style}>
 			<svg
 				x='0px'
 				y='0px'

@@ -1,4 +1,4 @@
-import { Button, Stack, Typography, useTheme } from '@mui/material'
+import { Button, Stack, Typography } from '@mui/material'
 import { toast } from 'react-toastify'
 
 import type { IFetchError } from '@/app/types/error'
@@ -8,11 +8,9 @@ import { useModal } from '@/features/modal/hooks/useModal'
 import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { Confirm } from '@/components/Confirm/Confirm'
-import { WarningIcon } from '@/components/Icons/WarningIcon'
 import { useDeleteLocationMutation, useGetLastLocationQuery } from '../locationApiSlice'
 
 export const DeleteLocation = () => {
-	const { palette } = useTheme()
 	const active = useAppSelector(getActiveItem)
 
 	const { closeModal } = useModal()
@@ -50,25 +48,15 @@ export const DeleteLocation = () => {
 					Отменить
 				</Button>
 				<Confirm
+					width='100%'
 					onClick={deleteHandler}
-					fullWidth
+					confirmText='Вы уверены, что хотите удалить перемещение?'
 					buttonComponent={
 						<Button variant='contained' fullWidth>
 							Да
 						</Button>
 					}
-				>
-					<Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
-						<WarningIcon fill={palette.error.main} />
-						<Typography fontSize={'1.1rem'} fontWeight={'bold'} align='center'>
-							Удаление
-						</Typography>
-					</Stack>
-
-					<Typography maxWidth={260} align='center'>
-						Вы уверены, что хотите удалить перемещение?
-					</Typography>
-				</Confirm>
+				/>
 			</Stack>
 		</Stack>
 	)

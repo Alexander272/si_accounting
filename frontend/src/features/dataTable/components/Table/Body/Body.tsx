@@ -63,7 +63,8 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 				itemCount={data.data.length > (size || Size) ? size || Size : data.data.length}
 				itemSize={RowHeight}
 				itemData={data}
-				width={HeadCells.reduce((ac, cur) => ac + cur.width, 0)}
+				//TODO надо вернуть место для scroll, либо сделать так чтобы scroll был поверх данных
+				width={HeadCells.reduce((ac, cur) => ac + cur.width, 12)}
 			>
 				{({ index, style }) => (
 					<Row

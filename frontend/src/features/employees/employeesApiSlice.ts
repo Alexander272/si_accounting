@@ -35,6 +35,22 @@ const employeesApiSlice = apiSlice.injectEndpoints({
 				}
 			},
 		}),
+		getEmployeeById: builder.query<{ data: IEmployee }, string>({
+			query: id => `${API.employees}/${id}`,
+			providesTags: (_result, _error, arg) => [
+				{ type: 'Employees', id: arg },
+				{ type: 'Employees', id: 'all' },
+			],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
+
 		createEmployee: builder.mutation<null, IEmployee>({
 			query: data => ({
 				url: `${API.employees}`,
@@ -124,6 +140,7 @@ const employeesApiSlice = apiSlice.injectEndpoints({
 export const {
 	useGetEmployeesQuery,
 	useGetUniqueEmployeeQuery,
+	useGetEmployeeByIdQuery,
 	useCreateEmployeeMutation,
 	useUpdateEmployeeMutation,
 	useDeleteEmployeeMutation,

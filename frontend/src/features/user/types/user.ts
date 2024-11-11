@@ -8,3 +8,12 @@ export interface IUser {
 	token: string
 	filters: ISIFilter[]
 }
+
+export interface IUserData {
+	id: string
+	ssoId: string
+	username: string
+	firstName: string
+	lastName: string
+	email: string
+}

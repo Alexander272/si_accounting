@@ -1,15 +1,5 @@
 import { useEffect } from 'react'
-import {
-	Autocomplete,
-	Box,
-	Button,
-	Checkbox,
-	FormControlLabel,
-	Stack,
-	TextField,
-	Typography,
-	useTheme,
-} from '@mui/material'
+import { Autocomplete, Box, Button, Checkbox, FormControlLabel, Stack, TextField } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
@@ -17,7 +7,6 @@ import type { IFetchError } from '@/app/types/error'
 import type { IEmployee, IEmployeeForm } from '../types/employee'
 import { useAppSelector } from '@/hooks/redux'
 import { useModal } from '@/features/modal/hooks/useModal'
-import { WarningIcon } from '@/components/Icons/WarningIcon'
 import { Confirm } from '@/components/Confirm/Confirm'
 import { getEmployee } from '../employeeSlice'
 import {
@@ -39,8 +28,6 @@ export const EmployeeForm = () => {
 	const employee = useAppSelector(getEmployee)
 
 	const { closeModal } = useModal()
-
-	const { palette } = useTheme()
 
 	const methods = useForm<IEmployeeForm>({ defaultValues })
 
@@ -70,6 +57,7 @@ export const EmployeeForm = () => {
 			departmentId: data.departmentId,
 			isLead: data.isLead,
 			mattermostId: '',
+			notes: '',
 		}
 
 		try {
@@ -181,18 +169,22 @@ export const EmployeeForm = () => {
 					Сохранить
 				</Button>
 				{employee && (
-					<Confirm onClick={deleteHandler} fullWidth>
-						<Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
-							<WarningIcon fill={palette.error.main} />
-							<Typography fontSize={'1.1rem'} fontWeight={'bold'} align='center'>
-								Удаление
-							</Typography>
-						</Stack>
+					<Confirm
+						onClick={deleteHandler}
+						width='100%'
+						confirmText='Вы уверены, что хотите удалить сотрудника?'
+					/>
+					// 	<Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
+					// 		<WarningIcon fill={palette.error.main} />
+					// 		<Typography fontSize={'1.1rem'} fontWeight={'bold'} align='center'>
+					// 			Удаление
+					// 		</Typography>
+					// 	</Stack>
 
-						<Typography maxWidth={260} align='center'>
-							Вы уверены, что хотите удалить сотрудника?
-						</Typography>
-					</Confirm>
+					// 	<Typography maxWidth={260} align='center'>
+					// 		Вы уверены, что хотите удалить сотрудника?
+					// 	</Typography>
+					// </Confirm>
 				)}
 				<Button onClick={closeModal} variant='outlined' fullWidth>
 					Отмена

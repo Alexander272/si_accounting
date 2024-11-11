@@ -1,4 +1,4 @@
-import { Button, Stack, TextField, Typography, useTheme } from '@mui/material'
+import { Button, Stack, TextField } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
@@ -7,7 +7,6 @@ import type { IDepartment, IDepartmentForm } from '../types/employee'
 import { useAppSelector } from '@/hooks/redux'
 import { useModal } from '@/features/modal/hooks/useModal'
 import { Confirm } from '@/components/Confirm/Confirm'
-import { WarningIcon } from '@/components/Icons/WarningIcon'
 import {
 	useCreateDepartmentMutation,
 	useDeleteDepartmentMutation,
@@ -23,8 +22,6 @@ export const DepartmentForm = () => {
 	const department = useAppSelector(getDepartment)
 
 	const { closeModal } = useModal()
-
-	const { palette } = useTheme()
 
 	const methods = useForm<IDepartmentForm>({
 		defaultValues,
@@ -94,19 +91,22 @@ export const DepartmentForm = () => {
 					Сохранить
 				</Button>
 				{department && (
-					<Confirm onClick={deleteHandler} fullWidth>
-						<Stack direction={'row'} spacing={1} alignItems={'center'} justifyContent={'center'} mb={1}>
-							<WarningIcon fill={palette.error.main} />
-							<Typography fontSize={'1.1rem'} fontWeight='bold'>
-								Удаление
-							</Typography>
-						</Stack>
+					<Confirm
+						onClick={deleteHandler}
+						confirmText='Вы уверены, что хотите удалить подразделение? Все сотрудники данного подразделения также будут удалены.'
+					/>
+					// 	<Stack direction={'row'} spacing={1} alignItems={'center'} justifyContent={'center'} mb={1}>
+					// 		<WarningIcon fill={palette.error.main} />
+					// 		<Typography fontSize={'1.1rem'} fontWeight='bold'>
+					// 			Удаление
+					// 		</Typography>
+					// 	</Stack>
 
-						<Typography maxWidth={300} align='center'>
-							Вы уверены, что хотите удалить подразделение? Все сотрудники данного подразделения также
-							будут удалены.
-						</Typography>
-					</Confirm>
+					// 	<Typography maxWidth={300} align='center'>
+					// 		Вы уверены, что хотите удалить подразделение? Все сотрудники данного подразделения также
+					// 		будут удалены.
+					// 	</Typography>
+					// </Confirm>
 				)}
 				<Button onClick={closeModal} variant='outlined' fullWidth>
 					Отмена

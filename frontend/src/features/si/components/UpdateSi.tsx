@@ -11,7 +11,6 @@ import { useGetLastVerificationQuery } from '@/features/verification/verificatio
 import { UpdateInstrumentForm } from '@/features/instrument/components/UpdateInstrumentForm'
 import { UpdateVerificationForm } from '@/features/verification/components/UpdateVerificationForm'
 import { FileDeleteIcon } from '@/components/Icons/FileDeleteIcon'
-import { WarningIcon } from '@/components/Icons/WarningIcon'
 import { Confirm } from '@/components/Confirm/Confirm'
 import { Fallback } from '@/components/Fallback/Fallback'
 
@@ -66,13 +65,14 @@ export const UpdateSi = () => {
 
 				<Confirm
 					onClick={deleteHandler}
+					confirmText='Вы уверены, что хотите удалить инструмент?'
 					buttonComponent={
 						<Button variant='outlined' color='error'>
 							<FileDeleteIcon fontSize={20} fill={palette.error.main} />
 						</Button>
 					}
-				>
-					<Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
+				/>
+				{/* <Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
 						<WarningIcon fill={palette.error.main} />
 						<Typography fontSize={'1.1rem'} fontWeight={'bold'} align='center'>
 							Удаление
@@ -82,7 +82,7 @@ export const UpdateSi = () => {
 					<Typography maxWidth={260} align='center'>
 						Вы уверены, что хотите удалить инструмент?
 					</Typography>
-				</Confirm>
+				</Confirm> */}
 			</Stack>
 
 			{activeForm == steps[0].id && <InstrumentForm />}

@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { Stack, TextField } from '@mui/material'
-import { Controller, useFormContext } from 'react-hook-form'
+import { Controller, RegisterOptions, useFormContext } from 'react-hook-form'
 
 import type { Field } from '../type'
 import type { IInstrumentForm, KeysOfInstrument } from './type'
@@ -39,6 +39,7 @@ export const InstrumentInputs: FC<Props> = ({ disabled }) => {
 						key={f.key}
 						control={control}
 						name={f.key}
+						rules={f.rules as RegisterOptions<IInstrumentForm, KeysOfInstrument>}
 						render={({ field, fieldState: { error } }) => (
 							<TextField
 								{...field}
@@ -55,6 +56,7 @@ export const InstrumentInputs: FC<Props> = ({ disabled }) => {
 						key={f.key}
 						control={control}
 						name={f.key}
+						rules={f.rules as RegisterOptions<IInstrumentForm, KeysOfInstrument>}
 						render={({ field, fieldState: { error } }) => (
 							<TextField
 								{...field}

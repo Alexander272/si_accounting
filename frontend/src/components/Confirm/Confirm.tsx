@@ -1,15 +1,30 @@
-import { FC, MouseEvent, PropsWithChildren, useRef, useState } from 'react'
-import { Box, Button, Popover, Stack } from '@mui/material'
+import { FC, MouseEvent, useRef, useState } from 'react'
+import { Box, Button, Popover, Stack, Typography, useTheme } from '@mui/material'
+import { WarningIcon } from '../Icons/WarningIcon'
 
 type Props = {
 	onClick: () => void
-	fullWidth?: boolean
+	width?: string
+	iconColor?: string
 	buttonComponent?: JSX.Element
+	confirmTitle?: string
+	confirmText: string
+	buttonColor?: 'error' | 'inherit' | 'primary' | 'secondary' | 'success' | 'info' | 'warning'
 }
 
-export const Confirm: FC<PropsWithChildren<Props>> = ({ children, fullWidth, onClick, buttonComponent }) => {
+export const Confirm: FC<Props> = ({
+	width,
+	onClick,
+	iconColor,
+	buttonComponent,
+	confirmTitle,
+	confirmText,
+	buttonColor = 'error',
+}) => {
 	const [open, setOpen] = useState(false)
 	const anchor = useRef<HTMLButtonElement>(null)
+
+	const { palette } = useTheme()
 
 	const toggleHandler = (event: MouseEvent) => {
 		event.stopPropagation()
@@ -22,7 +37,7 @@ export const Confirm: FC<PropsWithChildren<Props>> = ({ children, fullWidth, onC
 	}
 
 	return (
-		<Box ref={anchor} onClick={toggleHandler} sx={{ width: fullWidth ? '100%' : 'inherit' }}>
+		<Box ref={anchor} onClick={toggleHandler} sx={{ width: width ? width : 'inherit', height: '100%' }}>
 			{buttonComponent ? (
 				buttonComponent
 			) : (
@@ -43,13 +58,23 @@ export const Confirm: FC<PropsWithChildren<Props>> = ({ children, fullWidth, onC
 					vertical: 'top',
 					horizontal: 'center',
 				}}
-				// sx={{ mt: 1 }}
 			>
 				<Stack spacing={2} paddingX={2} paddingY={1.2}>
-					<Box>{children}</Box>
+					<Box>
+						<Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
+							<WarningIcon fill={iconColor || palette.error.main} />
+							<Typography fontSize={'1.1rem'} fontWeight={'bold'} align='center'>
+								{confirmTitle || 'Удаление'}
+							</Typography>
+						</Stack>
+
+						<Typography maxWidth={260} align='center'>
+							{confirmText}
+						</Typography>
+					</Box>
 
 					<Stack direction='row' spacing={2}>
-						<Button onClick={confirmHandler} variant='contained' color='error' fullWidth>
+						<Button onClick={confirmHandler} variant='contained' color={buttonColor} fullWidth>
 							Да
 						</Button>
 						<Button onClick={toggleHandler} variant='outlined' fullWidth>

@@ -27,5 +27,8 @@ export const API = {
 	},
 	departments: '/departments',
 	employees: '/employees',
+	responsible: '/responsible',
+	channels: '/channels',
 	filters: '/filters',
+	users: '/users',
 }

@@ -58,10 +58,11 @@ export const Row: FC<Props> = memo(({ style, data, selected, itemId, onSelect, p
 		const overdue = dayjs().isAfter(dayjs(data.nextVerificationDate, DayjsFormat))
 		if (overdue) return RowColors['overdue']
 
+		if (data.status == 'moved') return RowColors['moved']
+
 		const deadline = dayjs().add(15, 'd').isAfter(dayjs(data.nextVerificationDate, DayjsFormat))
 		if (deadline) return RowColors['deadline']
 
-		if (data.status == 'moved') return RowColors['moved']
 		if (data.status == 'reserve') return RowColors['reverse']
 		// if (data.place == 'Перемещение') return RowColors['moved']
 		// if (data.place == 'Резерв') return RowColors['reverse']
