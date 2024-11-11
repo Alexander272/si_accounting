@@ -29,6 +29,7 @@ func Register(api *gin.RouterGroup, service services.Department, middleware *mid
 	departments := api.Group("/departments")
 	{
 		departments.GET("", middleware.CheckPermissions(constants.Department, constants.Read), handlers.GetAll)
+		departments.GET("/:id", middleware.CheckPermissions(constants.Department, constants.Read), handlers.GetById)
 		departments.GET("/sso", middleware.CheckPermissions(constants.Department, constants.Read), handlers.GetBySSOId)
 		departments.POST("", middleware.CheckPermissions(constants.Department, constants.Write), handlers.Create)
 		departments.PUT("/:id", middleware.CheckPermissions(constants.Department, constants.Write), handlers.Update)
@@ -45,6 +46,23 @@ func (h *DepartmentHandlers) GetAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.DataResponse{Data: departments})
+}
+
+func (h *DepartmentHandlers) GetById(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id подразделения не задан")
+		return
+	}
+
+	department, err := h.service.GetById(c, id)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), id)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DataResponse{Data: department})
 }
 
 func (h *DepartmentHandlers) GetBySSOId(c *gin.Context) {
@@ -71,14 +89,15 @@ func (h *DepartmentHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Create(c, dto); err != nil {
+	id, err := h.service.Create(c, dto)
+	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 	logger.Info("Подразделение создано", logger.StringAttr("name", dto.Name), logger.StringAttr("id", dto.Id))
 
-	c.JSON(http.StatusCreated, response.IdResponse{Message: "Новое подразделение создано"})
+	c.JSON(http.StatusCreated, response.IdResponse{Id: id, Message: "Новое подразделение создано"})
 }
 
 func (h *DepartmentHandlers) Update(c *gin.Context) {

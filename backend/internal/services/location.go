@@ -91,6 +91,7 @@ func (s *LocationService) Create(ctx context.Context, location *models.CreateLoc
 // 			locations[l.InstrumentId] = l
 // 		}
 
+// TODO возможно стоит все-таки вернуть проверку при перемещении инструмента и добавить похожую при подтверждении через приложение
 // 		// при возвращении инструментов я отфильтровываю те что не находятся в том же подразделении что и пользователь
 // 		filtered, err := s.FilterByDepartmentId(ctx, models.DepartmentFilterDTO{InstrumentIds: instrumentIds, DepartmentId: emp.DepartmentId})
 // 		if err != nil {

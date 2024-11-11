@@ -5,10 +5,12 @@ const (
 	Department   = "department"
 	Employee     = "employee"
 	Location     = "location"
+	Channel      = "channel"
 	Verification = "verification"
 	Reserve      = "reserve"
 	Documents    = "documents"
 	Roles        = "roles"
+	Users        = "users"
 )
 
 const (

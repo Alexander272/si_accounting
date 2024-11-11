@@ -12,6 +12,7 @@ type GetDepartmentsDTO struct {
 type Employee struct {
 	Id           string `json:"id" db:"id"`
 	Name         string `json:"name" db:"name"`
+	Notes        string `json:"notes" db:"notes"`
 	DepartmentId string `json:"departmentId" db:"department_id"`
 	// IncludeDepartments []string `json:"includeDepartments" db:"include_departments"` //TODO возможно это нужно делать в другом месте
 	// DefaultFilters     string   // TODO определиться с типом и форматом фильтров (возможно фильтры нужно делать в другом месте)
@@ -24,6 +25,7 @@ type Employee struct {
 type EmployeeData struct {
 	Id         string `json:"id" db:"id"`
 	Name       string `json:"name" db:"name"`
+	Notes      string `json:"notes" db:"notes"`
 	Department string `json:"department" db:"department"`
 	MostId     string `json:"mostId" db:"most_id"`
 	IsLead     bool   `json:"isLead" db:"is_lead"`
@@ -32,6 +34,7 @@ type EmployeeData struct {
 type WriteEmployeeDTO struct {
 	Id           string `json:"id"`
 	Name         string `json:"name"`
+	Notes        string `json:"notes" db:"notes"`
 	DepartmentId string `json:"departmentId"`
 	MattermostId string `json:"mattermostId"`
 }

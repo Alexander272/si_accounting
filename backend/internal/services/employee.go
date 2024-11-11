@@ -25,6 +25,7 @@ type Employee interface {
 	GetAll(context.Context, *models.GetEmployeesDTO) ([]*models.Employee, error)
 	GetUnique(context.Context) ([]*models.Employee, error)
 	GetByDepartment(context.Context, string) ([]*models.Employee, error)
+	GetById(context.Context, string) (*models.Employee, error)
 	GetByMostId(context.Context, string) (*models.EmployeeData, error)
 	GetBySSOId(context.Context, string) (*models.Employee, error)
 	Create(context.Context, *models.WriteEmployeeDTO) error
@@ -84,6 +85,17 @@ func (s *EmployeeService) GetDepartments(ctx context.Context, req *models.GetDep
 	// // employee
 	// return employee, nil
 	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *EmployeeService) GetById(ctx context.Context, id string) (*models.Employee, error) {
+	employee, err := s.repo.GetById(ctx, id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRows) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("failed to get employee by id. error: %w", err)
+	}
+	return employee, nil
 }
 
 func (s *EmployeeService) GetByMostId(ctx context.Context, mostId string) (*models.EmployeeData, error) {

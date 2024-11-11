@@ -26,6 +26,16 @@ type Department interface {
 type Employee interface {
 	postgres.Employee
 }
+type Channel interface {
+	postgres.Channel
+}
+
+type User interface {
+	postgres.User
+}
+type Responsible interface {
+	postgres.Responsible
+}
 
 type Role interface {
 	postgres.Role
@@ -48,6 +58,9 @@ type Repository struct {
 	SI
 	Department
 	Employee
+	Channel
+	User
+	Responsible
 	Role
 	MenuItem
 	Menu
@@ -63,6 +76,9 @@ func NewRepository(db *sqlx.DB) *Repository {
 		SI:            postgres.NewSIRepo(db),
 		Department:    postgres.NewDepartmentRepo(db),
 		Employee:      postgres.NewEmployeeRepo(db),
+		Channel:       postgres.NewChannelRepo(db),
+		User:          postgres.NewUserRepo(db),
+		Responsible:   postgres.NewResponsibleRepo(db),
 		Role:          postgres.NewRoleRepo(db),
 		MenuItem:      postgres.NewMenuItemRepo(db),
 		Menu:          postgres.NewMenuRepo(db),

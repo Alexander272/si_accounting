@@ -5,16 +5,19 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/auth"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/channel"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/employees"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/file"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/filter"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/responsible"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/roles"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/instrument"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/location"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/receiving"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si/verification"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/user"
 	"github.com/gin-gonic/gin"
 )
 
@@ -90,6 +93,10 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 
 	departments.Register(secure, h.services.Department, h.middleware)
 	employees.Register(secure, h.services.Employee, h.middleware)
+	channel.Register(secure, h.services.Channel, h.middleware)
+
+	user.Register(secure, h.services.User, h.middleware)
+	responsible.Register(secure, h.services.Responsible, h.middleware)
 
 	roles.Register(secure, h.services.Role, h.middleware)
 	// menu.Register(secure, h.services.Menu, errBot)

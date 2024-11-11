@@ -7,6 +7,9 @@ const (
 	DocumentsTable    = "documents"
 	DepartmentTable   = "departments"
 	EmployeeTable     = "employee"
+	ChannelTable      = "channels"
+	UserTable         = "users"
+	ResponsibleTable  = "responsible"
 
 	DefaultFilterTable = "default_filters"
 

@@ -12,6 +12,8 @@ type KeycloakClient struct {
 	ClientId     string           // clientId specified in Keycloak
 	ClientSecret string           // client secret specified in Keycloak
 	Realm        string           // realm specified in Keycloak
+	adminName    string
+	adminPass    string
 }
 
 type Deps struct {
@@ -48,5 +50,16 @@ func NewKeycloakClient(deps Deps) *KeycloakClient {
 		ClientId:     deps.ClientId,
 		ClientSecret: secret,
 		Realm:        deps.Realm,
+		adminName:    deps.AdminName,
+		adminPass:    deps.AdminPass,
 	}
+}
+
+func (k *KeycloakClient) Login(ctx context.Context) (*gocloak.JWT, error) {
+	token, err := k.Client.LoginAdmin(ctx, k.adminName, k.adminPass, "master")
+	if err != nil {
+		// log.Fatalf("failed to login admin to keycloak. error: %s", err.Error())
+		return nil, err
+	}
+	return token, nil
 }
