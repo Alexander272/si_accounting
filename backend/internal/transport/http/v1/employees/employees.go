@@ -116,7 +116,12 @@ func (h *EmployeeHandlers) Create(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
-	logger.Info("Работник создан", logger.StringAttr("name", dto.Name), logger.StringAttr("id", dto.Id))
+
+	logger.Info("Работник создан",
+		logger.StringAttr("id", dto.Id),
+		logger.StringAttr("name", dto.Name),
+		logger.AnyAttr("data", dto),
+	)
 
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Пользователь создан"})
 }
@@ -140,7 +145,12 @@ func (h *EmployeeHandlers) Update(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
-	logger.Info("Работник обновлен", logger.StringAttr("name", dto.Name), logger.StringAttr("id", dto.Id))
+
+	logger.Info("Работник обновлен",
+		logger.StringAttr("id", dto.Id),
+		logger.StringAttr("name", dto.Name),
+		logger.AnyAttr("data", dto),
+	)
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные пользователя обновлены"})
 }

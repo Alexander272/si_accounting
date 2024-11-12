@@ -9,29 +9,41 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/repository"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/goccy/go-json"
 )
 
 type LocationService struct {
-	repo repository.Location
+	repo        repository.Location
+	department  Department
+	responsible Responsible
+	most        Most
 	// employee Employee
-	most Most
+}
+
+type LocationDeps struct {
+	Repo        repository.Location
+	Department  Department
+	Responsible Responsible
+	Most        Most
 }
 
 // func NewLocationService(repo repository.Location, employee Employee, most Most) *LocationService {
-func NewLocationService(repo repository.Location, most Most) *LocationService {
+func NewLocationService(deps *LocationDeps) *LocationService {
 	return &LocationService{
-		repo: repo,
+		repo:        deps.Repo,
+		department:  deps.Department,
+		responsible: deps.Responsible,
+		most:        deps.Most,
 		// employee: employee,
-		most: most,
 	}
 }
 
 type Location interface {
 	GetLast(context.Context, string) (*models.Location, error)
 	GetByInstrumentId(context.Context, string) ([]*models.Location, error)
-	// CreateSeveral(context.Context, models.CreateSeveralLocationDTO) (bool, error)
-	CreateSeveral(context.Context, *models.CreateSeveralLocationDTO) error
+	CreateSeveral(context.Context, *models.CreateSeveralLocationDTO) (bool, error)
+	// CreateSeveral(context.Context, *models.CreateSeveralLocationDTO) error
 	Create(context.Context, *models.CreateLocationDTO) error
 	Update(context.Context, *models.UpdateLocationDTO) error
 	UpdatePlace(context.Context, *models.UpdatePlaceDTO) error
@@ -60,8 +72,8 @@ func (s *LocationService) GetByInstrumentId(ctx context.Context, instrumentId st
 	return locations, nil
 }
 
-func (s *LocationService) FilterByDepartmentId(ctx context.Context, filter *models.DepartmentFilterDTO) ([]string, error) {
-	ids, err := s.repo.FilterByDepartmentId(ctx, filter)
+func (s *LocationService) FilterByDepartments(ctx context.Context, filter *models.DepartmentFilterDTO) ([]string, error) {
+	ids, err := s.repo.FilterByDepartments(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to filter locations by department id. error: %w", err)
 	}
@@ -69,55 +81,87 @@ func (s *LocationService) FilterByDepartmentId(ctx context.Context, filter *mode
 }
 
 func (s *LocationService) Create(ctx context.Context, location *models.CreateLocationDTO) error {
+	if location.Status == constants.LocationStatusMoved && location.DepartmentId != "" {
+		department, err := s.department.GetById(ctx, location.DepartmentId)
+		if err != nil {
+			return err
+		}
+		if department.ChannelId == "" {
+			return models.ErrNoChannel
+		}
+
+		responsible, err := s.responsible.Get(ctx, &models.GetResponsibleDTO{DepartmentId: location.DepartmentId})
+		if err != nil {
+			return err
+		}
+
+		if len(responsible) == 0 {
+			return models.ErrNoResponsible
+		}
+	}
+
 	if err := s.repo.Create(ctx, location); err != nil {
 		return fmt.Errorf("failed to create si location. error: %w", err)
 	}
 	return nil
 }
 
-// func (s *LocationService) CreateSeveral(ctx context.Context, dto models.CreateSeveralLocationDTO) (bool, error) {
-// 	emp, err := s.employee.GetBySSOId(ctx, dto.UserId)
-// 	if err != nil && !errors.Is(err, models.ErrNoRows) {
-// 		return false, err
-// 	}
+func (s *LocationService) CreateSeveral(ctx context.Context, dto *models.CreateSeveralLocationDTO) (bool, error) {
+	responsible, err := s.responsible.GetBySSOId(ctx, dto.UserId)
+	if err != nil {
+		return false, err
+	}
 
-// 	isFull := true
+	//TODO для инструментов которые перемещаются из резерва, проверка не нужна
+	//// В таком виде эта функция не будет работать для метролога
 
-// 	if emp != nil {
-// 		instrumentIds := []string{}
-// 		locations := make(map[string]models.CreateLocationDTO)
-// 		for _, l := range dto.Locations {
-// 			instrumentIds = append(instrumentIds, l.InstrumentId)
-// 			locations[l.InstrumentId] = l
-// 		}
+	isFull := true
+
+	if dto.Locations[0].PersonId == "" {
+		if len(responsible) == 0 {
+			return false, models.ErrNoResponsible
+		}
+
+		instrumentIds := []string{}
+		locations := make(map[string]*models.CreateLocationDTO)
+		for _, l := range dto.Locations {
+			instrumentIds = append(instrumentIds, l.InstrumentId)
+			locations[l.InstrumentId] = l
+		}
+
+		ids := []string{}
+		for _, r := range responsible {
+			ids = append(ids, r.DepartmentId)
+		}
+
+		// при возвращении инструментов я отфильтровываю те что не находятся в том же подразделении что и пользователь
+		filtered, err := s.FilterByDepartments(ctx, &models.DepartmentFilterDTO{InstrumentIds: instrumentIds, DepartmentIds: ids})
+		if err != nil {
+			return false, err
+		}
+
+		isFull = len(filtered) == len(dto.Locations)
+		if !isFull {
+			newLocations := []*models.CreateLocationDTO{}
+			for _, l := range filtered {
+				newLocations = append(newLocations, locations[l])
+			}
+			dto.Locations = newLocations
+		}
+	}
+
+	if len(dto.Locations) == 0 {
+		return isFull, models.ErrNoInstrument
+	}
+
+	if err := s.repo.CreateSeveral(ctx, dto.Locations); err != nil {
+		return isFull, fmt.Errorf("failed to create several locations. error: %w", err)
+	}
+	return isFull, nil
+}
 
 // TODO возможно стоит все-таки вернуть проверку при перемещении инструмента и добавить похожую при подтверждении через приложение
-// 		// при возвращении инструментов я отфильтровываю те что не находятся в том же подразделении что и пользователь
-// 		filtered, err := s.FilterByDepartmentId(ctx, models.DepartmentFilterDTO{InstrumentIds: instrumentIds, DepartmentId: emp.DepartmentId})
-// 		if err != nil {
-// 			return false, err
-// 		}
-
-// 		isFull = len(filtered) == len(dto.Locations)
-// 		if !isFull {
-// 			newLocations := []models.CreateLocationDTO{}
-// 			for _, l := range filtered {
-// 				newLocations = append(newLocations, locations[l])
-// 			}
-// 			dto.Locations = newLocations
-// 		}
-// 	}
-
-// 	if len(dto.Locations) == 0 {
-// 		return isFull, nil
-// 	}
-
-//		if err := s.repo.CreateSeveral(ctx, dto.Locations); err != nil {
-//			return isFull, fmt.Errorf("failed to create several locations. error: %w", err)
-//		}
-//		return isFull, nil
-//	}
-func (s *LocationService) CreateSeveral(ctx context.Context, dto *models.CreateSeveralLocationDTO) error {
+func (s *LocationService) CreateSeveralOld(ctx context.Context, dto *models.CreateSeveralLocationDTO) error {
 	if err := s.repo.CreateSeveral(ctx, dto.Locations); err != nil {
 		return fmt.Errorf("failed to create several locations. error: %w", err)
 	}
@@ -155,8 +199,42 @@ func (s *LocationService) ReceivingFromApp(ctx context.Context, dto *models.Rece
 	// }
 	// location.InstrumentIds = ids
 
+	responsible, err := s.responsible.GetBySSOId(ctx, dto.UserId)
+	if err != nil {
+		return err
+	}
+
+	logger.Debug("receiving", logger.StringAttr("status", dto.Status), logger.AnyAttr("responsible", responsible))
+	if dto.Status == constants.LocationStatusUsed {
+		if len(responsible) == 0 {
+			return models.ErrNoResponsible
+		}
+
+		ids := []string{}
+		for _, r := range responsible {
+			ids = append(ids, r.DepartmentId)
+		}
+
+		// при подтверждении инструментов я отфильтровываю те что не находятся в том же подразделении что и пользователь
+		filtered, err := s.FilterByDepartments(ctx, &models.DepartmentFilterDTO{
+			InstrumentIds: dto.InstrumentIds,
+			DepartmentIds: ids,
+			Status:        constants.LocationStatusMoved,
+		})
+		if err != nil {
+			return err
+		}
+
+		isFull := len(filtered) == len(dto.InstrumentIds)
+		if !isFull {
+			dto.InstrumentIds = filtered
+		}
+	}
+
+	//TODO наверное стоит добавить проверку чтобы получить инструмент мог только ответственный, а не любой пользователь
+
 	if len(dto.InstrumentIds) == 0 {
-		return nil
+		return models.ErrNoInstrument
 	}
 
 	if err := s.repo.Receiving(ctx, dto); err != nil {

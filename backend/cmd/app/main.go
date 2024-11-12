@@ -65,16 +65,20 @@ func main() {
 		Keycloak:        keycloak,
 		AccessTokenTTL:  conf.Auth.AccessTokenTTL,
 		RefreshTokenTTL: conf.Auth.RefreshTokenTTL,
-		ErrorBotUrl:     conf.ErrorBot.Url,
 		BotUrl:          conf.Bot.Url,
+		Times:           conf.Notification.Times,
 	})
 
 	handlers := transport.NewHandler(services, keycloak)
 
 	//* HTTP Server
 
-	if err := services.Notification.Start(&conf.Notification); err != nil {
-		log.Fatalf("failed to start sending notification. error: %s\n", err.Error())
+	// if err := services.Notification.Start(&conf.Notification); err != nil {
+	// 	log.Fatalf("failed to start sending notification. error: %s\n", err.Error())
+	// }
+
+	if err := services.Scheduler.Start(&conf.Scheduler); err != nil {
+		log.Fatalf("failed to start scheduler. error: %s\n", err.Error())
 	}
 
 	srv := server.NewServer(conf, handlers.Init(conf))
@@ -95,8 +99,11 @@ func main() {
 	ctx, shutdown := context.WithTimeout(context.Background(), timeout)
 	defer shutdown()
 
-	if err := services.Notification.Stop(); err != nil {
-		logger.Error("failed to stop sending notification.", logger.ErrAttr(err))
+	// if err := services.Notification.Stop(); err != nil {
+	// 	logger.Error("failed to stop sending notification.", logger.ErrAttr(err))
+	// }
+	if err := services.Scheduler.Stop(); err != nil {
+		logger.Error("failed to stop scheduler.", logger.ErrAttr(err))
 	}
 
 	if err := srv.Stop(ctx); err != nil {

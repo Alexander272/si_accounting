@@ -35,6 +35,29 @@ func Register(api *gin.RouterGroup, service services.SI, middleware *middleware.
 	api.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Create)
 }
 
+// func (h *SIHandlers) Get(c *gin.Context) {
+// 	// не уверен, что это хорошее решение. а судя по тому что я прописываю id это решение плохое
+// 	logger.Debug("Get", logger.StringAttr("url", c.Request.URL.String()))
+// 	newURL := c.Request.URL.Query()
+// 	newURL.Add("filters[status]", "")
+// 	newURL.Add("status[neq]", "reserve")
+// 	newURL.Add("filters[department]", "list")
+// 	newURL.Add("department[nin]", "cc718041-f3da-4490-b647-380297bd3344")
+
+// 	c.Request.URL.RawQuery = newURL.Encode()
+
+// 	logger.Debug("Get", logger.StringAttr("url", c.Request.URL.String()))
+
+// 	var user models.User
+// 	u, exists := c.Get(constants.CtxUser)
+// 	if exists {
+// 		user = u.(models.User)
+// 	}
+// 	logger.Debug("Get", logger.StringAttr("user_id", user.Id), logger.AnyAttr("user", user))
+
+// 	h.GetAll(c)
+// }
+
 func (h *SIHandlers) GetAll(c *gin.Context) {
 	params := &models.SIParams{
 		Page:    &models.SIPage{},
@@ -44,6 +67,8 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 
 	page := c.Query("page")
 	size := c.Query("size")
+
+	all := c.Query("all")
 
 	sortLine := c.Query("sort_by")
 	filters := c.QueryMap("filters")
@@ -134,6 +159,20 @@ func (h *SIHandlers) GetAll(c *gin.Context) {
 		}
 
 		params.Filters = append(params.Filters, f)
+	}
+
+	if all != "true" {
+		params.Filters = append(params.Filters, &models.SIFilter{
+			Field:     "status",
+			FieldType: "",
+			Values:    []*models.SIFilterValue{{CompareType: "nlike", Value: "reserve"}},
+		})
+		//TODO задавать id подразделения не очень хорошая идея
+		params.Filters = append(params.Filters, &models.SIFilter{
+			Field:     "department",
+			FieldType: "list",
+			Values:    []*models.SIFilterValue{{CompareType: "nin", Value: "cc718041-f3da-4490-b647-380297bd3344"}},
+		})
 	}
 
 	status := c.Query("status")

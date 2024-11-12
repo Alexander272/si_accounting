@@ -1,6 +1,7 @@
 package receiving
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -29,7 +30,7 @@ func Register(api *gin.RouterGroup, service services.Location, middleware *middl
 
 	locations := api.Group("/si/locations")
 	{
-		locations.POST("/receiving", handlers.Receiving)
+		locations.POST("/receiving", middleware.VerifyToken, handlers.Receiving)
 		locations.POST("/receiving/dialog", handlers.ReceivingDialog)
 	}
 }
@@ -41,16 +42,25 @@ func (h *ReceivingHandlers) Receiving(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.ReceivingFromApp(c, dto); err != nil {
-		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		error_bot.Send(c, err.Error(), dto)
-		return
-	}
-
 	var user models.User
 	u, exists := c.Get(constants.CtxUser)
 	if exists {
 		user = u.(models.User)
+	}
+	dto.UserId = user.Id
+
+	if err := h.service.ReceivingFromApp(c, dto); err != nil {
+		if errors.Is(err, models.ErrNoResponsible) {
+			response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Вы не являетесь ответственным")
+			return
+		}
+		if errors.Is(err, models.ErrNoInstrument) {
+			response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Вы не можете подтвердить получение инструментов")
+			return
+		}
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
 	}
 
 	logger.Info("Получены инструменты",

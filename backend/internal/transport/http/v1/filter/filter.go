@@ -85,7 +85,7 @@ func (h *Handler) change(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
-	logger.Info("Фильтры обновлены", logger.StringAttr("user id", user.Id), logger.AnyAttr("filters", filters))
+	logger.Info("Фильтры обновлены", logger.StringAttr("user_id", user.Id), logger.AnyAttr("filters", filters))
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Фильтры обновлены"})
 }

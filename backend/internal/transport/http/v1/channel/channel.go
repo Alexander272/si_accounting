@@ -28,8 +28,7 @@ func Register(api *gin.RouterGroup, service services.Channel, middleware *middle
 
 	channels := api.Group("/channels")
 	{
-		//TODO поменять на Channel
-		channels.GET("", middleware.CheckPermissions(constants.Department, constants.Read), handler.getAll)
+		channels.GET("", middleware.CheckPermissions(constants.Channel, constants.Read), handler.getAll)
 		channels.POST("", middleware.CheckPermissions(constants.Channel, constants.Write), handler.create)
 		channels.PUT("/:id", middleware.CheckPermissions(constants.Channel, constants.Write), handler.update)
 		channels.DELETE("/:id", middleware.CheckPermissions(constants.Channel, constants.Write), handler.delete)

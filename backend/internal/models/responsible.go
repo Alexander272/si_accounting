@@ -14,6 +14,7 @@ type ResponsibleDTO struct {
 
 type GetResponsibleDTO struct {
 	DepartmentId string `json:"departmentId" db:"department_id"`
+	SSOId        string `json:"ssoId" db:"sso_id"`
 }
 
 type ChangeResponsibleDTO struct {

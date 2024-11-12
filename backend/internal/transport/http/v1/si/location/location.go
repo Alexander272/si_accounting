@@ -88,6 +88,14 @@ func (h *LocationHandlers) Create(c *gin.Context) {
 	}
 
 	if err := h.service.Create(c, dto); err != nil {
+		if errors.Is(err, models.ErrNoChannel) {
+			response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Канал для получения уведомлений не указан")
+			return
+		}
+		if errors.Is(err, models.ErrNoResponsible) {
+			response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Ответственный не указан")
+			return
+		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), dto)
 		return
@@ -109,7 +117,7 @@ func (h *LocationHandlers) CreateSeveral(c *gin.Context) {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
-	// создавать перемещение могут только люди из этого же подразделения, а если подразделение не нашлось, то доступны все////или все у кого уровень роли не ниже 5
+	// создавать перемещение могут только люди из этого же подразделения, а если подразделение не нашлось, то доступны все
 
 	var user models.User
 	u, exists := c.Get(constants.CtxUser)
@@ -120,19 +128,27 @@ func (h *LocationHandlers) CreateSeveral(c *gin.Context) {
 	dto.UserId = user.Id
 
 	// isFull, err := h.service.CreateSeveral(c, dto)
-	err := h.service.CreateSeveral(c, dto)
+	full, err := h.service.CreateSeveral(c, dto)
 	if err != nil {
+		if errors.Is(err, models.ErrNoResponsible) {
+			response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Вы не являетесь ответственным")
+			return
+		}
+		if errors.Is(err, models.ErrNoInstrument) {
+			response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Вы не можете переместить инструмент")
+			return
+		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		// h.errBot.Send(c, err.Error(), dto)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
 	logger.Info("Инструменты перемещены", logger.StringAttr("user_id", user.Id))
 
 	message := "Данные о месте нахождения успешно добавлены"
-	// if !isFull {
-	// 	message = "Данные о месте нахождения добавлены частично"
-	// }
+	if !full {
+		message = "Данные о месте нахождения добавлены частично"
+	}
 
 	c.JSON(http.StatusCreated, response.IdResponse{Message: message})
 }

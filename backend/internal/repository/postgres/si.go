@@ -192,18 +192,32 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 	}
 
 	data := []*models.SIFromNotification{}
+	// query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, COALESCE(e.name, '') AS person, COALESCE(d.name, '') AS department,
+	// 	COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id,
+	// 	COALESCE(CASE WHEN e.most_id != '' THEN '' ELSE l.channel_id END, '') AS channel_id
+	// 	FROM %s AS i
+	// 	LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
+	// 	LEFT JOIN LATERAL (SELECT person_id, department_id, status FROM %s WHERE instrument_id=i.id
+	// 		ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
+	// 	LEFT JOIN %s AS e ON e.id=m.person_id
+	// 	LEFT JOIN %s AS d ON d.id=m.department_id
+	// 	LEFT JOIN LATERAL (SELECT most_id, channel_id FROM %s WHERE department_id=m.department_id AND is_lead=true LIMIT 1) AS l ON true
+	// 	WHERE m.status=$1 %s
+	// 	ORDER BY most_id, channel_id, department, next_date`,
+	// 	InstrumentTable, VerificationTable, SIMovementTable, EmployeeTable, DepartmentTable, EmployeeTable, periodCond,
+	// )
 	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, v.date, v.next_date, COALESCE(e.name, '') AS person, COALESCE(d.name, '') AS department,
-		COALESCE(CASE WHEN e.most_id != '' THEN e.most_id ELSE l.most_id END, '') AS most_id, 
-		COALESCE(CASE WHEN e.most_id != '' THEN '' ELSE l.channel_id END, '') AS channel_id
+		COALESCE(most_id, '') AS most_id, COALESCE(most_channel_id, '') AS channel_id
 		FROM %s AS i
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
-		LEFT JOIN LATERAL (SELECT person_id, department_id, status FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
+		LEFT JOIN LATERAL (SELECT person_id, department_id, status FROM %s WHERE instrument_id=i.id 
+			ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
 		LEFT JOIN %s AS e ON e.id=m.person_id
 		LEFT JOIN %s AS d ON d.id=m.department_id
-		LEFT JOIN LATERAL (SELECT most_id, channel_id FROM %s WHERE department_id=m.department_id AND is_lead=true LIMIT 1) AS l ON true
+		LEFT JOIN LATERAL (SELECT most_channel_id FROM %s WHERE id=d.channel_id) AS c ON TRUE
 		WHERE m.status=$1 %s
 		ORDER BY most_id, channel_id, department, next_date`,
-		InstrumentTable, VerificationTable, SIMovementTable, EmployeeTable, DepartmentTable, EmployeeTable, periodCond,
+		InstrumentTable, VerificationTable, SIMovementTable, EmployeeTable, DepartmentTable, ChannelTable, periodCond,
 	)
 
 	// if req.StartAt != "" {

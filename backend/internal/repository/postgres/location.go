@@ -28,7 +28,7 @@ func NewLocationRepo(db *sqlx.DB) *LocationRepo {
 type Location interface {
 	GetLast(context.Context, string) (*models.Location, error)
 	GetByInstrumentId(context.Context, string) ([]*models.Location, error)
-	FilterByDepartmentId(context.Context, *models.DepartmentFilterDTO) ([]string, error)
+	FilterByDepartments(context.Context, *models.DepartmentFilterDTO) ([]string, error)
 	Create(context.Context, *models.CreateLocationDTO) error
 	CreateSeveral(context.Context, []*models.CreateLocationDTO) error
 	Update(context.Context, *models.UpdateLocationDTO) error
@@ -73,15 +73,18 @@ func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId strin
 }
 
 // Функция для того чтобы найти все инструменты которые находятся в определенном подразделении
-func (r *LocationRepo) FilterByDepartmentId(ctx context.Context, filter *models.DepartmentFilterDTO) (instrumentIds []string, err error) {
+func (r *LocationRepo) FilterByDepartments(ctx context.Context, filter *models.DepartmentFilterDTO) (instrumentIds []string, err error) {
 	locations := []*models.Location{}
 	query := fmt.Sprintf(`SELECT s.instrument_id FROM %s AS m LEFT JOIN LATERAL (SELECT instrument_id, department_id 
 		FROM %s WHERE instrument_id=m.instrument_id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS s ON TRUE
-		WHERE s.instrument_id = ANY($1) AND s.department_id=$2 AND status='%s'`,
-		SIMovementTable, SIMovementTable, constants.LocationStatusUsed,
+		WHERE s.instrument_id=ANY($1) AND s.department_id=ANY($2) AND status=$3`,
+		SIMovementTable, SIMovementTable,
 	)
+	if filter.Status == "" {
+		filter.Status = constants.LocationStatusUsed
+	}
 
-	if err := r.db.Select(&locations, query, pq.Array(filter.InstrumentIds), filter.DepartmentId); err != nil {
+	if err := r.db.Select(&locations, query, pq.Array(filter.InstrumentIds), pq.Array(filter.DepartmentIds), filter.Status); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 

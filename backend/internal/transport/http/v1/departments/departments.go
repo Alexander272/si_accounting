@@ -95,7 +95,11 @@ func (h *DepartmentHandlers) Create(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
-	logger.Info("Подразделение создано", logger.StringAttr("name", dto.Name), logger.StringAttr("id", dto.Id))
+	logger.Info("Подразделение создано",
+		logger.StringAttr("id", dto.Id),
+		logger.StringAttr("name", dto.Name),
+		logger.AnyAttr("data", dto),
+	)
 
 	c.JSON(http.StatusCreated, response.IdResponse{Id: id, Message: "Новое подразделение создано"})
 }
@@ -118,7 +122,11 @@ func (h *DepartmentHandlers) Update(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
-	logger.Info("Подразделение обновлено", logger.StringAttr("name", dto.Name), logger.StringAttr("id", dto.Id))
+	logger.Info("Подразделение обновлено",
+		logger.StringAttr("id", dto.Id),
+		logger.StringAttr("name", dto.Name),
+		logger.AnyAttr("data", dto),
+	)
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Подразделение обновлено"})
 }

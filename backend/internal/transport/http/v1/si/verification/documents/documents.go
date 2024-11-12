@@ -141,6 +141,12 @@ func (h *DocumentsHandlers) upload(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
+
+	logger.Info("Файлы загружены",
+		logger.StringAttr("instrument_id", dto.InstrumentId),
+		logger.StringAttr("verification_id", dto.VerificationId),
+	)
+
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Файлы загружены"})
 }
 
@@ -174,5 +180,12 @@ func (h *DocumentsHandlers) delete(c *gin.Context) {
 		error_bot.Send(c, err.Error(), req)
 		return
 	}
+
+	logger.Info("Файл удален",
+		logger.StringAttr("instrument_id", req.InstrumentId),
+		logger.StringAttr("verification_id", req.VerificationId),
+		logger.StringAttr("filename", req.Filename),
+	)
+
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Файл удален"})
 }

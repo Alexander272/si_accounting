@@ -7,6 +7,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/repository"
 	"github.com/Alexander272/si_accounting/backend/pkg/auth"
+	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/Nerzal/gocloak/v13"
 )
 
@@ -60,6 +61,8 @@ func (s *UserService) GetBySSOId(ctx context.Context, id string) (*models.UserDa
 }
 
 func (s *UserService) Sync(ctx context.Context) error {
+	logger.Info("sync users")
+
 	token, err := s.keycloak.Login(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to login to keycloak. error: %w", err)

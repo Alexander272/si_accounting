@@ -20,6 +20,7 @@ type (
 		Http         HttpConfig
 		Limiter      LimiterConfig
 		Notification NotificationConfig
+		Scheduler    SchedulerConfig
 		Bot          BotConfig
 		ErrorBot     ErrorBotConfig
 	}
@@ -73,10 +74,15 @@ type (
 		TTL   time.Duration `yaml:"ttl" env:"TTL" env-default:"10m"`
 	}
 
+	SchedulerConfig struct {
+		StartTime int           `yaml:"start_time" env-default:"12"` // 12 hours (noon)
+		Interval  time.Duration `yaml:"interval" env-default:"24h"`
+	}
+
 	NotificationConfig struct {
-		StartTime int                       `yaml:"start_time" env-default:"12"` // 12 hours (noon)
-		Interval  time.Duration             `yaml:"interval" env-default:"24h"`
-		Times     []models.NotificationTime `yaml:"times"`
+		StartTime int                        `yaml:"start_time" env-default:"12"` // 12 hours (noon)
+		Interval  time.Duration              `yaml:"interval" env-default:"24h"`
+		Times     []*models.NotificationTime `yaml:"times"`
 	}
 
 	ErrorBotConfig struct {

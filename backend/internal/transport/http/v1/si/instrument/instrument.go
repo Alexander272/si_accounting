@@ -79,10 +79,10 @@ func (h *InstrumentHandlers) Create(c *gin.Context) {
 	user := u.(models.User)
 
 	logger.Info("Создан инструмент",
-		logger.StringAttr("id", id),
-		logger.StringAttr("instrument_name", dto.Name),
-		logger.StringAttr("instrument_number", dto.FactoryNumber),
 		logger.StringAttr("user_id", user.Id),
+		logger.StringAttr("instrument_id", id),
+		logger.StringAttr("instrument_name", dto.Name),
+		logger.AnyAttr("instrument", dto),
 	)
 
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные об инструменте успешно добавлены"})
@@ -115,10 +115,10 @@ func (h *InstrumentHandlers) Update(c *gin.Context) {
 	}
 
 	logger.Info("Инструмент обновлен",
+		logger.StringAttr("user_id", user.Id),
 		logger.StringAttr("instrument_id", dto.Id),
 		logger.StringAttr("instrument_name", dto.Name),
-		logger.StringAttr("instrument_number", dto.FactoryNumber),
-		logger.StringAttr("user_id", user.Id),
+		logger.AnyAttr("instrument", dto),
 	)
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные об инструменте успешно обновлены"})

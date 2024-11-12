@@ -75,6 +75,7 @@ type ReceivingDTO struct {
 	// PostID        string
 	InstrumentIds []string `json:"instrumentId" db:"instrument_id"`
 	Status        string   `json:"status" db:"status"` // либо отправляется в резерв, либо к сотруднику
+	UserId        string
 	// Missing       []SelectedSI
 	// DateOfReceiving string   `json:"dateOfReceiving" db:"date_of_receiving"`
 }
@@ -84,6 +85,7 @@ type ReceivingFromBotDTO struct {
 }
 
 type DepartmentFilterDTO struct {
-	DepartmentId  string
+	DepartmentIds []string
 	InstrumentIds []string
+	Status        string
 }

@@ -3,6 +3,7 @@ package services
 import (
 	"time"
 
+	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/repository"
 	"github.com/Alexander272/si_accounting/backend/pkg/auth"
 )
@@ -29,8 +30,8 @@ type Services struct {
 	Session
 	Permission
 
-	ErrorBot
-	Notification
+	SINotification
+	Scheduler
 }
 
 type Deps struct {
@@ -39,18 +40,26 @@ type Deps struct {
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
 	BotUrl          string
-	ErrorBotUrl     string
+	Times           []*models.NotificationTime
 }
 
 func NewServices(deps Deps) *Services {
-	errorBot := NewErrorBotService(deps.ErrorBotUrl)
+	// errorBot := NewErrorBotService()
 	most := NewMostService(deps.BotUrl)
+
+	user := NewUserService(deps.Repos.User, deps.Keycloak)
+	responsible := NewResponsibleService(deps.Repos.Responsible)
 
 	documents := NewDocumentsService(deps.Repos.Documents)
 	instrument := NewInstrumentService(deps.Repos.Instrument, documents)
 	verification := NewVerificationService(deps.Repos.Verification, documents, instrument)
 	// location := NewLocationService(deps.Repos.Location, NewEmployeeService(deps.Repos.Employee, nil), most)
-	location := NewLocationService(deps.Repos.Location, most)
+	location := NewLocationService(&LocationDeps{
+		Repo:        deps.Repos.Location,
+		Most:        most,
+		Responsible: responsible,
+		Department:  NewDepartmentService(deps.Repos.Department, nil),
+	})
 
 	department := NewDepartmentService(deps.Repos.Department, location)
 	employee := NewEmployeeService(deps.Repos.Employee, location)
@@ -66,9 +75,6 @@ func NewServices(deps Deps) *Services {
 	menuItem := NewMenuItemService(deps.Repos.MenuItem)
 	menu := NewMenuService(deps.Repos.Menu, menuItem)
 
-	user := NewUserService(deps.Repos.User, deps.Keycloak)
-	responsible := NewResponsibleService(deps.Repos.Responsible)
-
 	// TODO можно включить для keycloak настройку что он за прокси и запустить сервер на 80 (или на другом) порту для вывода интерфейса
 	// TODO при авторизации пользователя его можно искать сразу по нескольким realm
 	session := NewSessionService(deps.Keycloak, role, filter)
@@ -77,7 +83,9 @@ func NewServices(deps Deps) *Services {
 
 	permission := NewPermissionService("configs/privacy.conf", menu, role)
 
-	notification := NewNotificationService(si, most, errorBot)
+	// notification := NewNotificationService(si, most)
+	si_notification := NewSINotificationService(si, most, deps.Times)
+	scheduler := NewSchedulerService(&SchedulerDeps{Notification: si_notification, User: user})
 
 	return &Services{
 		Instrument:    instrument,
@@ -101,7 +109,9 @@ func NewServices(deps Deps) *Services {
 		Session:    session,
 		Permission: permission,
 
-		ErrorBot:     errorBot,
-		Notification: notification,
+		// ErrorBot:     errorBot,
+		// Notification:   notification,
+		SINotification: si_notification,
+		Scheduler:      scheduler,
 	}
 }

@@ -1,32 +1,18 @@
-package services
+package error_bot
 
 import (
 	"bytes"
 	"context"
 	"net/http"
+	"os"
 	"time"
 
-	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models/bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/goccy/go-json"
 )
 
-type ErrorBotService struct {
-	URL string
-}
-
-func NewErrorBotService(url string) *ErrorBotService {
-	return &ErrorBotService{
-		URL: url + constants.ErrorBotApi,
-	}
-}
-
-type ErrorBot interface {
-	Send(context.Context, bot.Data)
-}
-
-func (s *ErrorBotService) Send(ctx context.Context, data bot.Data) {
+func Send(ctx context.Context, data bot.Data) {
 	var req []byte
 	if data.Request != nil {
 		var err error
@@ -55,7 +41,12 @@ func (s *ErrorBotService) Send(ctx context.Context, data bot.Data) {
 		logger.Error("failed to encode struct.", logger.ErrAttr(err))
 	}
 
-	_, err := http.Post(s.URL, "application/json", &buf)
+	url := os.Getenv("ERR_URL")
+	if url == "" {
+		return
+	}
+
+	_, err := http.Post(url, "application/json", &buf)
 	if err != nil {
 		logger.Error("failed to send error to bot.", logger.ErrAttr(err))
 	}

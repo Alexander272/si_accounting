@@ -94,9 +94,9 @@ func (h *VerificationHandlers) Create(c *gin.Context) {
 	}
 
 	logger.Info("Добавлена поверка",
-		logger.StringAttr("instrument_id", dto.InstrumentId),
-		logger.StringAttr("status", dto.Status),
 		logger.StringAttr("user_id", user.Id),
+		logger.StringAttr("instrument_id", dto.InstrumentId),
+		logger.AnyAttr("verification", dto),
 	)
 
 	c.JSON(http.StatusCreated, response.IdResponse{Message: "Данные о поверке успешно добавлены"})
@@ -129,10 +129,10 @@ func (h *VerificationHandlers) Update(c *gin.Context) {
 	}
 
 	logger.Info("Поверка обновлена",
+		logger.StringAttr("user_id", user.Id),
 		logger.StringAttr("instrument_id", dto.InstrumentId),
 		logger.StringAttr("verification_id", dto.Id),
-		logger.StringAttr("status", dto.Status),
-		logger.StringAttr("user_id", user.Id),
+		logger.AnyAttr("verification", dto),
 	)
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о поверке успешно обновлены"})

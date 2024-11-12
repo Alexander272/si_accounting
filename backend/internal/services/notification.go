@@ -9,7 +9,6 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
-	"github.com/Alexander272/si_accounting/backend/internal/models/bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/goodsign/monday"
@@ -21,20 +20,20 @@ type NotificationService struct {
 	dates           []time.Time
 	si              SI
 	bot             Most
-	errBot          ErrorBot
+	// errBot          ErrorBot
 }
 
-func NewNotificationService(si SI, bot Most, errBot ErrorBot) *NotificationService {
+func NewNotificationService(si SI, bot Most) *NotificationService {
 	cron, err := gocron.NewScheduler()
 	if err != nil {
 		log.Fatalf("failed to create new scheduler. error: %s", err.Error())
 	}
 
 	return &NotificationService{
-		cron:            cron,
-		si:              si,
-		bot:             bot,
-		errBot:          errBot,
+		cron: cron,
+		si:   si,
+		bot:  bot,
+		// errBot:          errBot,
 		iterationNumber: 0,
 		// dates:           make([]time.Time, 5),
 	}
@@ -99,7 +98,7 @@ func (s *NotificationService) CheckSendSI() {
 	nots, err := s.si.GetForNotification(context.Background(), &models.Period{})
 	if err != nil {
 		logger.Error("notification error:", logger.ErrAttr(err))
-		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: nil, Url: "notification bot. get si list (checkSend)"})
+		// s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: nil, Url: "notification bot. get si list (checkSend)"})
 		return
 	}
 
@@ -119,7 +118,7 @@ func (s *NotificationService) CheckSendSI() {
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
 			logger.Error("notification error:", logger.ErrAttr(err))
-			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot. send to bot (checkSend)"})
+			// s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot. send to bot (checkSend)"})
 
 		}
 	}
@@ -192,7 +191,7 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 	si, err := s.si.GetForNotification(context.Background(), period)
 	if err != nil {
 		logger.Error("notification error:", logger.ErrAttr(err))
-		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: period, Url: "notification bot"})
+		// s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: period, Url: "notification bot"})
 		return
 	}
 
@@ -210,7 +209,7 @@ func (s *NotificationService) CheckNotificationTime(times []models.NotificationT
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
 			logger.Error("notification error:", logger.ErrAttr(err))
-			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})
+			// s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})
 		}
 	}
 
@@ -274,7 +273,7 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 	si, err := s.si.GetForNotification(context.Background(), period)
 	if err != nil {
 		logger.Error("notification error:", logger.ErrAttr(err))
-		s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: period, Url: "notification bot"})
+		// s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: period, Url: "notification bot"})
 		return
 	}
 
@@ -295,7 +294,7 @@ func (s *NotificationService) Send(times []models.NotificationTime) {
 		}
 		if err := s.bot.Send(context.Background(), n); err != nil {
 			logger.Error("notification error:", logger.ErrAttr(err))
-			s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})
+			// s.errBot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "notification bot"})
 
 		}
 	}

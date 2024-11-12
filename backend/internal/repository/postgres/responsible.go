@@ -34,15 +34,27 @@ type Responsible interface {
 
 func (r *ResponsibleRepo) Get(ctx context.Context, req *models.GetResponsibleDTO) ([]*models.Responsible, error) {
 	condition := ""
-	params := []interface{}{}
+	params := []string{}
+	values := []interface{}{}
+	count := 1
 	if req.DepartmentId != "" {
-		condition = "WHERE department_id=$1"
-		params = append(params, req.DepartmentId)
+		values = append(values, req.DepartmentId)
+		params = append(params, fmt.Sprintf("department_id=$%d", count))
+		count++
 	}
+	if req.SSOId != "" {
+		values = append(values, req.SSOId)
+		params = append(params, fmt.Sprintf("sso_id=$%d", count))
+		count++
+	}
+	if len(params) > 0 {
+		condition = "WHERE " + strings.Join(params, " AND ")
+	}
+
 	query := fmt.Sprintf(`SELECT id, department_id, sso_id FROM %s %s ORDER BY created_at, id`, ResponsibleTable, condition)
 	data := []*models.Responsible{}
 
-	if err := r.db.SelectContext(ctx, &data, query, params...); err != nil {
+	if err := r.db.SelectContext(ctx, &data, query, values...); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return data, nil

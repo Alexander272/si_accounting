@@ -31,7 +31,6 @@ type Department interface {
 }
 
 func (r *DepartmentRepo) GetAll(ctx context.Context) ([]*models.Department, error) {
-	//TODO возможно нужно забирать данные о начальнике из таблицы users
 	query := fmt.Sprintf(`SELECT id, name FROM %s ORDER BY name`, DepartmentTable)
 	departments := []*models.Department{}
 

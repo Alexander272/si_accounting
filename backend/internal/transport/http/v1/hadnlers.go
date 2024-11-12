@@ -74,11 +74,8 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 
 	v1 := group.Group("/v1")
 
-	// errBot := error_bot.NewErrorBotApi(h.conf.ErrorBot.Url, h.conf.ErrorBot.ApiPath)
-
 	auth.Register(v1, auth.Deps{Service: h.services.Session, Auth: h.conf.Auth})
 
-	// secure := v1.Group("")
 	secure := v1.Group("", h.middleware.VerifyToken)
 
 	siGroup := secure.Group("/si")
@@ -99,7 +96,6 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	responsible.Register(secure, h.services.Responsible, h.middleware)
 
 	roles.Register(secure, h.services.Role, h.middleware)
-	// menu.Register(secure, h.services.Menu, errBot)
-	// menu_item.Register(secure, h.services.MenuItem, errBot)
-	// menu_with_api.Register(secure, h.services.MenuWithApi, errBot)
+	// menu.Register(secure, h.services.Menu, h.middleware)
+	// menu_item.Register(secure, h.services.MenuItem, h.middleware)
 }

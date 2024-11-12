@@ -28,7 +28,7 @@ func Register(api *gin.RouterGroup, service services.Responsible, middleware *mi
 	responsible := api.Group("/responsible")
 	{
 		responsible.GET("", middleware.CheckPermissions(constants.Users, constants.Read), handler.getAll)
-		responsible.GET("/:id", middleware.CheckPermissions(constants.Users, constants.Read), handler.getBySSOId)
+		responsible.GET("/sso", middleware.CheckPermissions(constants.Users, constants.Read), handler.getBySSO)
 		responsible.POST("/change", middleware.CheckPermissions(constants.Users, constants.Write), handler.change)
 		responsible.POST("", middleware.CheckPermissions(constants.Users, constants.Write), handler.create)
 		responsible.PUT("/:id", middleware.CheckPermissions(constants.Users, constants.Write), handler.update)
@@ -43,6 +43,10 @@ func (h *Handler) getAll(c *gin.Context) {
 	if department != "" {
 		req.DepartmentId = department
 	}
+	ssoId := c.Query("sso")
+	if ssoId != "" {
+		req.SSOId = ssoId
+	}
 
 	data, err := h.service.Get(c, req)
 	if err != nil {
@@ -53,17 +57,22 @@ func (h *Handler) getAll(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DataResponse{Data: data})
 }
 
-func (h *Handler) getBySSOId(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id пользователя не задан")
-		return
+func (h *Handler) getBySSO(c *gin.Context) {
+	// id := c.Param("id")
+	// if id == "" {
+	// 	response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id пользователя не задан")
+	// 	return
+	// }
+	var user models.User
+	u, exists := c.Get(constants.CtxUser)
+	if exists {
+		user = u.(models.User)
 	}
 
-	data, err := h.service.GetBySSOId(c, id)
+	data, err := h.service.GetBySSOId(c, user.Id)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		error_bot.Send(c, err.Error(), id)
+		error_bot.Send(c, err.Error(), user)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: data})

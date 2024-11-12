@@ -6,3 +6,5 @@ type Channel struct {
 	Description   string `json:"description" db:"description"`
 	MostChannelId string `json:"mostChannelId" db:"most_channel_id"`
 }
+
+type GetChannel struct{}

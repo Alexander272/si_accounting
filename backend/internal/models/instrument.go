@@ -24,7 +24,7 @@ type CreateInstrumentDTO struct {
 	StateRegister             string `json:"stateRegister" db:"state_register"`
 	Manufacturer              string `json:"manufacturer" db:"manufacturer"`
 	YearOfIssue               string `json:"yearOfIssue" db:"year_of_issue" binding:"required"`
-	InterVerificationInterval string `json:"interVerificationInterval" db:"inter_verification_interval" binding:"required"`
+	InterVerificationInterval string `json:"interVerificationInterval" db:"inter_verification_interval"`
 	Notes                     string `json:"notes" db:"notes"`
 }
 
