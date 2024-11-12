@@ -30,5 +30,8 @@ export const API = {
 	responsible: '/responsible',
 	channels: '/channels',
 	filters: '/filters',
-	users: '/users',
+	users: {
+		base: '/users',
+		sync: '/users/sync',
+	},
 }

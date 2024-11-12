@@ -23,6 +23,7 @@ export interface ISIParams {
 	status?: SIStatus
 	page?: number
 	size?: number
+	all?: boolean
 	sort?: ISISortObj
 	filter?: ISIFilter[]
 }

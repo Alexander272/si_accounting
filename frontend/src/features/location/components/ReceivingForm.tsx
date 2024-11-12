@@ -20,7 +20,8 @@ import { useAppSelector } from '@/hooks/redux'
 import { PermRules } from '@/constants/permissions'
 import { useGetMovedSIQuery } from '@/features/dataTable/siApiSlice'
 import { useCheckPermission } from '@/features/auth/hooks/check'
-import { useGetDepartmentsByUserQuery, useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
+import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
+import { useGetResponsibleByUserQuery } from '@/features/departments/responsibleApiSlice'
 import { getActiveItem } from '@/features/dataTable/dataTableSlice'
 import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
 import { useModal } from '@/features/modal/hooks/useModal'
@@ -91,13 +92,14 @@ const ReceivingList = () => {
 	const [enable, setEnable] = useState<string[]>([])
 	const [filter, setFilter] = useState(defFilter)
 	const { data: departments, isFetching: isFetchDepartments } = useGetDepartmentsQuery(null)
-	const { data: departmentsByUser } = useGetDepartmentsByUserQuery(null)
+	// const { data: departmentsByUser } = useGetDepartmentsByUserQuery(null)
+	const { data: departmentsByUser } = useGetResponsibleByUserQuery(null)
 
 	const { data, isFetching } = useGetMovedSIQuery({ filter })
 	// console.log(data)
 
 	useEffect(() => {
-		if (departmentsByUser) setEnable(departmentsByUser.data.map(d => d.id))
+		if (departmentsByUser) setEnable(departmentsByUser.data.map(d => d.departmentId))
 	}, [departmentsByUser])
 	useEffect(() => {
 		if (hasResWrite) {

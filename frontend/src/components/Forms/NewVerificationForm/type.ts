@@ -15,4 +15,10 @@ export type KeysOfVerification = 'date' | 'nextDate' | 'registerLink' | 'status'
 
 export type HiddenField = {
 	notVerified?: boolean
+	date?: boolean
+	nextDate?: boolean
+	status?: boolean
+	registerLink?: boolean
+	verificationFile?: boolean
+	notes?: boolean
 }

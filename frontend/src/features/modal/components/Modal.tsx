@@ -12,8 +12,6 @@ import { CreateSeveralVerification } from '@/features/verification/components/Cr
 import { CreateLocation } from '@/features/location/components/CreateLocation'
 import { CreateSeveralLocation } from '@/features/location/components/CreateSeveralLocation'
 import { SendToReserve } from '@/features/location/components/SendToReserve'
-import { EmployeeForm } from '@/features/employees/components/EmployeeForm'
-import { DepartmentForm } from '@/features/employees/components/DepartmentForm'
 import { LocationHistory } from '@/features/location/components/LocationHistory'
 import { VerificationHistory } from '@/features/verification/components/VerificationHistory'
 import { Schedule } from '@/features/dataTable/components/Schedule/Schedule'
@@ -89,9 +87,6 @@ export const Modal = () => {
 				{selector == 'DeleteLocation' && <DeleteLocation />}
 				{selector == 'SendToReserve' && <SendToReserve />}
 				{selector == 'Receive' && <ReceivingForm />}
-
-				{selector == 'EditEmployee' || selector == 'CreateEmployee' ? <EmployeeForm /> : null}
-				{selector == 'EditDepartment' || selector == 'CreateDepartment' ? <DepartmentForm /> : null}
 
 				{selector == 'ViewLocationHistory' && <LocationHistory />}
 				{selector == 'ViewVerificationHistory' && <VerificationHistory />}

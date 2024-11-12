@@ -1,12 +1,12 @@
 import { FC, useRef } from 'react'
-import { Box, Button, MenuItem, Select, Stack, Tooltip, Typography, useTheme } from '@mui/material'
+import { Box, Button, CircularProgress, MenuItem, Select, Stack, Tooltip, Typography, useTheme } from '@mui/material'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
 import type { IFetchError } from '@/app/types/error'
 import type { IDepartment } from '../types/departments'
 import type { IResponsible } from '../types/responsible'
-import { useGetAllUsersQuery } from '@/features/user/usersApiSlice'
+import { useGetAllUsersQuery, useSyncUsersMutation } from '@/features/user/usersApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { PlusIcon } from '@/components/Icons/PlusIcon'
 import { FileDeleteIcon } from '@/components/Icons/FileDeleteIcon'
@@ -22,9 +22,11 @@ export const Responsible: FC<Props> = ({ department }) => {
 	const { palette } = useTheme()
 	const defaultValue = { id: '', departmentId: department?.id || '', ssoId: '' }
 
-	const { data, isFetching } = useGetResponsibleQuery(department?.id || '', { skip: !department })
+	const { data, isFetching } = useGetResponsibleQuery({ department: department?.id || '' }, { skip: !department })
 	const { data: users, isFetching: usersIsFetching } = useGetAllUsersQuery(null)
 	const [change] = useChangeResponsibleMutation()
+
+	const [sync, { isLoading }] = useSyncUsersMutation()
 
 	const deleted = useRef<string[]>([])
 
@@ -49,6 +51,16 @@ export const Responsible: FC<Props> = ({ department }) => {
 
 		if (index == 0 && fields.length == 1) setValue('values.0', defaultValue)
 		else remove(index)
+	}
+
+	const syncHandler = async () => {
+		try {
+			await sync(null).unwrap()
+			toast.success('Пользователи синхронизированы')
+		} catch (error) {
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
+		}
 	}
 
 	const saveHandler = handleSubmit(async form => {
@@ -178,8 +190,8 @@ export const Responsible: FC<Props> = ({ department }) => {
 			</Stack>
 			<Stack justifyContent={'space-between'} ml={2} spacing={1}>
 				<Tooltip title={'Синхронизировать список пользователей с системой авторизации'}>
-					<Button sx={{ minWidth: 56, height: 40 }}>
-						<SyncIcon fontSize={18} />
+					<Button onClick={syncHandler} sx={{ minWidth: 56, height: 40 }}>
+						{isLoading ? <CircularProgress size={18} /> : <SyncIcon fontSize={18} />}
 					</Button>
 				</Tooltip>
 

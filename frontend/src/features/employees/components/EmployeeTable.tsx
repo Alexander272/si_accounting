@@ -13,16 +13,16 @@ import {
 import { toast } from 'react-toastify'
 
 import type { IFetchError } from '@/app/types/error'
+import { useAppDispatch } from '@/hooks/redux'
 import { useGetDepartmentsByIdQuery } from '@/features/departments/departmentApiSlice'
+import { changeDialogIsOpen } from '@/features/dialog/dialogSlice'
 import { Responsible } from '@/features/departments/components/Responsible'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { Confirm } from '@/components/Confirm/Confirm'
 import { EditIcon } from '@/components/Icons/EditIcon'
 import { CloseIcon } from '@/components/Icons/CloseIcon'
-import { useDeleteEmployeeMutation, useGetEmployeesQuery } from '../employeesApiSlice'
-import { useAppDispatch } from '@/hooks/redux'
-import { changeDialogIsOpen } from '@/features/dialog/dialogSlice'
 import { EmployeeDialog } from './EmployeeDialog'
+import { useDeleteEmployeeMutation, useGetEmployeesQuery } from '../employeesApiSlice'
 
 type Props = {
 	department: string
@@ -40,7 +40,7 @@ export const EmployeeTable: FC<Props> = ({ department }) => {
 	const [remove] = useDeleteEmployeeMutation()
 
 	const deleteHandler = async (id: string) => {
-		console.log('delete', id)
+		// console.log('delete', id)
 		const employee = data?.data.find(e => e.id === id)
 		if (!employee) return
 
@@ -53,23 +53,19 @@ export const EmployeeTable: FC<Props> = ({ department }) => {
 	}
 
 	const updateHandler = (id: string) => {
-		console.log('update', id)
+		// console.log('update', id)
 		dispatch(changeDialogIsOpen({ variant: 'Employee', isOpen: true, content: { id, department } }))
 	}
 
 	const addHandler = () => {
-		console.log('add')
+		// console.log('add')
 		dispatch(changeDialogIsOpen({ variant: 'Employee', isOpen: true, content: { department } }))
 	}
 
 	return (
 		<Stack width={'100%'} alignItems={'center'}>
 			<Responsible department={dep?.data} />
-			{/* <ResponsibleEmployee employees={data?.data || []} department={dep?.data} /> */}
 
-			{/* //TODO прописать sso_id всех пользователям */}
-
-			{/* //TODO кнопка для добавления нового сотрудника и еще надо как-то редактировать уже созданных */}
 			<TableContainer sx={{ position: 'relative', minHeight: 140, mt: 3, mb: 4 }}>
 				{(isFetching || depIsFetching) && (
 					<Fallback

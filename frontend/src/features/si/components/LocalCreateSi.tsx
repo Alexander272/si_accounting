@@ -22,9 +22,9 @@ import { Fallback } from '@/components/Fallback/Fallback'
 import { FormLoader } from '@/components/Loader/FormLoader'
 
 const steps = [
-	{ id: 'instrument', label: 'Информация о СИ' },
-	{ id: 'verification', label: 'Поверка СИ' },
-	{ id: 'place', label: 'Место нахождения СИ' },
+	{ id: 'instrument', number: 0, label: 'Информация о СИ', skip: false },
+	{ id: 'verification', number: 1, label: 'Поверка СИ', skip: false },
+	{ id: 'place', number: 2, label: 'Место нахождения СИ', skip: false },
 ]
 const InstrumentData: IInstrumentForm = {
 	name: '',
@@ -35,6 +35,7 @@ const InstrumentData: IInstrumentForm = {
 	stateRegister: '',
 	manufacturer: '',
 	yearOfIssue: dayjs().get('year').toString(),
+	notVerified: false,
 	interVerificationInterval: '12',
 	notes: '',
 }
@@ -79,7 +80,7 @@ export const LocalCreateSi = () => {
 	useEffect(() => {
 		if (data) {
 			// instrument = data?.data
-			setInstrument({ ...data.data, id: '' })
+			setInstrument({ ...data.data, notVerified: data.data.interVerificationInterval == '', id: '' })
 			dispatch(setActive())
 			localStorage.setItem(localKeys.instrument, JSON.stringify(data.data))
 		}
@@ -102,56 +103,29 @@ export const LocalCreateSi = () => {
 			return
 		}
 
+		let count = 1
+		if (steps[(activeStep + 1) % steps.length].skip || steps[activeStep - 1].skip) count = 2
+
 		if (isNext) {
-			if (activeStep + 1 == steps.length) {
-				// console.log('location', location)
-				// const data: INewSI = {
-				// 	instrument: {
-				// 		name: instrument.name.trim(),
-				// 		type: instrument.type.trim(),
-				// 		factoryNumber: instrument.factoryNumber.trim(),
-				// 		measurementLimits: instrument.measurementLimits.trim(),
-				// 		accuracy: instrument.accuracy.trim(),
-				// 		stateRegister: instrument.stateRegister.trim(),
-				// 		manufacturer: instrument.manufacturer.trim(),
-				// 		yearOfIssue: instrument.yearOfIssue,
-				// 		interVerificationInterval: instrument.interVerificationInterval,
-				// 		notes: instrument.notes.trim(),
-				// 	},
-				// 	verification: {
-				// 		instrumentId: '',
-				// 		date: verification.date,
-				// 		nextDate:
-				// 			verification.status != VerificationStatuses.Decommissioning ? verification.nextDate : 0,
-				// 		registerLink: verification.registerLink.trim(),
-				// 		status: verification.status,
-				// 		notes: verification.notes.trim(),
-				// 	},
-				// 	//TODO данные location не успевают обновляться
-				// 	location: {
-				// 		instrumentId: '',
-				// 		department: location.isToReserve ? '' : location.department,
-				// 		person: location.isToReserve ? '' : location.person,
-				// 		dateOfIssue: location.dateOfIssue,
-				// 		dateOfReceiving: !location.needConfirmed || location.isToReserve ? location.dateOfIssue : 0,
-				// 		needConfirmed: location.needConfirmed,
-				// 		status: location.needConfirmed ? 'moved' : location.isToReserve ? 'reserve' : 'used',
-				// 	},
-				// }
-				// console.log(data)
-				// await save(data?.data.id || '').unwrap()
-				//TODO save
-				// await create(data).unwrap()
-				// deleteHandler()
-			}
-			setActiveStep(prev => (prev + 1) % steps.length)
-		} else setActiveStep(prev => prev - 1)
+			// if (activeStep + 1 == steps.length) {
+			// }
+			setActiveStep(prev => (prev + count) % steps.length)
+		} else setActiveStep(prev => prev - count)
 	}
 
 	const submitHandler = (key: string) => async (data: unknown, isShouldUpdate?: boolean) => {
 		console.log(key, 'data', data, 'update', isShouldUpdate)
 		localStorage.setItem(key, JSON.stringify(data))
-		if (key == localKeys.instrument) setInstrument(data as IInstrumentForm)
+		if (key == localKeys.instrument) {
+			const temp = data as IInstrumentForm
+			setInstrument({
+				...temp,
+				interVerificationInterval: temp.notVerified ? '' : temp.interVerificationInterval,
+			})
+			if ((temp as IInstrumentForm).notVerified) steps[1].skip = true
+			else steps[1].skip = false
+			setVerification({ ...VerificationData, notVerified: true })
+		}
 		if (key == localKeys.verification) setVerification(data as IVerificationForm)
 		if (key == localKeys.location) {
 			// setLocation(data as ILocationForm)

@@ -10,7 +10,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 	endpoints: builder => ({
 		getAllUsers: builder.query<{ data: IUserData[] }, null>({
 			query: () => ({
-				url: API.users,
+				url: API.users.base,
 				method: 'GET',
 			}),
 			providesTags: [{ type: 'Users', id: 'all' }],
@@ -23,7 +23,15 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 				}
 			},
 		}),
+
+		syncUsers: builder.mutation<null, null>({
+			query: () => ({
+				url: API.users.sync,
+				method: 'POST',
+			}),
+			invalidatesTags: [{ type: 'Users', id: 'all' }],
+		}),
 	}),
 })
 
-export const { useGetAllUsersQuery } = usersApiSlice
+export const { useGetAllUsersQuery, useSyncUsersMutation } = usersApiSlice

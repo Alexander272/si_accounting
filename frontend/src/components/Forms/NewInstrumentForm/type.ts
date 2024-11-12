@@ -8,6 +8,7 @@ export interface IInstrumentForm {
 	stateRegister: string
 	manufacturer: string
 	yearOfIssue: string
+	notVerified: boolean
 	interVerificationInterval: string
 	notes: string
 }
@@ -21,5 +22,6 @@ export type KeysOfInstrument =
 	| 'stateRegister'
 	| 'manufacturer'
 	| 'yearOfIssue'
+	| 'notVerified'
 	| 'interVerificationInterval'
 	| 'notes'

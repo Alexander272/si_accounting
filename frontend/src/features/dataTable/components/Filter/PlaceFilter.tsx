@@ -8,6 +8,8 @@ import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { SearchIcon } from '@/components/Icons/SearchIcon'
 import { ListFilter } from './ListFilter'
+import { useCheckPermission } from '@/features/auth/hooks/check'
+import { PermRules } from '@/constants/permissions'
 
 export type PlaceFilter = {
 	search: string
@@ -32,6 +34,8 @@ export const PlaceFilter: FC<unknown> = props => {
 		list || {},
 		values?.reduce((a, v) => ({ ...a, [v]: true }), {})
 	)
+
+	const hasReserve = useCheckPermission(PermRules.SI.Write)
 
 	const { control, watch, handleSubmit } = useForm<PlaceFilter>({
 		values: { search: '', list: list || {} },
@@ -98,22 +102,24 @@ export const PlaceFilter: FC<unknown> = props => {
 			/>
 
 			<Stack spacing={1} sx={{ maxHeight: 300, overflow: 'auto', userSelect: 'none', pr: 1 }}>
-				<Controller
-					control={control}
-					name={`list._reserve`}
-					render={({ field }) => (
-						<FormControlLabel
-							label={'Резерв'}
-							control={<Checkbox checked={field.value || false} />}
-							onChange={field.onChange}
-							sx={{
-								transition: 'all 0.3s ease-in-out',
-								borderRadius: 3,
-								':hover': { backgroundColor: palette.action.hover },
-							}}
-						/>
-					)}
-				/>
+				{hasReserve && (
+					<Controller
+						control={control}
+						name={`list._reserve`}
+						render={({ field }) => (
+							<FormControlLabel
+								label={'Резерв'}
+								control={<Checkbox checked={field.value || false} />}
+								onChange={field.onChange}
+								sx={{
+									transition: 'all 0.3s ease-in-out',
+									borderRadius: 3,
+									':hover': { backgroundColor: palette.action.hover },
+								}}
+							/>
+						)}
+					/>
+				)}
 				<Controller
 					control={control}
 					name={`list._moved`}

@@ -7,6 +7,7 @@ export const buildSiUrlParams = (req: ISIParams): URLSearchParams => {
 	if (req.page && req.page != 1) params.push(['page', req.page.toString()])
 	if (req.size && req.size != Size) params.push(['size', req.size.toString()])
 	if (req.status) params.push(['status', req.status])
+	if (req.all) params.push(['all', 'true'])
 
 	if (req.sort) {
 		const s = req.sort
