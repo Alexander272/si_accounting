@@ -46,3 +46,7 @@ type UpdateStatus struct {
 	Id     string `json:"id" binding:"required"`
 	Status string `json:"status"`
 }
+
+type GetInstrumentsDTO struct {
+	IDs []string `json:"ids"`
+}

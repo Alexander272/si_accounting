@@ -3,6 +3,7 @@ package instrument
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
@@ -29,12 +30,30 @@ func Register(api *gin.RouterGroup, service services.Instrument, middleware *mid
 
 	instruments := api.Group("/instruments")
 	{
-		// instruments.GET("")
+		instruments.GET("", middleware.CheckPermissions(constants.SI, constants.Read), handlers.Get)
 		instruments.GET("/:id", middleware.CheckPermissions(constants.SI, constants.Read), handlers.GetById)
 		instruments.POST("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Create)
 		instruments.PUT("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Update)
 		instruments.DELETE("/:id", middleware.CheckPermissions(constants.SI, constants.Write), handlers.Delete)
 	}
+}
+
+func (h *InstrumentHandlers) Get(c *gin.Context) {
+	// по хорошему надо сделать нормальный фильтр, но пока хватит и этого
+	tmp := c.Query("instruments")
+	if tmp == "" {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "ids не заданы")
+		return
+	}
+	ids := strings.Split(tmp, ",")
+
+	instruments, err := h.service.Get(c, &models.GetInstrumentsDTO{IDs: ids})
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), ids)
+		return
+	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: instruments})
 }
 
 func (h *InstrumentHandlers) GetById(c *gin.Context) {

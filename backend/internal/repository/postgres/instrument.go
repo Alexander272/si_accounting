@@ -10,6 +10,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type InstrumentRepo struct {
@@ -23,6 +24,7 @@ func NewInstrumentRepo(db *sqlx.DB) *InstrumentRepo {
 }
 
 type Instrument interface {
+	Get(context.Context, *models.GetInstrumentsDTO) ([]*models.Instrument, error)
 	GetById(context.Context, string) (*models.Instrument, error)
 	Create(context.Context, *models.CreateInstrumentDTO) (string, error)
 	Update(context.Context, *models.UpdateInstrumentDTO) error
@@ -30,7 +32,18 @@ type Instrument interface {
 	Delete(context.Context, string) error
 }
 
-// func (r *InstrumentRepo) GetAll(ctx context.Context, )
+func (r *InstrumentRepo) Get(ctx context.Context, req *models.GetInstrumentsDTO) ([]*models.Instrument, error) {
+	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer,
+		year_of_issue, inter_verification_interval, notes, status FROM %s WHERE id::text=ANY($1)`,
+		InstrumentTable,
+	)
+	instruments := make([]*models.Instrument, 0)
+
+	if err := r.db.Select(&instruments, query, pq.Array(req.IDs)); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return instruments, nil
+}
 
 func (r *InstrumentRepo) GetById(ctx context.Context, id string) (*models.Instrument, error) {
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer,

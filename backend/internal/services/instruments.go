@@ -24,11 +24,20 @@ func NewInstrumentService(repo repository.Instrument, documents Documents) *Inst
 }
 
 type Instrument interface {
+	Get(ctx context.Context, req *models.GetInstrumentsDTO) ([]*models.Instrument, error)
 	GetById(ctx context.Context, id string) (*models.Instrument, error)
 	Create(ctx context.Context, in *models.CreateInstrumentDTO) (string, error)
 	Update(ctx context.Context, in *models.UpdateInstrumentDTO) error
 	ChangeStatus(ctx context.Context, status *models.UpdateStatus) error
 	Delete(ctx context.Context, id string) error
+}
+
+func (s *InstrumentService) Get(ctx context.Context, req *models.GetInstrumentsDTO) ([]*models.Instrument, error) {
+	instruments, err := s.repo.Get(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get instruments. error: %w", err)
+	}
+	return instruments, nil
 }
 
 func (s *InstrumentService) GetById(ctx context.Context, id string) (*models.Instrument, error) {
