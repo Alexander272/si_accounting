@@ -9,8 +9,8 @@ import type { Location } from '../types/location'
 import { ColumnNames } from '@/constants/columns'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useModal } from '@/features/modal/hooks/useModal'
-import { getSelectedItems, getTableFilter, getTableSort, removeSelected } from '@/features/dataTable/dataTableSlice'
-import { useGetAllSIQuery } from '@/features/dataTable/siApiSlice'
+import { getSelectedItems, removeSelected } from '@/features/dataTable/dataTableSlice'
+import { useGetInstrumentsQuery } from '@/features/instrument/instrumentApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { LocationInputs } from '@/components/Forms/NewLocationForm/LocationInputs'
 import { useCreateSeveralLocationMutation } from '../locationApiSlice'
@@ -25,15 +25,14 @@ const defaultValues: ILocationForm = {
 export const CreateSeveralLocation = () => {
 	const selectedItems = useAppSelector(getSelectedItems)
 
-	const sort = useAppSelector(getTableSort)
-	const filter = useAppSelector(getTableFilter)
-
 	const dispatch = useAppDispatch()
 
 	const { closeModal } = useModal()
 	const methods = useForm<ILocationForm>({ values: defaultValues })
 
-	const { data, isFetching } = useGetAllSIQuery({ page: 0, size: 9999999, sort, filter })
+	const { data, isFetching } = useGetInstrumentsQuery(selectedItems.map(i => i.id).join(','), {
+		skip: !selectedItems.length,
+	})
 	const [create] = useCreateSeveralLocationMutation()
 
 	const items = selectedItems.filter(i => i.status != 'moved')
@@ -77,6 +76,7 @@ export const CreateSeveralLocation = () => {
 		}
 	})
 
+	// TODO это перестало работать
 	return (
 		<Stack position={'relative'}>
 			{isFetching && (
@@ -101,55 +101,63 @@ export const CreateSeveralLocation = () => {
 				<LocationInputs hidden={{ isToReserve: true }} />
 			</FormProvider>
 
-			<Table sx={{ mt: 2 }}>
-				<TableHead>
-					<TableRow>
-						<TableCell width={'70%'}>{ColumnNames.NAME}</TableCell>
-						<TableCell>{ColumnNames.FACTORY_NUMBER}</TableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
-					{data?.data.map(r => {
-						if (reserve.some(i => i.id == r.id)) {
-							return (
-								<TableRow key={r.id}>
-									<TableCell>{r.name}</TableCell>
-									<TableCell>{r.factoryNumber}</TableCell>
-									{/* <TableCell>{r.status}</TableCell> */}
-								</TableRow>
-							)
-						}
-					})}
-				</TableBody>
-			</Table>
+			{reserve.length > 0 && (
+				<>
+					<Table sx={{ mt: 2 }}>
+						<TableHead>
+							<TableRow>
+								<TableCell width={'70%'}>{ColumnNames.NAME}</TableCell>
+								<TableCell>{ColumnNames.FACTORY_NUMBER}</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{data?.data.map(r => {
+								if (reserve.some(i => i.id == r.id)) {
+									return (
+										<TableRow key={r.id}>
+											<TableCell>{r.name}</TableCell>
+											<TableCell>{r.factoryNumber}</TableCell>
+											{/* <TableCell>{r.status}</TableCell> */}
+										</TableRow>
+									)
+								}
+							})}
+						</TableBody>
+					</Table>
+					<Divider sx={{ m: 3 }} />
+				</>
+			)}
 
-			<Divider sx={{ m: 3 }} />
-			<Typography fontSize={'1.2rem'} fontWeight={'bold'} textAlign={'center'}>
-				Переместить следующий инструмент в резерв
-			</Typography>
-			<Table>
-				<TableHead>
-					<TableRow>
-						<TableCell width={'70%'}>{ColumnNames.NAME}</TableCell>
-						<TableCell>{ColumnNames.FACTORY_NUMBER}</TableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
-					{data?.data.map(r => {
-						if (used.some(i => i.id == r.id)) {
-							return (
-								<TableRow key={r.id}>
-									<TableCell>{r.name}</TableCell>
-									<TableCell>{r.factoryNumber}</TableCell>
-									{/* <TableCell>{r.status}</TableCell> */}
-								</TableRow>
-							)
-						}
-					})}
-				</TableBody>
-			</Table>
+			{used.length > 0 && (
+				<>
+					<Typography fontSize={'1.2rem'} fontWeight={'bold'} textAlign={'center'}>
+						Переместить следующий инструмент в резерв
+					</Typography>
+					<Table>
+						<TableHead>
+							<TableRow>
+								<TableCell width={'70%'}>{ColumnNames.NAME}</TableCell>
+								<TableCell>{ColumnNames.FACTORY_NUMBER}</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{data?.data.map(r => {
+								if (used.some(i => i.id == r.id)) {
+									return (
+										<TableRow key={r.id}>
+											<TableCell>{r.name}</TableCell>
+											<TableCell>{r.factoryNumber}</TableCell>
+											{/* <TableCell>{r.status}</TableCell> */}
+										</TableRow>
+									)
+								}
+							})}
+						</TableBody>
+					</Table>
+					<Divider sx={{ m: 3 }} />
+				</>
+			)}
 
-			<Divider sx={{ m: 3 }} />
 			<Button onClick={submitHandler} variant={'outlined'} sx={{ width: 400, mx: 'auto' }}>
 				Переместить
 			</Button>

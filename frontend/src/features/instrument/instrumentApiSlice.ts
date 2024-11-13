@@ -9,6 +9,22 @@ import { DraftKey } from '@/constants/localKeys'
 const instrumentApiSlice = apiSlice.injectEndpoints({
 	overrideExisting: false,
 	endpoints: builder => ({
+		getInstruments: builder.query<{ data: Instrument[] }, string>({
+			query: instruments => ({
+				url: API.si.instruments.base,
+				method: 'GET',
+				params: { instruments },
+			}),
+			providesTags: [{ type: 'Instrument', id: 'ALL' }],
+			onQueryStarted: (_arg, api) => {
+				try {
+					api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
 		getInstrumentById: builder.query<{ data: Instrument }, string>({
 			query: id => `${API.si.instruments.base}/${id}`,
 			providesTags: [
@@ -60,6 +76,7 @@ const instrumentApiSlice = apiSlice.injectEndpoints({
 })
 
 export const {
+	useGetInstrumentsQuery,
 	useGetInstrumentByIdQuery,
 	useCreateInstrumentMutation,
 	useUpdateInstrumentMutation,

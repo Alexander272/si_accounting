@@ -19,6 +19,7 @@ const defaultValues: IInstrumentForm = {
 	stateRegister: '',
 	manufacturer: '',
 	yearOfIssue: dayjs().get('year').toString(),
+	notVerified: false,
 	interVerificationInterval: '12',
 	notes: '',
 }
@@ -52,7 +53,7 @@ export const CreateInstrumentForm: FC<Props> = ({ data, loading, submitLabel, ca
 	return (
 		<Stack mt={2}>
 			<InstrumentForm
-				defaultValues={data || defaultValues}
+				defaultValues={data ? { ...data, notVerified: data.interVerificationInterval == '' } : defaultValues}
 				disabled={isLoading || loading}
 				onSubmit={submitHandler}
 				submitLabel={submitLabel}

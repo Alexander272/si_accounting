@@ -56,8 +56,10 @@ export const DepartmentForm: FC<Props> = ({ department, setDepartment }) => {
 				const payload = await create(newData).unwrap()
 				console.log(payload)
 				setDepartment(payload.id)
+				toast.success('Подразделение создано')
 			} else {
 				await update(newData).unwrap()
+				toast.success('Подразделение обновлено')
 			}
 		} catch (error) {
 			const fetchError = error as IFetchError
@@ -70,6 +72,7 @@ export const DepartmentForm: FC<Props> = ({ department, setDepartment }) => {
 		try {
 			await remove(department).unwrap()
 			setDepartment('new')
+			toast.success('Подразделение удалено')
 		} catch (error) {
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })

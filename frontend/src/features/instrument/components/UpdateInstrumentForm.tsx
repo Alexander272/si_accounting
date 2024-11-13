@@ -5,6 +5,10 @@ import { toast } from 'react-toastify'
 import type { IFetchError } from '@/app/types/error'
 import type { IInstrumentForm } from '@/components/Forms/NewInstrumentForm/type'
 import type { Instrument } from '../types/instrument'
+import {
+	useGetLastVerificationQuery,
+	useUpdateVerificationMutation,
+} from '@/features/verification/verificationApiSlice'
 import { FormLoader } from '@/components/Loader/FormLoader'
 import { InstrumentForm } from '@/components/Forms/NewInstrumentForm/InstrumentForm'
 import { useUpdateInstrumentMutation } from '../instrumentApiSlice'
@@ -18,6 +22,7 @@ const defaultValues: IInstrumentForm = {
 	stateRegister: '',
 	manufacturer: '',
 	yearOfIssue: '',
+	notVerified: false,
 	interVerificationInterval: '12',
 	notes: '',
 }
@@ -33,6 +38,9 @@ type Props = {
 
 export const UpdateInstrumentForm: FC<Props> = ({ data, loading, submitLabel, cancelLabel, onSubmit, onCancel }) => {
 	const [update, { isLoading }] = useUpdateInstrumentMutation()
+	const [updateVerification, { isLoading: isLoadingVerification }] = useUpdateVerificationMutation()
+
+	const { data: verification } = useGetLastVerificationQuery(data.id || '', { skip: !data.id })
 
 	const submitHandler = async (data: IInstrumentForm, isShouldUpdate?: boolean) => {
 		if (!isShouldUpdate) {
@@ -40,8 +48,19 @@ export const UpdateInstrumentForm: FC<Props> = ({ data, loading, submitLabel, ca
 			return
 		}
 		console.log('update instrument', data)
+		if (data.notVerified) data.interVerificationInterval = ''
 
 		try {
+			if (data.notVerified && verification?.data) {
+				const newVerification = {
+					...verification.data,
+					date: 0,
+					nextDate: 0,
+					notVerified: true,
+				}
+				await updateVerification(newVerification).unwrap()
+			}
+
 			await update(data).unwrap()
 			onSubmit && onSubmit()
 			// toast.success('Инструмент обновлен')
@@ -55,7 +74,7 @@ export const UpdateInstrumentForm: FC<Props> = ({ data, loading, submitLabel, ca
 	return (
 		<Stack mt={2}>
 			<InstrumentForm
-				defaultValues={data || defaultValues}
+				defaultValues={data ? { ...data, notVerified: data.interVerificationInterval == '' } : defaultValues}
 				disabled={isLoading || loading}
 				onSubmit={submitHandler}
 				submitLabel={submitLabel}
@@ -63,7 +82,7 @@ export const UpdateInstrumentForm: FC<Props> = ({ data, loading, submitLabel, ca
 				onCancel={onCancel}
 			/>
 
-			{isLoading && <FormLoader />}
+			{isLoading || isLoadingVerification ? <FormLoader /> : null}
 		</Stack>
 	)
 }

@@ -81,6 +81,7 @@ export const Responsible: FC<Props> = ({ department }) => {
 
 		try {
 			await change({ new: created, updated, deleted: deleted.current }).unwrap()
+			toast.success('Ответственные сохранены')
 		} catch (error) {
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })
