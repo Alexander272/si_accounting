@@ -5,7 +5,7 @@ import { ColumnNames } from '@/constants/columns'
 import { PersonFilter } from '../../Filter/PersonFilter'
 import { PlaceFilter } from '../../Filter/PlaceFilter'
 
-const initWidth = 200
+export const initWidth = 200
 
 export type FilterType = 'string' | 'date' | 'number' | 'list'
 export interface IFullFilter {

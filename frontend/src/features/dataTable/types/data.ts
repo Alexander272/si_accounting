@@ -69,3 +69,14 @@ export interface ISelected {
 	id: string
 	status: Status
 }
+
+export interface IHidden {
+	[id: string]: boolean
+}
+
+export interface IColumn {
+	id: keyof IDataItem
+	label: string
+	width: number
+	hidden?: boolean
+}

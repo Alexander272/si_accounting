@@ -8,6 +8,7 @@ import { FastFilter } from './FastFilter/FastFilter'
 import { FastChoose } from './FastChoose/FastChoose'
 import { Tools } from './Tools/Tools'
 import { SelectSIList } from './SelectSIList/SelectSIList'
+import { ColumnsSetting } from './Table/Columns/ColumnsSetting'
 
 export const DataHeader = () => {
 	const { palette } = useTheme()
@@ -40,6 +41,7 @@ export const DataHeader = () => {
 				</Stack>
 
 				<Stack direction={'row'} spacing={2}>
+					<ColumnsSetting />
 					<FastChoose />
 					<FastFilter />
 					<Tools />

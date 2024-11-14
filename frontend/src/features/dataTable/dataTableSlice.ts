@@ -1,23 +1,23 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-import type { IDataItem, ISIFilter, ISISortObj, ISelected, SIStatus } from './types/data'
+import type { IDataItem, IHidden, ISIFilter, ISISortObj, ISelected, SIStatus, IColumn } from './types/data'
 import { RootState } from '@/app/store'
 import { localKeys } from '@/constants/localKeys'
 import { Size } from '@/constants/defaultValues'
 import { changeModalIsOpen } from '../modal/modalSlice'
 import { setUser } from '../user/userSlice'
+import { HeadCells } from './components/Table/Head/columns'
 
 interface IDataTableSlice {
 	status?: SIStatus
 	page: number
 	size: number
-	// sort?: ISISort
-	// sort2?: ISISort[]
 	sort: ISISortObj
 	filter?: ISIFilter[]
-	// filterNew?: ISIFilterNew[]
 	selected: ISelected[]
 	active?: ISelected
+	hidden: IHidden
+	columns: IColumn[]
 }
 
 const initialState: IDataTableSlice = {
@@ -31,6 +31,10 @@ const initialState: IDataTableSlice = {
 		nextVerificationDate: 'ASC',
 	},
 	selected: [],
+	hidden: JSON.parse(localStorage.getItem(localKeys.hidden) || '{}'),
+	columns:
+		JSON.parse(localStorage.getItem(localKeys.columns) || 'null') ||
+		HeadCells.map(c => ({ id: c.id, label: c.label, width: c.width })),
 }
 
 const dataTableSlice = createSlice({
@@ -112,6 +116,12 @@ const dataTableSlice = createSlice({
 			state.active = action.payload
 		},
 
+		setHidden: (state, action: PayloadAction<IHidden | undefined>) => {
+			if (action.payload) state.hidden = action.payload
+			else state.hidden = {}
+			localStorage.setItem(localKeys.hidden, JSON.stringify(state.hidden))
+		},
+
 		resetDataTableState: () => {
 			localStorage.removeItem(localKeys.page)
 			return initialState
@@ -150,6 +160,8 @@ export const getTableSort = (state: RootState) => state.dataTable.sort
 export const getTableFilter = (state: RootState) => state.dataTable.filter
 export const getSelectedItems = (state: RootState) => state.dataTable.selected
 export const getActiveItem = (state: RootState) => state.dataTable.active
+export const getHidden = (state: RootState) => state.dataTable.hidden
+export const getColumns = (state: RootState) => state.dataTable.columns
 
 export const dataTablePath = dataTableSlice.name
 export const dataTableReducer = dataTableSlice.reducer
@@ -163,5 +175,6 @@ export const {
 	addSelected,
 	removeSelected,
 	setActive,
+	setHidden,
 	resetDataTableState,
 } = dataTableSlice.actions

@@ -30,7 +30,7 @@ export const Table: FC<Props> = () => {
 					<LinearProgress />
 				</Box>
 			)}
-			{/* //TODO из-за того что я прокидываю функцию (насколько я понимаю) при клике все таблица перерисовывается */}
+			{/* //TODO при клике вся таблица перерисовывается */}
 			<Body itemId={item?.id} positionHandler={positionHandler} />
 
 			<ContextMenu
