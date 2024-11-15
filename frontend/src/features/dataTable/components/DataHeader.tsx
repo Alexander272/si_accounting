@@ -1,4 +1,5 @@
-import { Button, Stack, Typography, useTheme } from '@mui/material'
+import { Button, CircularProgress, Stack, Typography, useTheme } from '@mui/material'
+import { lazy, Suspense } from 'react'
 
 import { PermRules } from '@/constants/permissions'
 import { useModal } from '@/features/modal/hooks/useModal'
@@ -8,7 +9,8 @@ import { FastFilter } from './FastFilter/FastFilter'
 import { FastChoose } from './FastChoose/FastChoose'
 import { Tools } from './Tools/Tools'
 import { SelectSIList } from './SelectSIList/SelectSIList'
-import { ColumnsSetting } from './Table/Columns/ColumnsSetting'
+
+const Setting = lazy(() => import('./Table/Columns/ColumnsSetting.tsx'))
 
 export const DataHeader = () => {
 	const { palette } = useTheme()
@@ -40,8 +42,12 @@ export const DataHeader = () => {
 					) : null}
 				</Stack>
 
+				{/* //TODO надо уменьшать размер бандла */}
 				<Stack direction={'row'} spacing={2}>
-					<ColumnsSetting />
+					<Suspense fallback={<CircularProgress size={20} />}>
+						<Setting />
+					</Suspense>
+
 					<FastChoose />
 					<FastFilter />
 					<Tools />

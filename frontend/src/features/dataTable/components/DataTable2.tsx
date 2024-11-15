@@ -1,11 +1,14 @@
+import { lazy, Suspense } from 'react'
 import { Box } from '@mui/material'
 
 // import { Table } from '@/components/Table/Table'
 // import { HeadCells } from './DataTableHead/columns'
 import { DataHeader } from './DataHeader'
 import { DataFooter } from './DataFooter'
+import { Fallback } from '@/components/Fallback/Fallback'
 // import { CustomHeader } from './CustomHeader/CustomHeader'
-import { Table } from './Table/Table'
+
+const Table = lazy(() => import('./Table/Table'))
 
 // type Props = {
 // 	status?: SIStatus
@@ -33,7 +36,9 @@ export const DataTable2 = () => {
 				loading={isFetching}
 				header={<CustomHeader />}
 			/> */}
-			<Table />
+			<Suspense fallback={<Fallback />}>
+				<Table />
+			</Suspense>
 
 			<DataFooter />
 		</Box>

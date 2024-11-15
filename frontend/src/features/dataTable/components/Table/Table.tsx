@@ -1,4 +1,3 @@
-import { FC } from 'react'
 import { Box, LinearProgress, Stack } from '@mui/material'
 
 import { Body } from './Body/Body'
@@ -7,15 +6,15 @@ import { ContextMenu } from '../ContextMenu/ContextMenu'
 import { useContextMenu } from '../../hooks/useContextMenu'
 import { useGetAllSI } from '../../hooks/getAllSI'
 
-type Props = {
-	loading?: boolean
-	height?: number
-	itemSize?: number
-	itemCount?: number
-}
+// type Props = {
+// 	loading?: boolean
+// 	height?: number
+// 	itemSize?: number
+// 	itemCount?: number
+// }
 
 //TODO по хорошему всякие обработчики кликов и подобного надо передавать снаружи. контекстное меню тоже должно зависеть от таблицы
-export const Table: FC<Props> = () => {
+export default function Table() {
 	const { isFetching } = useGetAllSI()
 
 	const { coordinates, isSelected, item, positionHandler } = useContextMenu()

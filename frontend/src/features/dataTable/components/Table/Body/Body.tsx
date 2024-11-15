@@ -5,11 +5,16 @@ import { FixedSizeList } from 'react-window'
 import type { IDataItem, ISelected } from '@/features/dataTable/types/data'
 import { RowHeight, Size } from '@/constants/defaultValues'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { addSelected, getSelectedItems, getTableSize, removeSelected } from '@/features/dataTable/dataTableSlice'
+import {
+	addSelected,
+	getColumns,
+	getSelectedItems,
+	getTableSize,
+	removeSelected,
+} from '@/features/dataTable/dataTableSlice'
 import { Coordinates } from '@/features/dataTable/hooks/useContextMenu'
 import { useGetAllSI } from '@/features/dataTable/hooks/getAllSI'
 import { Fallback } from '@/components/Fallback/Fallback'
-import { HeadCells } from '../Head/columns'
 import { NoRowsOverlay } from '../../NoRowsOverlay/components/NoRowsOverlay'
 import { Row } from './Row'
 
@@ -20,6 +25,7 @@ type Props = {
 
 export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 	const size = useAppSelector(getTableSize)
+	const columns = useAppSelector(getColumns)
 
 	const selectedItems = useAppSelector(getSelectedItems)
 
@@ -64,7 +70,7 @@ export const Body: FC<Props> = memo(({ itemId, positionHandler }) => {
 				itemSize={RowHeight}
 				itemData={data}
 				//TODO надо вернуть место для scroll, либо сделать так чтобы scroll был поверх данных
-				width={HeadCells.reduce((ac, cur) => ac + cur.width, 12)}
+				width={columns.reduce((ac, cur) => ac + (cur.hidden ? 0 : cur.width), 12)}
 			>
 				{({ index, style }) => (
 					<Row

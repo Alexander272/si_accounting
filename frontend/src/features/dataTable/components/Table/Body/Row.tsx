@@ -5,7 +5,8 @@ import dayjs from 'dayjs'
 import type { Coordinates } from '@/features/dataTable/hooks/useContextMenu'
 import type { IDataItem, ISelected } from '@/features/dataTable/types/data'
 import { DayjsFormat } from '@/constants/dateFormat'
-import { HeadCells } from '../Head/columns'
+import { useAppSelector } from '@/hooks/redux'
+import { getColumns } from '@/features/dataTable/dataTableSlice'
 import { Cell } from './Cell'
 
 const RowColors = {
@@ -27,6 +28,8 @@ type Props = {
 }
 
 export const Row: FC<Props> = memo(({ style, data, selected, itemId, onSelect, positionHandler }) => {
+	const columns = useAppSelector(getColumns)
+
 	// TODO по какой-то причине data бывает undefined
 	if (!data) return
 
@@ -86,9 +89,10 @@ export const Row: FC<Props> = memo(({ style, data, selected, itemId, onSelect, p
 				},
 			}}
 		>
-			{HeadCells.map((c, i) => (
-				<Cell key={data.id + c.id} first={!i} width={c.width} label={data[c.id] || '-'} />
-			))}
+			{columns.map((c, i) => {
+				if (c.hidden) return
+				return <Cell key={data.id + c.id} first={!i} width={c.width} label={data[c.id] || '-'} />
+			})}
 		</Stack>
 	)
 })

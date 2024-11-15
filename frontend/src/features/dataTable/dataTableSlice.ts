@@ -121,6 +121,10 @@ const dataTableSlice = createSlice({
 			else state.hidden = {}
 			localStorage.setItem(localKeys.hidden, JSON.stringify(state.hidden))
 		},
+		setColumns: (state, action: PayloadAction<IColumn[]>) => {
+			state.columns = action.payload
+			localStorage.setItem(localKeys.columns, JSON.stringify(state.columns))
+		},
 
 		resetDataTableState: () => {
 			localStorage.removeItem(localKeys.page)
@@ -176,5 +180,6 @@ export const {
 	removeSelected,
 	setActive,
 	setHidden,
+	setColumns,
 	resetDataTableState,
 } = dataTableSlice.actions
