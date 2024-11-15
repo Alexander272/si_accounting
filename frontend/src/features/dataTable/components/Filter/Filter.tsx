@@ -1,7 +1,7 @@
-import { FC, useRef, useState } from 'react'
+import { FC, Suspense, useRef, useState } from 'react'
 import { Divider, IconButton, Menu, Stack, Tooltip, Typography } from '@mui/material'
 
-import type { IHeadCell } from '../Table/Head/columns'
+import { Filters, type IHeadCell } from '../Table/Head/columns'
 import type { ISIFilter } from '../../types/data'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { FilterIcon } from '@/components/Icons/FilterIcon'
@@ -10,6 +10,7 @@ import { DateFilter } from './DateFilter'
 import { NumberFilter } from './NumberFilter'
 import { TextFilter } from './TextFilter'
 import { HeadBadge } from '../Table/Head/HeadBadge'
+import { Fallback } from '@/components/Fallback/Fallback'
 
 type Props = {
 	cell: IHeadCell
@@ -19,6 +20,7 @@ export const Filter: FC<Props> = ({ cell }) => {
 	const filters = useAppSelector(getTableFilter)
 	// const index = filters?.findIndex(f => f.field == cell.id)
 	const filter = filters?.find(f => f.field == cell.id)
+	const filterCell = Filters.find(f => f.id == cell.id)
 
 	const dispatch = useAppDispatch()
 
@@ -120,7 +122,7 @@ export const Filter: FC<Props> = ({ cell }) => {
 
 				<Divider sx={{ mb: 2, mt: 1 }} />
 
-				{cell.type == 'date' && (
+				{filterCell?.type == 'date' && (
 					<DateFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
 				)}
 				{/* {cell.type == 'list' && (
@@ -132,17 +134,28 @@ export const Filter: FC<Props> = ({ cell }) => {
 						onSubmit={submitHandler}
 					/>
 				)} */}
-				{cell.type == 'number' && (
+				{filterCell?.type == 'number' && (
 					<NumberFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
 				)}
-				{cell.filterComponent &&
-					cell.filterComponent({
+				{/* {filterCell?.filterComponent &&
+					filterCell.filterComponent({
 						field: cell.id,
 						values: filter?.values[0].value.split(','),
 						onSubmit: submitHandler,
 						onCancel: clearHandler,
-					})}
-				{(!cell.type && !cell.filterComponent) || cell.type == 'string' ? (
+					})} */}
+				<Suspense fallback={<Fallback />}>
+					{filterCell?.filterComponent && (
+						<filterCell.filterComponent
+							field={cell.id}
+							values={filter?.values[0].value.split(',')}
+							onSubmit={submitHandler}
+							onCancel={clearHandler}
+						/>
+					)}
+				</Suspense>
+
+				{(!filterCell?.type && !filterCell?.filterComponent) || filterCell.type == 'string' ? (
 					<TextFilter
 						field={cell.id}
 						values={

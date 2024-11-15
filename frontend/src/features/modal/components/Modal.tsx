@@ -31,7 +31,7 @@ const Transition = forwardRef(function Transition(
 	return <Slide direction='up' ref={ref} {...props} />
 })
 
-export const Modal = () => {
+export default function Modal() {
 	const open = useAppSelector(getIsOpenModal)
 	const selector = useAppSelector(getModalSelector)
 

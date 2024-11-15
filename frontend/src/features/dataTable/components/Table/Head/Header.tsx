@@ -25,6 +25,7 @@ export const Header = () => {
 
 	return (
 		<Stack direction={'row'}>
+			{/* //TODO сломались фильтры. (их нет в колонках которые я храню в redux) */}
 			{columns.map((c, i) => {
 				if (c.hidden) return null
 				return (

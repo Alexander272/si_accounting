@@ -2,7 +2,7 @@ import type { RouteObject } from 'react-router-dom'
 import { createBrowserRouter } from 'react-router-dom'
 
 import { AppRoutes } from '@/constants/routes'
-import { Layout } from '@/components/Layout/Layout'
+import { Layout } from '@/components/Layout/LayoutLazy'
 import { NotFound } from '@/pages/notFound/NotFoundLazy'
 import { Home } from '@/pages/home/HomeLazy'
 import { Auth } from '@/pages/auth/AuthLazy'

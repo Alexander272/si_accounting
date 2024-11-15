@@ -3,7 +3,7 @@ import { Autocomplete, TextField } from '@mui/material'
 import { Controller, RegisterOptions, useFormContext } from 'react-hook-form'
 
 import type { ILocationForm } from './NewLocationForm/type'
-import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
+import { useGetDepartmentsQuery } from '@/features/departments/departmentApiSlice'
 
 type Props = {
 	label: string

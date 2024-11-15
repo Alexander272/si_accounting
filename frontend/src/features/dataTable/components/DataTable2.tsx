@@ -14,7 +14,7 @@ const Table = lazy(() => import('./Table/Table'))
 // 	status?: SIStatus
 // }
 
-export const DataTable2 = () => {
+export default function DataTable() {
 	return (
 		<Box
 			borderRadius={3}

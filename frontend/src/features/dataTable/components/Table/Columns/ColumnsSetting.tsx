@@ -76,8 +76,8 @@ export default function ColumnsSetting() {
 
 					<Stack direction={'row'} spacing={1} height={34}>
 						<Tooltip title='Сбросить настройки'>
-							<Button onClick={resetHandler} variant='outlined' color='gray' sx={{ minWidth: 40 }}>
-								<RefreshIcon fill={palette.gray.main} fontSize={18} />
+							<Button onClick={resetHandler} variant='outlined' color='inherit' sx={{ minWidth: 40 }}>
+								<RefreshIcon fontSize={18} />
 							</Button>
 						</Tooltip>
 

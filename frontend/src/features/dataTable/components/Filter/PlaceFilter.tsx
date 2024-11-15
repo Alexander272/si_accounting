@@ -4,7 +4,7 @@ import { Controller, useForm } from 'react-hook-form'
 
 import type { IDataItem, ISIFilter } from '../../types/data'
 import { useDebounce } from '@/hooks/useDebounce'
-import { useGetDepartmentsQuery } from '@/features/employees/employeesApiSlice'
+import { useGetDepartmentsQuery } from '@/features/departments/departmentApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { SearchIcon } from '@/components/Icons/SearchIcon'
 import { ListFilter } from './ListFilter'
@@ -23,7 +23,7 @@ type Props = {
 	onSubmit: (data: ISIFilter) => void
 }
 
-export const PlaceFilter: FC<unknown> = props => {
+export const PlaceFilter: FC<Props> = props => {
 	const { field, values, onCancel, onSubmit } = props as Props
 	const { palette } = useTheme()
 
@@ -148,7 +148,7 @@ export const PlaceFilter: FC<unknown> = props => {
 							render={({ field }) => (
 								<FormControlLabel
 									label={l.name}
-									control={<Checkbox checked={field.value} />}
+									control={<Checkbox checked={field.value || false} />}
 									onChange={field.onChange}
 									sx={{
 										transition: 'all 0.3s ease-in-out',
@@ -173,3 +173,5 @@ export const PlaceFilter: FC<unknown> = props => {
 		</Stack>
 	)
 }
+
+export default PlaceFilter

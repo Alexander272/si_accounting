@@ -4,10 +4,11 @@ import { Controller, useForm } from 'react-hook-form'
 
 import type { IDataItem, ISIFilter } from '../../types/data'
 import type { ListFilter } from './ListFilter'
+import { useDebounce } from '@/hooks/useDebounce'
 import { useGetUniqueEmployeeQuery } from '@/features/employees/employeesApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { SearchIcon } from '@/components/Icons/SearchIcon'
-import { useDebounce } from '@/hooks/useDebounce'
+import { FixedSizeList } from 'react-window'
 
 type Props = {
 	field: keyof IDataItem
@@ -16,11 +17,11 @@ type Props = {
 	onSubmit: (data: ISIFilter) => void
 }
 
-export const PersonFilter: FC<unknown> = props => {
+export const PersonFilter: FC<Props> = props => {
 	const { field, values, onCancel, onSubmit } = props as Props
 	const { palette } = useTheme()
 
-	const { data, isLoading } = useGetUniqueEmployeeQuery(null)
+	const { data, isFetching } = useGetUniqueEmployeeQuery(null)
 
 	const list = data?.data?.reduce((a, v) => ({ ...a, [v.name.replaceAll('.', '_')]: false }), {})
 	Object.assign(
@@ -58,7 +59,9 @@ export const PersonFilter: FC<unknown> = props => {
 		onSubmit(filter)
 	})
 
-	if (isLoading) return <Fallback />
+	const items = data?.data?.filter(l => l.name.toLowerCase().includes(debouncedSearch.toLowerCase())) || []
+
+	if (isFetching) return <Fallback />
 	return (
 		<Stack spacing={2}>
 			<Controller
@@ -81,20 +84,27 @@ export const PersonFilter: FC<unknown> = props => {
 				)}
 			/>
 
-			<Stack spacing={1} sx={{ maxHeight: 300, overflow: 'auto', userSelect: 'none', pr: 1 }}>
+			<Stack spacing={1} sx={{ maxHeight: 300, overflow: 'auto', userSelect: 'none' }}>
 				{/* {data?.data.map(l => ( */}
-				{data?.data
-					.filter(l => l.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
-					.map(l => (
+				<FixedSizeList
+					overscanCount={12}
+					height={300}
+					itemCount={items.length}
+					itemSize={42}
+					itemData={items}
+					width={368}
+				>
+					{({ index, style }) => (
 						<Controller
-							key={l.name}
+							key={items[index].name}
 							control={control}
-							name={`list.${l.name.replaceAll('.', '_')}`}
+							name={`list.${items[index].name.replaceAll('.', '_')}`}
 							render={({ field }) => (
 								<FormControlLabel
-									label={l.name}
-									control={<Checkbox checked={field.value} />}
+									label={items[index].name}
+									control={<Checkbox checked={field.value || false} />}
 									onChange={field.onChange}
+									style={style}
 									sx={{
 										transition: 'all 0.3s ease-in-out',
 										borderRadius: 3,
@@ -103,7 +113,27 @@ export const PersonFilter: FC<unknown> = props => {
 								/>
 							)}
 						/>
-					))}
+					)}
+				</FixedSizeList>
+				{/* {items.map(l => (
+					<Controller
+						key={l.name}
+						control={control}
+						name={`list.${l.name.replaceAll('.', '_')}`}
+						render={({ field }) => (
+							<FormControlLabel
+								label={l.name}
+								control={<Checkbox checked={field.value || false} />}
+								onChange={field.onChange}
+								sx={{
+									transition: 'all 0.3s ease-in-out',
+									borderRadius: 3,
+									':hover': { backgroundColor: palette.action.hover },
+								}}
+							/>
+						)}
+					/>
+				))} */}
 			</Stack>
 
 			<Stack direction={'row'} mt={3} spacing={2}>
@@ -118,3 +148,5 @@ export const PersonFilter: FC<unknown> = props => {
 		</Stack>
 	)
 }
+
+export default PersonFilter

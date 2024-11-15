@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-import type { IDataItem, IHidden, ISIFilter, ISISortObj, ISelected, SIStatus, IColumn } from './types/data'
+import type { IDataItem, ISIFilter, ISISortObj, ISelected, SIStatus, IColumn } from './types/data'
 import { RootState } from '@/app/store'
 import { localKeys } from '@/constants/localKeys'
 import { Size } from '@/constants/defaultValues'
@@ -16,7 +16,7 @@ interface IDataTableSlice {
 	filter?: ISIFilter[]
 	selected: ISelected[]
 	active?: ISelected
-	hidden: IHidden
+	// hidden: IHidden
 	columns: IColumn[]
 }
 
@@ -31,10 +31,8 @@ const initialState: IDataTableSlice = {
 		nextVerificationDate: 'ASC',
 	},
 	selected: [],
-	hidden: JSON.parse(localStorage.getItem(localKeys.hidden) || '{}'),
-	columns:
-		JSON.parse(localStorage.getItem(localKeys.columns) || 'null') ||
-		HeadCells.map(c => ({ id: c.id, label: c.label, width: c.width })),
+	// hidden: JSON.parse(localStorage.getItem(localKeys.hidden) || '{}'),
+	columns: JSON.parse(localStorage.getItem(localKeys.columns) || 'null') || HeadCells,
 }
 
 const dataTableSlice = createSlice({
@@ -116,11 +114,11 @@ const dataTableSlice = createSlice({
 			state.active = action.payload
 		},
 
-		setHidden: (state, action: PayloadAction<IHidden | undefined>) => {
-			if (action.payload) state.hidden = action.payload
-			else state.hidden = {}
-			localStorage.setItem(localKeys.hidden, JSON.stringify(state.hidden))
-		},
+		// setHidden: (state, action: PayloadAction<IHidden | undefined>) => {
+		// 	if (action.payload) state.hidden = action.payload
+		// 	else state.hidden = {}
+		// 	localStorage.setItem(localKeys.hidden, JSON.stringify(state.hidden))
+		// },
 		setColumns: (state, action: PayloadAction<IColumn[]>) => {
 			state.columns = action.payload
 			localStorage.setItem(localKeys.columns, JSON.stringify(state.columns))
@@ -164,7 +162,7 @@ export const getTableSort = (state: RootState) => state.dataTable.sort
 export const getTableFilter = (state: RootState) => state.dataTable.filter
 export const getSelectedItems = (state: RootState) => state.dataTable.selected
 export const getActiveItem = (state: RootState) => state.dataTable.active
-export const getHidden = (state: RootState) => state.dataTable.hidden
+// export const getHidden = (state: RootState) => state.dataTable.hidden
 export const getColumns = (state: RootState) => state.dataTable.columns
 
 export const dataTablePath = dataTableSlice.name
@@ -179,7 +177,7 @@ export const {
 	addSelected,
 	removeSelected,
 	setActive,
-	setHidden,
+	// setHidden,
 	setColumns,
 	resetDataTableState,
 } = dataTableSlice.actions

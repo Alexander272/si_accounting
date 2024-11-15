@@ -5,7 +5,7 @@ import { Box } from '@mui/material'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { LayoutHeader } from './LayoutHeader'
 
-export const Layout = () => {
+export default function Layout() {
 	return (
 		<Box minHeight='100vh' height='100vh' display='flex' flexDirection='column' pb={4}>
 			<LayoutHeader />
