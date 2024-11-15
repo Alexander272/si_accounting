@@ -104,7 +104,7 @@ export const LocalCreateSi = () => {
 		}
 
 		let count = 1
-		if (steps[(activeStep + 1) % steps.length].skip || steps[activeStep - 1].skip) count = 2
+		if (steps[(activeStep + 1) % steps.length]?.skip || steps[activeStep - 1]?.skip) count = 2
 
 		if (isNext) {
 			// if (activeStep + 1 == steps.length) {
@@ -122,9 +122,10 @@ export const LocalCreateSi = () => {
 				...temp,
 				interVerificationInterval: temp.notVerified ? '' : temp.interVerificationInterval,
 			})
-			if ((temp as IInstrumentForm).notVerified) steps[1].skip = true
-			else steps[1].skip = false
-			setVerification({ ...VerificationData, notVerified: true })
+			if ((temp as IInstrumentForm).notVerified) {
+				steps[1].skip = true
+				setVerification({ ...VerificationData, notVerified: true })
+			} else steps[1].skip = false
 		}
 		if (key == localKeys.verification) setVerification(data as IVerificationForm)
 		if (key == localKeys.location) {
