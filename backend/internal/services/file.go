@@ -67,7 +67,7 @@ func (s *FileService) Export(ctx context.Context, params *models.SIParams) (*byt
 
 	columnNames := []string{
 		"Наименование", "Тип СИ", "Заводской номер", "Пределы измерений", "Точность, цена деления, погрешность", "Госреестр СИ", "Изготовитель",
-		"Год выпуска", "Дата поверки (калибровки)", "Межповерочный интервал", "Следующая поверка (калибровка)", "Место нахождения", "Примечание",
+		"Год выпуска", "Дата поверки (калибровки)", "Межповерочный интервал", "Следующая поверка (калибровка)", "Место нахождения", "ФИО Сотрудника", "Примечание",
 	}
 	if err := file.SetSheetRow(sheetName, "A1", &columnNames); err != nil {
 		return nil, fmt.Errorf("failed to set header row. error: %w", err)
@@ -88,7 +88,7 @@ func (s *FileService) Export(ctx context.Context, params *models.SIParams) (*byt
 	for i, d := range data.SI {
 		values := []interface{}{
 			d.Name, d.Type, d.FactoryNumber, d.MeasurementLimits, d.Accuracy, d.StateRegister, d.Manufacturer, d.YearOfIssue, d.Date,
-			d.InterVerificationInterval, d.NextDate, d.Place, d.Notes,
+			d.InterVerificationInterval, d.NextDate, d.Place, d.Person, d.Notes,
 		}
 
 		if err := file.SetSheetRow(sheetName, fmt.Sprintf("A%d", i+2), &values); err != nil {

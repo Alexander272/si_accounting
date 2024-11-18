@@ -61,7 +61,7 @@ func (s *UserService) GetBySSOId(ctx context.Context, id string) (*models.UserDa
 }
 
 func (s *UserService) Sync(ctx context.Context) error {
-	logger.Info("sync users")
+	logger.Info("Sync users")
 
 	token, err := s.keycloak.Login(ctx)
 	if err != nil {

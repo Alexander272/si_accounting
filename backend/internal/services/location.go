@@ -117,7 +117,7 @@ func (s *LocationService) CreateSeveral(ctx context.Context, dto *models.CreateS
 
 	isFull := true
 
-	if dto.Locations[0].PersonId == "" {
+	if dto.Locations[0].PersonId == "" && dto.Locations[0].NeedConfirmed {
 		if len(responsible) == 0 {
 			return false, models.ErrNoResponsible
 		}
@@ -296,11 +296,12 @@ func (s *LocationService) Receiving(ctx context.Context, dto *models.DialogRespo
 	// Отправка сообщения для подтверждения получения оставшихся инструментов
 	if len(post.Missing) != 0 {
 		not := &models.Notification{
-			MostId:  dto.UserID,
-			Type:    constants.StatusReceiving,
-			Status:  post.Status,
-			Message: "Подтвердите получение инструментов",
-			SI:      post.Missing,
+			MostId:    dto.UserID,
+			ChannelId: dto.ChannelID,
+			Type:      constants.StatusReceiving,
+			Status:    post.Status,
+			Message:   "Подтвердите получение инструментов",
+			SI:        post.Missing,
 		}
 		if not.Status == constants.LocationStatusReserve {
 			not.MostId = ""

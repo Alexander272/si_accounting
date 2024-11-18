@@ -37,7 +37,7 @@ type SINotification interface {
 }
 
 func (s *SINotificationService) CheckSentSI() {
-	logger.Info("CheckSentSI")
+	logger.Info("Check sent SI")
 	//TODO есть проблема. уведомления будут отправляться каждый день пока не подтвердят, что наверное не очень хорошо
 	nots, err := s.si.GetForNotification(context.Background(), &models.Period{})
 	if err != nil {
@@ -69,7 +69,7 @@ func (s *SINotificationService) CheckSentSI() {
 }
 
 func (s *SINotificationService) CheckUsedSI() {
-	logger.Info("CheckUsedSI")
+	logger.Info("Check used SI")
 	index := s.iterationNumber % len(s.times)
 	logger.Debug("CheckUsedSI", logger.IntAttr("time index", index))
 

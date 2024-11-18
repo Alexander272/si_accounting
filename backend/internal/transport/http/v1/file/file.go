@@ -32,7 +32,7 @@ func Register(api *gin.RouterGroup, service services.File, middleware *middlewar
 
 	files := api.Group("/files")
 	{
-		files.GET("", middleware.CheckPermissions(constants.SI, constants.Write), handlers.export)
+		files.GET("", middleware.CheckPermissions(constants.SI, constants.Read), handlers.export)
 		files.GET("/schedule", middleware.CheckPermissions(constants.SI, constants.Write), handlers.makeVerificationSchedule)
 	}
 }
@@ -48,6 +48,7 @@ func (h *FileHandlers) export(c *gin.Context) {
 
 	sortLine := c.Query("sort_by")
 	filters := c.QueryMap("filters")
+	all := c.Query("all")
 
 	if sortLine != "" {
 		sort := strings.Split(sortLine, ",")
@@ -70,6 +71,26 @@ func (h *FileHandlers) export(c *gin.Context) {
 
 		values := []*models.SIFilterValue{}
 		for key, value := range valueMap {
+			if k == "place" {
+				statusFilter := &models.SIFilter{Field: "status", FieldType: "list", Values: []*models.SIFilterValue{{CompareType: "in"}}}
+				tmp := []string{}
+				if strings.Contains(value, "_moved") {
+					tmp = append(tmp, "moved")
+				}
+				statusFilter.Values[0].Value = strings.Join(tmp, ",")
+				params.Filters = append(params.Filters, statusFilter)
+
+				value = strings.Replace(value, "_reserve", "", -1)
+				value = strings.Replace(value, "_moved", "", -1)
+				value = strings.Trim(value, ",")
+				k = "department"
+
+				if value != "" {
+					// params.Filters = append(params.Filters, &models.SIFilter{Field: "last_place", Values: []*models.SIFilterValue{}})
+					values = append(values, &models.SIFilterValue{CompareType: key, Value: value})
+				}
+			}
+
 			values = append(values, &models.SIFilterValue{
 				CompareType: key,
 				Value:       value,
@@ -83,6 +104,20 @@ func (h *FileHandlers) export(c *gin.Context) {
 		}
 
 		params.Filters = append(params.Filters, f)
+	}
+
+	if all != "true" {
+		params.Filters = append(params.Filters, &models.SIFilter{
+			Field:     "status",
+			FieldType: "",
+			Values:    []*models.SIFilterValue{{CompareType: "nlike", Value: "reserve"}},
+		})
+		//TODO задавать id подразделения не очень хорошая идея
+		params.Filters = append(params.Filters, &models.SIFilter{
+			Field:     "department",
+			FieldType: "list",
+			Values:    []*models.SIFilterValue{{CompareType: "nin", Value: "cc718041-f3da-4490-b647-380297bd3344"}},
+		})
 	}
 
 	status := c.Query("status")
