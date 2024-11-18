@@ -4,9 +4,9 @@ import type { IDataItem, ISIFilter, ISISortObj, ISelected, SIStatus, IColumn } f
 import { RootState } from '@/app/store'
 import { localKeys } from '@/constants/localKeys'
 import { Size } from '@/constants/defaultValues'
+import { HeadCells } from './components/Table/Head/columns'
 import { changeModalIsOpen } from '../modal/modalSlice'
 import { setUser } from '../user/userSlice'
-import { HeadCells } from './components/Table/Head/columns'
 
 interface IDataTableSlice {
 	status?: SIStatus
@@ -52,24 +52,6 @@ const dataTableSlice = createSlice({
 		},
 
 		setSort: (state, action: PayloadAction<keyof IDataItem>) => {
-			// if (state.sort && state.sort.field == action.payload) {
-			// 	if (state.sort.type == 'ASC') {
-			// 		state.sort.type = 'DESC'
-			// 	} else {
-			// 		state.sort = undefined
-			// 	}
-			// } else {
-			// 	state.sort = { field: action.payload, type: 'ASC' }
-			// }
-
-			// const index = state.sort2?.findIndex(s => s.field == action.payload)
-			// if (!state.sort2 || index == -1) {
-			// 	state.sort2 = [...(state.sort2 || []), { field: action.payload, type: 'ASC' }]
-			// } else if (index != undefined) {
-			// 	if (state.sort2[index].type == 'ASC') state.sort2[index].type = 'DESC'
-			// 	else state.sort2 = state.sort2.filter(s => s.field != action.payload)
-			// }
-
 			if (!state.sort || !state.sort[action.payload]) {
 				state.sort = { ...(state.sort || {}), [action.payload]: 'ASC' }
 				return
@@ -81,9 +63,6 @@ const dataTableSlice = createSlice({
 			}
 		},
 
-		// setFilters: (state, action: PayloadAction<ISIFilter | undefined>) => {
-		// 	state.filter = action.payload
-		// },
 		setFilters: (state, action: PayloadAction<ISIFilter | undefined>) => {
 			// state.filter = action.payload
 

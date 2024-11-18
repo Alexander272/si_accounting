@@ -61,7 +61,7 @@ export default function ColumnsSetting() {
 
 	return (
 		<>
-			<IconButton ref={anchor} onClick={toggleHandler}>
+			<IconButton ref={anchor} onClick={toggleHandler} sx={{ my: '-3px!important' }}>
 				<SettingIcon fontSize={20} />
 			</IconButton>
 

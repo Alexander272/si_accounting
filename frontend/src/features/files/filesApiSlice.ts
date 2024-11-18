@@ -1,13 +1,13 @@
 import { toast } from 'react-toastify'
 import dayjs from 'dayjs'
 
+import type { IBaseFetchError, IFetchError } from '@/app/types/error'
 import type { IPeriodForm } from '@/components/Forms/PeriodForm/type'
 import type { ISIParams } from '../dataTable/types/data'
 import type { IDocument } from './types/file'
 import { HttpCodes } from '@/constants/httpCodes'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
-import { IBaseFetchError, IFetchError } from '@/app/types/error'
 import { saveAs } from '@/utils/saveAs'
 import { buildSiUrlParams } from '@/utils/buildUrlParams'
 
@@ -118,7 +118,7 @@ const filesApiSlice = apiSlice.injectEndpoints({
 
 				if (result.error) {
 					console.log(result.error)
-					const fetchError = (result.error.data as IBaseFetchError).error
+					const fetchError = result.error as IFetchError
 					toast.error(fetchError.data.message, { autoClose: false })
 				}
 
@@ -141,7 +141,7 @@ const filesApiSlice = apiSlice.injectEndpoints({
 
 				if (result.error) {
 					console.log(result.error)
-					const fetchError = (result.error.data as IBaseFetchError).error
+					const fetchError = result.error as IFetchError
 					toast.error(fetchError.data.message, { autoClose: false })
 				}
 

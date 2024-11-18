@@ -93,16 +93,16 @@ export const CreateSeveralLocation = () => {
 				/>
 			)}
 
-			<Typography fontSize={'1.2rem'} fontWeight={'bold'} textAlign={'center'}>
-				Передать инструмент сотруднику
-			</Typography>
-
-			<FormProvider {...methods}>
-				<LocationInputs hidden={{ isToReserve: true }} />
-			</FormProvider>
-
 			{reserve.length > 0 && (
 				<>
+					<Typography fontSize={'1.2rem'} fontWeight={'bold'} textAlign={'center'}>
+						Передать инструмент сотруднику
+					</Typography>
+
+					<FormProvider {...methods}>
+						<LocationInputs hidden={{ isToReserve: true }} />
+					</FormProvider>
+
 					<Table sx={{ mt: 2 }}>
 						<TableHead>
 							<TableRow>

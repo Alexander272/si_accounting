@@ -29,6 +29,7 @@ export const Tools = () => {
 	const status = useAppSelector(getSIStatus)
 	const sort = useAppSelector(getTableSort)
 	const filter = useAppSelector(getTableFilter)
+	const all = useCheckPermission(PermRules.SI.Write)
 
 	const [exportData] = useLazyExportQuery()
 
@@ -47,7 +48,7 @@ export const Tools = () => {
 	}
 
 	const exportHandler = async () => {
-		await exportData({ status, sort, filter })
+		await exportData({ status, sort, filter, all })
 		toggleHandler()
 	}
 
@@ -103,6 +104,12 @@ export const Tools = () => {
 				<FileSyncIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>
 			Получить инструменты
+		</MenuItem>,
+		<MenuItem key='export' onClick={exportHandler}>
+			<ListItemIcon>
+				<FileDownloadIcon fontSize={20} fill={'#757575'} />
+			</ListItemIcon>
+			Экспортировать
 		</MenuItem>,
 	]
 
