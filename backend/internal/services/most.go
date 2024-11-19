@@ -74,6 +74,7 @@ func (s *MostService) Send(ctx context.Context, not *models.Notification) error 
 	//TODO возможно в data_id стоит не только id инструментов передавать, но и тип функции (сообщения)
 	post.Props = []*models.Props{
 		{Key: "service", Value: "sia"},
+		{Key: "data_type", Value: "array"},
 		{Key: "data_id", Value: strings.Join(instrumentIds, ",")},
 	}
 

@@ -35,7 +35,7 @@ export const PlaceFilter: FC<Props> = props => {
 		values?.reduce((a, v) => ({ ...a, [v]: true }), {})
 	)
 
-	const hasReserve = useCheckPermission(PermRules.SI.Write)
+	const hasReserve = useCheckPermission(PermRules.Location.Write)
 
 	const { control, watch, handleSubmit } = useForm<PlaceFilter>({
 		values: { search: '', list: list || {} },

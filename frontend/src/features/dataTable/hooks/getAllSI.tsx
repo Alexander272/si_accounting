@@ -13,7 +13,7 @@ export const useGetAllSI = () => {
 	const sort = useAppSelector(getTableSort)
 	const filter = useAppSelector(getTableFilter)
 
-	const all = useCheckPermission(PermRules.SI.Write)
+	const all = useCheckPermission(PermRules.Location.Write)
 
 	const query = useGetAllSIQuery(
 		{ status, page, size, all, sort, filter },
