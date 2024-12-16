@@ -48,9 +48,9 @@ export const DepartmentForm: FC<Props> = ({ department, setDepartment }) => {
 
 	const saveHandler = handleSubmit(async form => {
 		console.log('save', form, dirtyFields)
-		if (!Object.keys(dirtyFields).length || !data) return
+		if (!Object.keys(dirtyFields).length) return
 
-		const newData = { ...data.data, ...form }
+		const newData = { ...form, id: data?.data.id || '', leaderId: data?.data.leaderId || '', channelName: '' }
 		try {
 			if (department == 'new') {
 				const payload = await create(newData).unwrap()

@@ -23,7 +23,7 @@ export const departmentApiSlice = apiSlice.injectEndpoints({
 
 		getDepartmentsById: builder.query<{ data: IDepartment }, string>({
 			query: id => `${API.departments}/${id}`,
-			providesTags: [{ type: 'Departments', id: 'all' }],
+			providesTags: (_arg, _err, id) => [{ type: 'Departments', id: id }],
 			onQueryStarted: async (_arg, api) => {
 				try {
 					await api.queryFulfilled
@@ -62,7 +62,10 @@ export const departmentApiSlice = apiSlice.injectEndpoints({
 				method: 'PUT',
 				body: data,
 			}),
-			invalidatesTags: [{ type: 'Departments', id: 'all' }],
+			invalidatesTags: (_arg, _err, data) => [
+				{ type: 'Departments', id: 'all' },
+				{ type: 'Departments', id: data.id },
+			],
 		}),
 
 		deleteDepartment: builder.mutation<null, string>({
