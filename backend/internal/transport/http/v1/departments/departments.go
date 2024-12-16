@@ -1,6 +1,7 @@
 package departments
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
@@ -57,6 +58,10 @@ func (h *DepartmentHandlers) GetById(c *gin.Context) {
 
 	department, err := h.service.GetById(c, id)
 	if err != nil {
+		if errors.Is(err, models.ErrNoRows) {
+			response.NewErrorResponse(c, http.StatusNotFound, err.Error(), "Подразделение не найдено")
+			return
+		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), id)
 		return

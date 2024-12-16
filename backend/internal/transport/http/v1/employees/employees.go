@@ -94,7 +94,7 @@ func (h *EmployeeHandlers) GetById(c *gin.Context) {
 	data, err := h.service.GetById(c, id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRows) {
-			response.NewErrorResponse(c, http.StatusNotFound, err.Error(), err.Error())
+			response.NewErrorResponse(c, http.StatusNotFound, err.Error(), "Сотрудник не найден")
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())

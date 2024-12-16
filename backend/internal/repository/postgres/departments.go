@@ -72,7 +72,16 @@ func (r *DepartmentRepo) Create(ctx context.Context, department *models.Departme
 	query := fmt.Sprintf(`INSERT INTO %s(id, name, leader_id, channel_id) VALUES ($1, $2, $3, $4)`, DepartmentTable)
 	department.Id = uuid.NewString()
 
-	_, err := r.db.Exec(query, department.Id, department.Name, department.LeaderId, department.ChannelId)
+	var leaderId *string = &department.LeaderId
+	if department.LeaderId == "" {
+		leaderId = nil
+	}
+	var channelId *string = &department.ChannelId
+	if department.ChannelId == "" {
+		channelId = nil
+	}
+
+	_, err := r.db.Exec(query, department.Id, department.Name, leaderId, channelId)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute query. error: %w", err)
 	}
