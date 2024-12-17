@@ -23,7 +23,6 @@ import { useCheckPermission } from '@/features/auth/hooks/check'
 import { useGetDepartmentsQuery } from '@/features/departments/departmentApiSlice'
 import { useGetResponsibleByUserQuery } from '@/features/departments/responsibleApiSlice'
 import { getActiveItem } from '@/features/dataTable/dataTableSlice'
-import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
 import { useModal } from '@/features/modal/hooks/useModal'
 import { CheckboxGroup } from '@/components/CheckboxGroup/CheckboxGroup'
 import { Fallback } from '@/components/Fallback/Fallback'
@@ -34,22 +33,21 @@ export const ReceivingForm = () => {
 
 	//TODO при закрытии формы вылазит весь список
 	if (!active) return <ReceivingList />
-	return <ReceivingOne id={active.id} />
+	return <ReceivingOne data={active} />
 }
 
 type ReceivingProps = {
-	id: string
+	data: IDataItem
 }
-const ReceivingOne: FC<ReceivingProps> = ({ id }) => {
+const ReceivingOne: FC<ReceivingProps> = ({ data }) => {
 	const hasResWrite = useCheckPermission(PermRules.Reserve.Write)
 	const { closeModal } = useModal()
 
-	const { data, isFetching } = useGetInstrumentByIdQuery(id || '', { skip: !id })
-	const [receiving] = useReceivingMutation()
+	const [receiving, { isLoading }] = useReceivingMutation()
 
 	const receiveHandler = async () => {
 		const payload = {
-			instrumentId: [id],
+			instrumentId: [data.id],
 			status: hasResWrite ? 'used' : 'reserve',
 		}
 		console.log(payload)
@@ -64,11 +62,24 @@ const ReceivingOne: FC<ReceivingProps> = ({ id }) => {
 		}
 	}
 
-	if (isFetching) return <Fallback />
 	return (
-		<Stack spacing={2} alignItems={'center'}>
+		<Stack spacing={2} alignItems={'center'} position={'relative'}>
+			{isLoading && (
+				<Fallback
+					position={'absolute'}
+					top={'50%'}
+					left={'50%'}
+					transform={'translate(-50%, -50%)'}
+					height={160}
+					width={160}
+					borderRadius={3}
+					zIndex={15}
+					backgroundColor={'#fafafa'}
+				/>
+			)}
+
 			<Typography width={'100%'}>
-				Подтвердите получение инструмента «{data?.data.name}» ({data?.data.factoryNumber})
+				Подтвердите получение инструмента «{data?.name}» ({data?.factoryNumber})
 			</Typography>
 
 			<Button onClick={receiveHandler} variant='outlined' sx={{ width: 300 }}>
@@ -118,7 +129,7 @@ const ReceivingList = () => {
 	}
 
 	return (
-		<Stack spacing={1} mt={1} alignItems={'center'}>
+		<Stack spacing={1} mt={1} alignItems={'center'} position={'relative'}>
 			{hasResWrite ? (
 				<>
 					<FormControl sx={{ m: 1, width: '100%' }}>
@@ -155,7 +166,7 @@ const GroupedList: FC<GroupedListProps> = ({ data }) => {
 	const hasResWrite = useCheckPermission(PermRules.Reserve.Write)
 	const { closeModal } = useModal()
 
-	const [receiving] = useReceivingMutation()
+	const [receiving, { isLoading }] = useReceivingMutation()
 
 	const groupMap = new Map<string, IDataItem[]>()
 	data.forEach(d => {
@@ -193,6 +204,20 @@ const GroupedList: FC<GroupedListProps> = ({ data }) => {
 	if (!groupMap.size) return <Typography>Инструменты для получения не найдены</Typography>
 	return (
 		<>
+			{isLoading && (
+				<Fallback
+					position={'absolute'}
+					top={'50%'}
+					left={'50%'}
+					transform={'translate(-50%, -50%)'}
+					height={160}
+					width={160}
+					borderRadius={3}
+					zIndex={15}
+					backgroundColor={'#fafafa'}
+				/>
+			)}
+
 			<Stack width={'100%'}>
 				{[...groupMap.keys()].map(key => (
 					<CheckboxGroup

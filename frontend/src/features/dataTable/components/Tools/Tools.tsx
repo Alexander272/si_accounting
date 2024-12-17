@@ -8,7 +8,7 @@ import { useAppSelector } from '@/hooks/redux'
 import { PermRules } from '@/constants/permissions'
 import { useModal } from '@/features/modal/hooks/useModal'
 import { useCheckPermission } from '@/features/auth/hooks/check'
-import { getSIStatus, getSelectedItems, getTableFilter, getTableSort } from '@/features/dataTable/dataTableSlice'
+import { getSIStatus, getSelected, getTableFilter, getTableSort } from '@/features/dataTable/dataTableSlice'
 import { useLazyExportQuery } from '@/features/files/filesApiSlice'
 import { VerifyIcon } from '@/components/Icons/VerifyIcon'
 import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
@@ -24,7 +24,7 @@ export const Tools = () => {
 
 	const navigate = useNavigate()
 
-	const selected = useAppSelector(getSelectedItems)
+	const selected = useAppSelector(getSelected)
 
 	const status = useAppSelector(getSIStatus)
 	const sort = useAppSelector(getTableSort)
@@ -39,7 +39,8 @@ export const Tools = () => {
 		(selector: ModalSelectors, notEmpty = true) =>
 		() => {
 			toggleHandler()
-			if (selector != 'Receive' && notEmpty && !selected.length) toast.error('Инструменты не выбраны')
+			if (selector != 'Receive' && notEmpty && !Object.keys(selected).length)
+				toast.error('Инструменты не выбраны')
 			else openModal(selector)
 		}
 

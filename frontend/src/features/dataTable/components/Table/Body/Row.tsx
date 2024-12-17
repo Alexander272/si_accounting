@@ -3,7 +3,7 @@ import { Stack } from '@mui/material'
 import dayjs from 'dayjs'
 
 import type { Coordinates } from '@/features/dataTable/hooks/useContextMenu'
-import type { IDataItem, ISelected } from '@/features/dataTable/types/data'
+import type { IDataItem } from '@/features/dataTable/types/data'
 import { DayjsFormat } from '@/constants/dateFormat'
 import { useAppSelector } from '@/hooks/redux'
 import { getColumns } from '@/features/dataTable/dataTableSlice'
@@ -23,7 +23,8 @@ type Props = {
 	data: IDataItem
 	selected: boolean
 	itemId?: string
-	onSelect: (item: ISelected, selected: boolean) => void
+	// onSelect: (item: ISelected, selected: boolean) => void
+	onSelect: (item: IDataItem) => void
 	positionHandler: (coordinates?: Coordinates, item?: IDataItem, isSelected?: boolean) => void
 }
 
@@ -44,7 +45,8 @@ export const Row: FC<Props> = memo(({ style, data, selected, itemId, onSelect, p
 	// }
 
 	const selectHandler = () => {
-		onSelect({ id: data.id, status: data.status }, selected)
+		// onSelect({ id: data.id, status: data.status }, selected)
+		onSelect(data)
 	}
 
 	const openHandler = (event: MouseEvent<HTMLTableRowElement>) => {

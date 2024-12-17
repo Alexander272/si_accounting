@@ -25,7 +25,6 @@ export const Header = () => {
 
 	return (
 		<Stack direction={'row'}>
-			{/* //TODO сломались фильтры. (их нет в колонках которые я храню в redux) */}
 			{columns.map((c, i) => {
 				if (c.hidden) return null
 				return (
@@ -56,36 +55,18 @@ export const Header = () => {
 						<Stack direction={'row'} spacing={2} mb={0.5} justifyContent={'center'} alignItems={'center'}>
 							<Tooltip title={'Сортировать'} arrow>
 								<IconButton onClick={setSortHandler(c.id)} sx={{ ml: 1 }}>
-									{/* {tableSort?.field !== c.id || tableSort?.type == 'ASC' ? (
-									<SortUpIcon fontSize={16} fill={tableSort?.field === c.id ? 'black' : '#adadad'} />
-								) : null}
-
-								{tableSort?.field === c.id && tableSort?.type == 'DESC' ? (
-									<SortDownIcon
-										fontSize={16}
-										fill={tableSort?.field === c.id ? 'black' : '#adadad'}
-									/>
-								) : null} */}
-
-									{!tableSort[c.id] || tableSort[c.id] == 'ASC' ? (
-										<HeadBadge
-											color='primary'
-											badgeContent={Object.keys(tableSort).findIndex(k => k == c.id) + 1}
-											invisible={Object.keys(tableSort).length < 2}
-										>
+									<HeadBadge
+										color='primary'
+										badgeContent={Object.keys(tableSort).findIndex(k => k == c.id) + 1}
+										invisible={Object.keys(tableSort).length < 2}
+									>
+										{!tableSort[c.id] || tableSort[c.id] == 'ASC' ? (
 											<SortUpIcon fontSize={16} fill={tableSort[c.id] ? 'black' : '#adadad'} />
-										</HeadBadge>
-									) : null}
-
-									{tableSort[c.id] == 'DESC' ? (
-										<HeadBadge
-											color='primary'
-											badgeContent={Object.keys(tableSort).findIndex(k => k == c.id) + 1}
-											invisible={Object.keys(tableSort).length < 2}
-										>
+										) : null}
+										{tableSort[c.id] == 'DESC' ? (
 											<SortDownIcon fontSize={16} fill={tableSort[c.id] ? 'black' : '#adadad'} />
-										</HeadBadge>
-									) : null}
+										) : null}
+									</HeadBadge>
 								</IconButton>
 							</Tooltip>
 

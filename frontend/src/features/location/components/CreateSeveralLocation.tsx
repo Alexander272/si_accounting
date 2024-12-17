@@ -9,8 +9,8 @@ import type { Location } from '../types/location'
 import { ColumnNames } from '@/constants/columns'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useModal } from '@/features/modal/hooks/useModal'
-import { getSelectedItems, removeSelected } from '@/features/dataTable/dataTableSlice'
-import { useGetInstrumentsQuery } from '@/features/instrument/instrumentApiSlice'
+import { getSelected, setSelected } from '@/features/dataTable/dataTableSlice'
+// import { useGetInstrumentsQuery } from '@/features/instrument/instrumentApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { LocationInputs } from '@/components/Forms/NewLocationForm/LocationInputs'
 import { useCreateSeveralLocationMutation } from '../locationApiSlice'
@@ -23,19 +23,19 @@ const defaultValues: ILocationForm = {
 	dateOfIssue: dayjs().startOf('d').unix(),
 }
 export const CreateSeveralLocation = () => {
-	const selectedItems = useAppSelector(getSelectedItems)
+	const selected = useAppSelector(getSelected)
 
 	const dispatch = useAppDispatch()
 
 	const { closeModal } = useModal()
 	const methods = useForm<ILocationForm>({ values: defaultValues })
 
-	const { data, isFetching } = useGetInstrumentsQuery(selectedItems.map(i => i.id).join(','), {
-		skip: !selectedItems.length,
-	})
-	const [create] = useCreateSeveralLocationMutation()
+	// const { data, isFetching } = useGetInstrumentsQuery(selectedItems.map(i => i.id).join(','), {
+	// 	skip: !selectedItems.length,
+	// })
+	const [create, { isLoading }] = useCreateSeveralLocationMutation()
 
-	const items = selectedItems.filter(i => i.status != 'moved')
+	const items = Object.values(selected).filter(i => i.status != 'moved')
 	const used = items.filter(i => i.status != 'reserve')
 	const reserve = items.filter(i => i.status != 'used')
 
@@ -68,7 +68,7 @@ export const CreateSeveralLocation = () => {
 			const payload = await create(locations).unwrap()
 			toast.success(payload.message)
 			closeModal()
-			dispatch(removeSelected(undefined))
+			dispatch(setSelected([]))
 		} catch (error) {
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })
@@ -76,10 +76,9 @@ export const CreateSeveralLocation = () => {
 		}
 	})
 
-	// TODO это перестало работать
 	return (
 		<Stack position={'relative'}>
-			{isFetching && (
+			{isLoading && (
 				<Fallback
 					position={'absolute'}
 					top={'50%'}
@@ -111,17 +110,13 @@ export const CreateSeveralLocation = () => {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{data?.data.map(r => {
-								if (reserve.some(i => i.id == r.id)) {
-									return (
-										<TableRow key={r.id}>
-											<TableCell>{r.name}</TableCell>
-											<TableCell>{r.factoryNumber}</TableCell>
-											{/* <TableCell>{r.status}</TableCell> */}
-										</TableRow>
-									)
-								}
-							})}
+							{reserve.map(r => (
+								<TableRow key={r.id}>
+									<TableCell>{r.name}</TableCell>
+									<TableCell>{r.factoryNumber}</TableCell>
+									{/* <TableCell>{r.status}</TableCell> */}
+								</TableRow>
+							))}
 						</TableBody>
 					</Table>
 					<Divider sx={{ m: 3 }} />
@@ -141,17 +136,13 @@ export const CreateSeveralLocation = () => {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{data?.data.map(r => {
-								if (used.some(i => i.id == r.id)) {
-									return (
-										<TableRow key={r.id}>
-											<TableCell>{r.name}</TableCell>
-											<TableCell>{r.factoryNumber}</TableCell>
-											{/* <TableCell>{r.status}</TableCell> */}
-										</TableRow>
-									)
-								}
-							})}
+							{used.map(r => (
+								<TableRow key={r.id}>
+									<TableCell>{r.name}</TableCell>
+									<TableCell>{r.factoryNumber}</TableCell>
+									{/* <TableCell>{r.status}</TableCell> */}
+								</TableRow>
+							))}
 						</TableBody>
 					</Table>
 					<Divider sx={{ m: 3 }} />

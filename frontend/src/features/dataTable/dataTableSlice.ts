@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-import type { IDataItem, ISIFilter, ISISortObj, ISelected, SIStatus, IColumn } from './types/data'
+import type { IDataItem, ISIFilter, ISISortObj, SIStatus, IColumn } from './types/data'
 import { RootState } from '@/app/store'
 import { localKeys } from '@/constants/localKeys'
 import { Size } from '@/constants/defaultValues'
@@ -14,24 +14,18 @@ interface IDataTableSlice {
 	size: number
 	sort: ISISortObj
 	filter?: ISIFilter[]
-	selected: ISelected[]
-	active?: ISelected
-	// hidden: IHidden
+	selected: { [x: string]: IDataItem }
+	active?: IDataItem
 	columns: IColumn[]
 }
 
 const initialState: IDataTableSlice = {
 	page: +(localStorage.getItem(localKeys.page) || 1),
 	size: +(localStorage.getItem(localKeys.size) || Size), // 15, 30, 50, 100 доступные лимиты. 15 строк макс (в chrome) который влазит без прокрутки
-	// sort: {
-	// 	field: 'nextVerificationDate',
-	// 	type: 'ASC',
-	// },
 	sort: {
 		nextVerificationDate: 'ASC',
 	},
-	selected: [],
-	// hidden: JSON.parse(localStorage.getItem(localKeys.hidden) || '{}'),
+	selected: {},
 	columns: JSON.parse(localStorage.getItem(localKeys.columns) || 'null') || HeadCells,
 }
 
@@ -80,16 +74,16 @@ const dataTableSlice = createSlice({
 			}
 		},
 
-		addSelected: (state, action: PayloadAction<ISelected | ISelected[]>) => {
-			if (Array.isArray(action.payload)) state.selected.push(...action.payload)
-			else state.selected.push(action.payload)
-		},
-		removeSelected: (state, action: PayloadAction<string | undefined>) => {
-			if (action.payload != undefined) state.selected = state.selected.filter(s => s.id != action.payload)
-			else state.selected = []
+		setSelected: (state, action: PayloadAction<IDataItem[] | IDataItem>) => {
+			if (Array.isArray(action.payload))
+				state.selected = action.payload.reduce((a, v) => ({ ...a, [v.id]: v }), {})
+			else {
+				if (state.selected[action.payload.id]) delete state.selected[action.payload.id]
+				else state.selected[action.payload.id] = action.payload
+			}
 		},
 
-		setActive: (state, action: PayloadAction<ISelected | undefined>) => {
+		setActive: (state, action: PayloadAction<IDataItem | undefined>) => {
 			state.active = action.payload
 		},
 
@@ -139,9 +133,8 @@ export const getTablePage = (state: RootState) => state.dataTable.page
 export const getTableSize = (state: RootState) => state.dataTable.size
 export const getTableSort = (state: RootState) => state.dataTable.sort
 export const getTableFilter = (state: RootState) => state.dataTable.filter
-export const getSelectedItems = (state: RootState) => state.dataTable.selected
+export const getSelected = (state: RootState) => state.dataTable.selected
 export const getActiveItem = (state: RootState) => state.dataTable.active
-// export const getHidden = (state: RootState) => state.dataTable.hidden
 export const getColumns = (state: RootState) => state.dataTable.columns
 
 export const dataTablePath = dataTableSlice.name
@@ -153,10 +146,8 @@ export const {
 	setSize,
 	setSort,
 	setFilters,
-	addSelected,
-	removeSelected,
+	setSelected,
 	setActive,
-	// setHidden,
 	setColumns,
 	resetDataTableState,
 } = dataTableSlice.actions

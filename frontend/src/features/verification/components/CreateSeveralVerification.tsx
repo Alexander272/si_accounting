@@ -1,7 +1,7 @@
 import { Stack, Typography } from '@mui/material'
 
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { getSelectedItems, removeSelected } from '@/features/dataTable/dataTableSlice'
+import { getSelected, setSelected } from '@/features/dataTable/dataTableSlice'
 import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
 import { useGetLastVerificationQuery } from '../verificationApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
@@ -9,10 +9,12 @@ import { CreateVerificationForm } from './CreateVerificationForm'
 import { useModal } from '@/features/modal/hooks/useModal'
 
 export const CreateSeveralVerification = () => {
-	const selectedItems = useAppSelector(getSelectedItems)
+	const selected = useAppSelector(getSelected)
 	const dispatch = useAppDispatch()
 
 	const { closeModal } = useModal()
+
+	const selectedItems = Object.values(selected)
 
 	const { data: instrument, isFetching: isLoadingInstrument } = useGetInstrumentByIdQuery(
 		selectedItems[0]?.id || '',
@@ -23,7 +25,7 @@ export const CreateSeveralVerification = () => {
 	const { data, isFetching } = useGetLastVerificationQuery(instrument?.data.id || '', { skip: !instrument?.data.id })
 
 	const submitHandler = () => {
-		dispatch(removeSelected(selectedItems[0].id))
+		dispatch(setSelected(selectedItems[0]))
 		if (selectedItems.length == 1) {
 			closeModal()
 			return

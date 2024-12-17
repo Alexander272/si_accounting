@@ -14,7 +14,6 @@ import dayjs from 'dayjs'
 import type { IDocument } from '../../files/types/file'
 import { useAppSelector } from '@/hooks/redux'
 import { DayjsFormat } from '@/constants/dateFormat'
-import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
 import { DocIcon } from '@/components/Icons/DocIcon'
 import { PdfIcon } from '@/components/Icons/PdfIcon'
 import { ImageIcon } from '@/components/Icons/ImageIcon'
@@ -39,7 +38,6 @@ const Statuses = {
 export const VerificationHistory = () => {
 	const active = useAppSelector(getActiveItem)
 
-	const { data: instrument } = useGetInstrumentByIdQuery(active?.id || '', { skip: !active?.id })
 	const { data } = useGetVerificationByInstrumentIdQuery(active?.id || '', { skip: !active?.id })
 
 	const [download] = useLazyDownloadFileQuery()
@@ -51,7 +49,7 @@ export const VerificationHistory = () => {
 	return (
 		<TableContainer>
 			<Typography fontSize={'1.2rem'} textAlign={'center'}>
-				{instrument?.data.name} ({instrument?.data.factoryNumber})
+				{active?.name} ({active?.factoryNumber})
 			</Typography>
 
 			<Table>

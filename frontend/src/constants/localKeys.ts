@@ -1,14 +1,14 @@
-export const localKeys = {
-	page: 'si_accounting/page',
-	size: 'si_accounting/size',
-	sort: 'si_accounting/sort',
-	filter: 'si_accounting/filter',
-	hidden: 'si_accounting/hidden',
-	columns: 'si_accounting/columns',
+export const localKeys = Object.freeze({
+	page: 'si_accounting/page' as const,
+	size: 'si_accounting/size' as const,
+	sort: 'si_accounting/sort' as const,
+	filter: 'si_accounting/filter' as const,
+	hidden: 'si_accounting/hidden' as const,
+	columns: 'si_accounting/columns' as const,
 
-	instrument: 'si_accounting/new/instrument',
-	verification: 'si_accounting/new/verification',
-	location: 'si_accounting/new/location',
-}
+	instrument: 'si_accounting/new/instrument' as const,
+	verification: 'si_accounting/new/verification' as const,
+	location: 'si_accounting/new/location' as const,
+})
 
 export const DraftKey = 'draft'

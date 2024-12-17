@@ -1,4 +1,4 @@
-export const AcceptedFiles = {
+export const AcceptedFiles = Object.freeze({
 	'application/msword': ['.doc'],
 	'application/x-extension-doc': ['.doc'],
 	'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
@@ -12,4 +12,4 @@ export const AcceptedFiles = {
 	'image/png': ['.png'],
 	'image/jpeg': ['.jpeg', '.jpg'],
 	'text/csv': ['.csv'],
-}
+})

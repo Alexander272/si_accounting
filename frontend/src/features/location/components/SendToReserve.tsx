@@ -7,23 +7,18 @@ import type { Location } from '../types/location'
 import { ColumnNames } from '@/constants/columns'
 import { useAppSelector } from '@/hooks/redux'
 import { useModal } from '@/features/modal/hooks/useModal'
-import { useGetAllSIQuery } from '@/features/dataTable/siApiSlice'
-import { getActiveItem, getSelectedItems, getTableFilter, getTableSort } from '@/features/dataTable/dataTableSlice'
+import { getActiveItem, getSelected } from '@/features/dataTable/dataTableSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { useCreateSeveralLocationMutation } from '../locationApiSlice'
 
 export const SendToReserve = () => {
 	const active = useAppSelector(getActiveItem)
 
-	const sort = useAppSelector(getTableSort)
-	const filter = useAppSelector(getTableFilter)
-
-	const selectedItems = useAppSelector(getSelectedItems)
+	const selected = useAppSelector(getSelected)
 
 	const { closeModal } = useModal()
 
-	const { data, isFetching } = useGetAllSIQuery({ page: 0, size: 9999999, sort, filter })
-	const [create] = useCreateSeveralLocationMutation()
+	const [create, { isLoading }] = useCreateSeveralLocationMutation()
 
 	const saveHandler = async () => {
 		const date = dayjs().startOf('d').unix()
@@ -38,13 +33,13 @@ export const SendToReserve = () => {
 			status: 'moved',
 		}
 
-		if (active?.id && active.status == 'used' && !selectedItems.some(s => s.id == active.id)) {
+		if (active?.id && active.status == 'used' && !selected[active.id]) {
 			locations.push({
 				instrumentId: active.id,
 				...location,
 			})
 		}
-		selectedItems.forEach(i => {
+		Object.values(selected).forEach(i => {
 			locations.push({
 				instrumentId: i.id,
 				...location,
@@ -63,11 +58,12 @@ export const SendToReserve = () => {
 		}
 	}
 
-	const items = selectedItems.filter(i => i.status == 'used')
+	const items = Object.values(selected).filter(i => i.status == 'used')
+	if (!items.some(i => i.id == active?.id) && active) items.push(active)
 
 	return (
 		<Stack position={'relative'}>
-			{isFetching && (
+			{isLoading && (
 				<Fallback
 					position={'absolute'}
 					top={'50%'}
@@ -90,17 +86,13 @@ export const SendToReserve = () => {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{data?.data.map(r => {
-						if (items.some(i => i.id == r.id) || (active?.id == r.id && active.status == 'used')) {
-							return (
-								<TableRow key={r.id}>
-									<TableCell>{r.name}</TableCell>
-									<TableCell>{r.factoryNumber}</TableCell>
-									<TableCell>{r.place}</TableCell>
-								</TableRow>
-							)
-						}
-					})}
+					{items.map(r => (
+						<TableRow key={r.id}>
+							<TableCell>{r.name}</TableCell>
+							<TableCell>{r.factoryNumber}</TableCell>
+							<TableCell>{r.place}</TableCell>
+						</TableRow>
+					))}
 				</TableBody>
 			</Table>
 
@@ -111,26 +103,6 @@ export const SendToReserve = () => {
 				<Button onClick={saveHandler} variant='contained' fullWidth>
 					Сохранить
 				</Button>
-				{/* <Confirm
-					onClick={deleteHandler}
-					fullWidth
-					buttonComponent={
-						<Button variant='contained' fullWidth>
-							Да
-						</Button>
-					}
-				>
-					<Stack spacing={1} direction={'row'} justifyContent={'center'} alignItems={'center'} mb={1}>
-						<WarningIcon fill={palette.error.main} />
-						<Typography fontSize={'1.1rem'} fontWeight={'bold'} align='center'>
-							Удаление
-						</Typography>
-					</Stack>
-
-					<Typography maxWidth={260} align='center'>
-						Вы уверены, что хотите удалить перемещение?
-					</Typography>
-				</Confirm> */}
 			</Stack>
 		</Stack>
 	)

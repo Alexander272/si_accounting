@@ -1,4 +1,4 @@
-export const PermRules = {
+export const PermRules = Object.freeze({
 	SI: {
 		Read: 'si:read',
 		Write: 'si:write',
@@ -26,4 +26,4 @@ export const PermRules = {
 		// Read: 'reserve:read',
 		Write: 'reserve:write',
 	},
-}
+})

@@ -37,7 +37,7 @@ export const ContextMenu: FC<Props> = ({ coordinates, item, positionHandler }) =
 
 	const contextHandler = (selector: ModalSelectors) => () => {
 		if (item) {
-			dispatch(setActive({ id: item.id, status: item.status }))
+			dispatch(setActive(item))
 			closeHandler()
 			openModal(selector)
 		}

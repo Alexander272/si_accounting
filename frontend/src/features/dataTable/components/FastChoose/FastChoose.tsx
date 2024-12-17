@@ -4,20 +4,15 @@ import { toast } from 'react-toastify'
 import dayjs from 'dayjs'
 
 import type { IFetchError } from '@/app/types/error'
-import type { ISIFilter, ISISortObj, ISelected } from '../../types/data'
+import type { ISIFilter, ISISortObj } from '../../types/data'
+import { PermRules } from '@/constants/permissions'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { useCheckPermission } from '@/features/auth/hooks/check'
 import { CheckListIcon } from '@/components/Icons/CheckListIcon'
 import { CheckAllIcon } from '@/components/Icons/CheckAllIcon'
 import { DelayIcon } from '@/components/Icons/DelayIcon'
 import { CalendarIcon } from '@/components/Icons/CalendarIcon'
-import {
-	addSelected,
-	getSIStatus,
-	getSelectedItems,
-	getTableFilter,
-	getTableSort,
-	removeSelected,
-} from '../../dataTableSlice'
+import { getSIStatus, getSelected, getTableFilter, getTableSort, setSelected } from '../../dataTableSlice'
 import { useLazyGetAllSIQuery } from '../../siApiSlice'
 import { useGetAllSI } from '../../hooks/getAllSI'
 
@@ -27,11 +22,12 @@ export const FastChoose = () => {
 
 	const [fetchSi] = useLazyGetAllSIQuery()
 
-	const selected = useAppSelector(getSelectedItems)
+	const selected = useAppSelector(getSelected)
 
 	const status = useAppSelector(getSIStatus)
 	const sort = useAppSelector(getTableSort)
 	const filter = useAppSelector(getTableFilter)
+	const all = useCheckPermission(PermRules.Location.Write)
 
 	const dispatch = useAppDispatch()
 
@@ -40,8 +36,8 @@ export const FastChoose = () => {
 	const toggleHandler = () => setOpen(prev => !prev)
 
 	const selectAllHandler = () => {
-		if (selected.length) {
-			dispatch(removeSelected())
+		if (Object.keys(selected).length) {
+			dispatch(setSelected([]))
 			toggleHandler()
 		} else fetching(filter, sort)
 	}
@@ -51,9 +47,6 @@ export const FastChoose = () => {
 			field: 'nextVerificationDate',
 			fieldType: 'date',
 			values: [{ compareType: 'lte', value: dayjs().startOf('d').unix().toString() }],
-			// compareType: 'lte',
-			// valueStart: dayjs().startOf('d').unix().toString(),
-			// valueEnd: '',
 		}
 
 		fetching(filter ? [...filter, newFilter] : [newFilter])
@@ -67,9 +60,6 @@ export const FastChoose = () => {
 				{ compareType: 'gte', value: dayjs().add(countMonth, 'M').startOf('month').unix().toString() },
 				{ compareType: 'lte', value: dayjs().add(countMonth, 'M').endOf('month').unix().toString() },
 			],
-			// compareType: 'range',
-			// valueStart: dayjs().add(countMonth, 'M').startOf('month').unix().toString(),
-			// valueEnd: dayjs().add(countMonth, 'M').endOf('month').unix().toString(),
 		}
 
 		fetching(filter ? [...filter, newFilter] : [newFilter])
@@ -77,14 +67,8 @@ export const FastChoose = () => {
 
 	const fetching = async (filter?: ISIFilter[], sort?: ISISortObj) => {
 		try {
-			const payload = await fetchSi({ status, size: data?.total, filter, sort }).unwrap()
-			const identifiers =
-				payload?.data.map(si => {
-					const status = si.place == 'Перемещение' ? 'moved' : si.place == 'Резерв' ? 'reserve' : 'used'
-					return { id: si.id, status: status } as ISelected
-				}) || []
-			dispatch(removeSelected())
-			dispatch(addSelected(identifiers))
+			const payload = await fetchSi({ status, all, size: data?.total, filter, sort }).unwrap()
+			dispatch(setSelected(payload.data))
 		} catch (error) {
 			const fetchError = error as IFetchError
 			toast.error(fetchError.data.message, { autoClose: false })
@@ -139,11 +123,14 @@ export const FastChoose = () => {
 					},
 				}}
 			>
-				<MenuItem onClick={selectAllHandler} sx={{ fontWeight: selected.length ? 'bold' : 'normal' }}>
+				<MenuItem
+					onClick={selectAllHandler}
+					sx={{ fontWeight: Object.keys(selected).length ? 'bold' : 'normal' }}
+				>
 					<ListItemIcon>
 						<CheckAllIcon fontSize={18} fill={'#474747'} />
 					</ListItemIcon>
-					{selected.length ? 'Отменить выбор' : 'Выбрать все'}
+					{Object.keys(selected).length ? 'Отменить выбор' : 'Выбрать все'}
 				</MenuItem>
 				<MenuItem onClick={selectOverdueHandler}>
 					<ListItemIcon>
