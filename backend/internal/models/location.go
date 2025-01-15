@@ -15,6 +15,7 @@ type Location struct {
 	DateOfIssue     int64  `json:"dateOfIssue" db:"date_of_issue"`
 	DateOfReceiving int64  `json:"dateOfReceiving" db:"date_of_receiving"`
 	NeedConfirmed   bool   `json:"needConfirmed" db:"need_confirmed"`
+	HasConfirmed    bool   `json:"hasConfirmed" db:"has_confirmed"`
 	LastPlace       string `json:"lastPlace" db:"last_place"`
 	Status          string `json:"status" db:"status"`
 }
@@ -76,12 +77,17 @@ type ReceivingDTO struct {
 	InstrumentIds []string `json:"instrumentId" db:"instrument_id"`
 	Status        string   `json:"status" db:"status"` // либо отправляется в резерв, либо к сотруднику
 	UserId        string
+	HasConfirmed  bool
 	// Missing       []SelectedSI
 	// DateOfReceiving string   `json:"dateOfReceiving" db:"date_of_receiving"`
 }
 
 type ReceivingFromBotDTO struct {
 	UserMostId string `json:"userId" binding:"required"`
+}
+
+type ForcedReceiptDTO struct {
+	InstrumentId string `json:"instrumentId" binding:"required"`
 }
 
 type DepartmentFilterDTO struct {

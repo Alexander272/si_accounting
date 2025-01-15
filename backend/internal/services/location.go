@@ -50,6 +50,8 @@ type Location interface {
 	UpdatePerson(context.Context, *models.UpdatePlaceDTO) error
 	ReceivingFromApp(context.Context, *models.ReceivingDTO) error
 	Receiving(context.Context, *models.DialogResponse) error
+	ForcedReceiptMany(context.Context) error
+	ForcedReceipt(context.Context, *models.ForcedReceiptDTO) error
 	Delete(context.Context, string) error
 }
 
@@ -231,8 +233,6 @@ func (s *LocationService) ReceivingFromApp(ctx context.Context, dto *models.Rece
 		}
 	}
 
-	//TODO наверное стоит добавить проверку чтобы получить инструмент мог только ответственный, а не любой пользователь
-
 	if len(dto.InstrumentIds) == 0 {
 		return models.ErrNoInstrument
 	}
@@ -281,7 +281,8 @@ func (s *LocationService) Receiving(ctx context.Context, dto *models.DialogRespo
 		// PostID:        PostID,
 		InstrumentIds: InstrumentIds,
 		// Missing:       missing,
-		Status: post.Status,
+		Status:       post.Status,
+		HasConfirmed: true,
 	}
 
 	if err := s.repo.Receiving(ctx, location); err != nil {
@@ -310,6 +311,20 @@ func (s *LocationService) Receiving(ctx context.Context, dto *models.DialogRespo
 		if err := s.most.Send(ctx, not); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (s *LocationService) ForcedReceiptMany(ctx context.Context) error {
+	logger.Info("Forced receipt si")
+	if err := s.repo.ForcedReceiptMany(ctx); err != nil {
+		return fmt.Errorf("failed to forced receipt many si. error: %w", err)
+	}
+	return nil
+}
+func (s *LocationService) ForcedReceipt(ctx context.Context, dto *models.ForcedReceiptDTO) error {
+	if err := s.repo.ForcedReceipt(ctx, dto); err != nil {
+		return fmt.Errorf("failed to forced receipt si. error: %w", err)
 	}
 	return nil
 }

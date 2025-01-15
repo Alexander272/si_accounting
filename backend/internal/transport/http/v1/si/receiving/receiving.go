@@ -25,13 +25,14 @@ func NewReceivingHandlers(service services.Location) *ReceivingHandlers {
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Location, middleware *middleware.Middleware) {
+func Register(api *gin.RouterGroup, service services.Location, ware *middleware.Middleware) {
 	handlers := NewReceivingHandlers(service)
 
 	locations := api.Group("/si/locations")
 	{
-		locations.POST("/receiving", middleware.VerifyToken, handlers.Receiving)
+		locations.POST("/receiving", ware.VerifyToken, handlers.Receiving)
 		locations.POST("/receiving/dialog", handlers.ReceivingDialog)
+		locations.POST("/forced", ware.VerifyToken, ware.CheckPermissions(constants.Location, constants.Write), handlers.ForcedReceipt)
 	}
 }
 
@@ -48,6 +49,7 @@ func (h *ReceivingHandlers) Receiving(c *gin.Context) {
 		user = u.(models.User)
 	}
 	dto.UserId = user.Id
+	dto.HasConfirmed = true
 
 	if err := h.service.ReceivingFromApp(c, dto); err != nil {
 		if errors.Is(err, models.ErrNoResponsible) {
@@ -162,6 +164,31 @@ func (h *ReceivingHandlers) ReceivingDialog(c *gin.Context) {
 	logger.Info("Получены инструменты",
 		logger.StringAttr("user_id", dto.UserID),
 		logger.StringAttr("instrument_ids", fmt.Sprint(dto.Submission)),
+	)
+
+	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})
+}
+
+func (h *ReceivingHandlers) ForcedReceipt(c *gin.Context) {
+	// instrument := c.Query("instrument")
+	// if instrument == "" {
+	// 	response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "id не задан")
+	// 	return
+	// }
+	dto := &models.ForcedReceiptDTO{}
+	if err := c.BindJSON(&dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+
+	if err := h.service.ForcedReceipt(c, dto); err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+
+	logger.Info("Получены инструменты (принудительно)",
+		logger.StringAttr("instrument_id", dto.InstrumentId),
 	)
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Данные о месте нахождения успешно обновлены"})

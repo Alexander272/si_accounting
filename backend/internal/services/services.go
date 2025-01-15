@@ -85,7 +85,7 @@ func NewServices(deps Deps) *Services {
 
 	// notification := NewNotificationService(si, most)
 	si_notification := NewSINotificationService(si, most, deps.Times)
-	scheduler := NewSchedulerService(&SchedulerDeps{Notification: si_notification, User: user})
+	scheduler := NewSchedulerService(&SchedulerDeps{Notification: si_notification, User: user, Location: location})
 
 	return &Services{
 		Instrument:    instrument,

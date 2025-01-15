@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
-	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron/v2"
 )
 
@@ -18,11 +16,13 @@ type SchedulerService struct {
 	cron         gocron.Scheduler
 	notification SINotification
 	user         User
+	location     Location
 }
 
 type SchedulerDeps struct {
 	Notification SINotification
 	User         User
+	Location     Location
 }
 
 func NewSchedulerService(deps *SchedulerDeps) *SchedulerService {
@@ -35,6 +35,7 @@ func NewSchedulerService(deps *SchedulerDeps) *SchedulerService {
 		cron:         cron,
 		notification: deps.Notification,
 		user:         deps.User,
+		location:     deps.Location,
 	}
 }
 
@@ -79,7 +80,12 @@ func (s *SchedulerService) Stop() error {
 func (s *SchedulerService) job() {
 	logger.Info("job was started")
 
-	ginCtx := &gin.Context{Request: &http.Request{Method: "Get"}}
+	// принудительное получение инструмента, который не принимают более 20 дней
+	if err := s.location.ForcedReceiptMany(context.Background()); err != nil {
+		logger.Error("location forced receipt error:", logger.ErrAttr(err))
+		error_bot.Send(nil, err.Error(), nil)
+		return
+	}
 
 	s.notification.CheckUsedSI()
 	s.notification.CheckSentSI()
@@ -87,7 +93,7 @@ func (s *SchedulerService) job() {
 	// Синхронизация пользователей с keycloak
 	if err := s.user.Sync(context.Background()); err != nil {
 		logger.Error("user sync error:", logger.ErrAttr(err))
-		error_bot.Send(ginCtx, err.Error(), nil)
+		error_bot.Send(nil, err.Error(), nil)
 		return
 	}
 }

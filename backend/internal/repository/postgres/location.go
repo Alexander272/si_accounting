@@ -35,6 +35,8 @@ type Location interface {
 	UpdatePlace(context.Context, *models.UpdatePlaceDTO) error
 	UpdatePerson(context.Context, *models.UpdatePlaceDTO) error
 	Receiving(context.Context, *models.ReceivingDTO) error
+	ForcedReceiptMany(context.Context) error
+	ForcedReceipt(context.Context, *models.ForcedReceiptDTO) error
 	Delete(context.Context, string) error
 }
 
@@ -59,7 +61,7 @@ func (r *LocationRepo) GetLast(ctx context.Context, instrumentId string) (*model
 func (r *LocationRepo) GetByInstrumentId(ctx context.Context, instrumentId string) ([]*models.Location, error) {
 	// var data []pq_models.LocationData
 	query := fmt.Sprintf(`SELECT id, instrument_id, status, date_of_receiving, date_of_issue, place, 
-		COALESCE(person_id::text, '') AS person_id, COALESCE(department_id::text, '') AS department_id, need_confirmed
+		COALESCE(person_id::text, '') AS person_id, COALESCE(department_id::text, '') AS department_id, need_confirmed, has_confirmed
 		FROM %s WHERE instrument_id=$1 ORDER BY date_of_issue DESC, created_at DESC, id`,
 		SIMovementTable,
 	)
@@ -250,9 +252,38 @@ func (r *LocationRepo) UpdatePerson(ctx context.Context, dto *models.UpdatePlace
 // // По идее это все входит в update -> надо как-то переписать update чтобы записывались только переданные данные даже если они пустые
 func (r *LocationRepo) Receiving(ctx context.Context, data *models.ReceivingDTO) error {
 	// query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE instrument_id=$3 AND date_of_receiving=0`, SIMovementTable)
-	query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2 WHERE ARRAY[instrument_id] <@ $3 AND date_of_receiving=0`, SIMovementTable)
+	query := fmt.Sprintf(`UPDATE %s SET status=$1, date_of_receiving=$2, has_confirmed=$3 WHERE ARRAY[instrument_id] <@ $4 AND date_of_receiving=0`,
+		SIMovementTable,
+	)
 
-	_, err := r.db.Exec(query, data.Status, time.Now().Unix(), pq.Array(data.InstrumentIds))
+	_, err := r.db.Exec(query, data.Status, time.Now().Unix(), data.HasConfirmed, pq.Array(data.InstrumentIds))
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return nil
+}
+
+func (r *LocationRepo) ForcedReceiptMany(ctx context.Context) error {
+	query := fmt.Sprintf(`UPDATE %s AS m SET date_of_receiving=$1, status=(
+			SELECT CASE WHEN status='used' THEN 'reserve' ELSE 'used' END FROM %s
+			WHERE instrument_id=m.instrument_id AND date_of_receiving!=0 ORDER BY date_of_issue DESC LIMIT 1
+		) WHERE date_of_receiving=0 AND date_of_issue < $2`,
+		SIMovementTable, SIMovementTable,
+	)
+
+	limit := time.Now().Add(-time.Hour * 24 * 20).Unix() //20 days ago
+	_, err := r.db.Exec(query, time.Now().Unix(), limit)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return nil
+}
+func (r *LocationRepo) ForcedReceipt(ctx context.Context, dto *models.ForcedReceiptDTO) error {
+	query := fmt.Sprintf(`UPDATE %s AS m SET date_of_receiving=$1, status='used' WHERE instrument_id=$2 AND date_of_receiving=0`,
+		SIMovementTable,
+	)
+
+	_, err := r.db.Exec(query, time.Now().Unix(), dto.InstrumentId)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
