@@ -90,6 +90,19 @@ const locationApiSlice = apiSlice.injectEndpoints({
 				{ type: 'SI', id: 'MOVED' },
 			],
 		}),
+		forcedReceipt: builder.mutation<string, { instrumentId: string }>({
+			query: data => ({
+				url: `${API.si.location.base}/forced`,
+				method: 'POST',
+				body: data,
+			}),
+			invalidatesTags: [
+				{ type: 'Location', id: 'LAST' },
+				{ type: 'Location', id: 'ALL' },
+				{ type: 'SI', id: 'ALL' },
+				{ type: 'SI', id: 'MOVED' },
+			],
+		}),
 
 		deleteLocation: builder.mutation<string, string>({
 			query: id => ({
@@ -113,5 +126,6 @@ export const {
 	useCreateSeveralLocationMutation,
 	useUpdateLocationMutation,
 	useReceivingMutation,
+	useForcedReceiptMutation,
 	useDeleteLocationMutation,
 } = locationApiSlice

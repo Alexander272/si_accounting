@@ -78,12 +78,20 @@ export const ContextMenu: FC<Props> = ({ coordinates, item, positionHandler }) =
 			</ListItemIcon>
 			Добавить перемещение
 		</MenuItem>,
-		item?.status == 'moved' ? (
-			<MenuItem key='receive' disabled={item?.lastPlace == ''} onClick={contextHandler('Receive')}>
+		item?.status == 'moved' && item?.lastPlace != '' ? (
+			<MenuItem key='receive' onClick={contextHandler('Receive')}>
 				<ListItemIcon>
 					<FileSyncIcon fontSize={18} fill={'#757575'} />
 				</ListItemIcon>
 				Получить инструмент
+			</MenuItem>
+		) : null,
+		item?.status == 'moved' && item?.lastPlace == '' ? (
+			<MenuItem key='receive' onClick={contextHandler('Forced')}>
+				<ListItemIcon>
+					<FileSyncIcon fontSize={18} fill={'#757575'} />
+				</ListItemIcon>
+				Отметить инструмент как полученный
 			</MenuItem>
 		) : null,
 		item?.lastPlace == '' ? (

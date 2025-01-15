@@ -20,6 +20,7 @@ import { DocumentsForm } from '@/features/files/components/Form/Form'
 import { ReceivingForm } from '@/features/location/components/ReceivingForm'
 import { useModal } from '../hooks/useModal'
 import { getIsOpenModal, getModalSelector } from '../modalSlice'
+import { ForcedReceiptForm } from '@/features/location/components/ForcedReceiptForm'
 
 const Transition = forwardRef(function Transition(
 	props: TransitionProps & {
@@ -58,6 +59,7 @@ export default function Modal() {
 					{selector == 'DeleteLocation' && ModalTitles.DEL_MOVEMENT}
 					{selector == 'SendToReserve' && ModalTitles.SEND_TO_RESERVE}
 					{selector == 'Receive' && ModalTitles.RECEIVE}
+					{selector == 'Forced' && ModalTitles.FORCED}
 
 					{selector == 'EditEmployee' && ModalTitles.EDIT_EMPLOYEE}
 					{selector == 'CreateEmployee' && ModalTitles.CREATE_EMPLOYEE}
@@ -87,6 +89,7 @@ export default function Modal() {
 				{selector == 'DeleteLocation' && <DeleteLocation />}
 				{selector == 'SendToReserve' && <SendToReserve />}
 				{selector == 'Receive' && <ReceivingForm />}
+				{selector == 'Forced' && <ForcedReceiptForm />}
 
 				{selector == 'ViewLocationHistory' && <LocationHistory />}
 				{selector == 'ViewVerificationHistory' && <VerificationHistory />}

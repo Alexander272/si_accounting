@@ -28,6 +28,11 @@ export const LocationHistory = () => {
 							<br />
 							запрашивалось?
 						</TableCell>
+						<TableCell align='center'>
+							Подтверждение
+							<br />
+							Получено?
+						</TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
@@ -43,6 +48,7 @@ export const LocationHistory = () => {
 								{d.status == 'reserve' && !d.place ? 'Резерв' : d.place}
 							</TableCell>
 							<TableCell align='center'>{d.needConfirmed ? 'Да' : 'Нет'}</TableCell>
+							<TableCell align='center'>{d.hasConfirmed ? 'Да' : 'Нет'}</TableCell>
 						</TableRow>
 					))}
 				</TableBody>

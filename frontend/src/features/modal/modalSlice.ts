@@ -21,6 +21,7 @@ export type ModalSelectors =
 	| 'Period'
 	| 'Documents'
 	| 'Receive'
+	| 'Forced'
 	| 'Test'
 
 interface IModalState {

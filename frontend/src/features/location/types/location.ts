@@ -9,6 +9,7 @@ export type Location = {
 	dateOfIssue: number
 	dateOfReceiving: number
 	needConfirmed: boolean
+	hasConfirmed: boolean
 	status: string
 }
 
