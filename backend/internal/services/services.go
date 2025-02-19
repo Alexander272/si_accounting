@@ -27,6 +27,9 @@ type Services struct {
 	User
 	Responsible
 
+	Realm
+	Accesses
+
 	Session
 	Permission
 
@@ -75,6 +78,9 @@ func NewServices(deps Deps) *Services {
 	menuItem := NewMenuItemService(deps.Repos.MenuItem)
 	menu := NewMenuService(deps.Repos.Menu, menuItem)
 
+	realm := NewRealmService(deps.Repos.Realm)
+	accesses := NewAccessesService(deps.Repos.Accesses)
+
 	// TODO можно включить для keycloak настройку что он за прокси и запустить сервер на 80 (или на другом) порту для вывода интерфейса
 	// TODO при авторизации пользователя его можно искать сразу по нескольким realm
 	session := NewSessionService(deps.Keycloak, role, filter)
@@ -102,6 +108,9 @@ func NewServices(deps Deps) *Services {
 		Role:     role,
 		MenuItem: menuItem,
 		Menu:     menu,
+
+		Realm:    realm,
+		Accesses: accesses,
 
 		User:        user,
 		Responsible: responsible,

@@ -12,6 +12,7 @@ import (
 
 	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
+	"github.com/Alexander272/si_accounting/backend/internal/migrate"
 	"github.com/Alexander272/si_accounting/backend/internal/repository"
 	"github.com/Alexander272/si_accounting/backend/internal/server"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
@@ -55,6 +56,10 @@ func main() {
 		AdminName: conf.Keycloak.Root,
 		AdminPass: conf.Keycloak.RootPass,
 	})
+
+	if err := migrate.Migrate(db.DB); err != nil {
+		log.Fatalf("failed to migrate: %s", err.Error())
+	}
 
 	constants.SetReserveChannelId(conf.Bot.ReserveChannelId)
 

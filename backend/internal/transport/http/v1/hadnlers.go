@@ -4,12 +4,14 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/accesses"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/auth"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/channel"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/departments"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/employees"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/file"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/filter"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/realm"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/responsible"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/roles"
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/v1/si"
@@ -77,6 +79,9 @@ func (h *Handler) Init(group *gin.RouterGroup) {
 	auth.Register(v1, auth.Deps{Service: h.services.Session, Auth: h.conf.Auth})
 
 	secure := v1.Group("", h.middleware.VerifyToken)
+
+	realm.Register(secure, h.services.Realm, h.middleware)
+	accesses.Register(secure, h.services.Accesses, h.middleware)
 
 	siGroup := secure.Group("/si")
 	si.Register(siGroup, h.services.SI, h.middleware)

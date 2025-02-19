@@ -50,6 +50,13 @@ type DefaultFilter interface {
 	postgres.DefaultFilter
 }
 
+type Realm interface {
+	postgres.Realm
+}
+type Accesses interface {
+	postgres.Accesses
+}
+
 type Repository struct {
 	Instrument
 	Verification
@@ -65,6 +72,9 @@ type Repository struct {
 	MenuItem
 	Menu
 	DefaultFilter
+
+	Realm
+	Accesses
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -83,5 +93,7 @@ func NewRepository(db *sqlx.DB) *Repository {
 		MenuItem:      postgres.NewMenuItemRepo(db),
 		Menu:          postgres.NewMenuRepo(db),
 		DefaultFilter: postgres.NewDefaultFilterRepo(db),
+		Realm:         postgres.NewRealmRepo(db),
+		Accesses:      postgres.NewAccessesRepo(db),
 	}
 }

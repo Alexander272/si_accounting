@@ -13,6 +13,9 @@ const (
 
 	DefaultFilterTable = "default_filters"
 
+	RealmTable  = "realms"
+	AccessTable = "accesses"
+
 	RoleTable     = "roles"
 	MenuItemTable = "menu_item"
 	MenuTable     = "menu"

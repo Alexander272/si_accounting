@@ -12,6 +12,7 @@ import (
 	"github.com/goccy/go-json"
 )
 
+// DEPRECATED
 func Send(ctx context.Context, data bot.Data) {
 	var req []byte
 	if data.Request != nil {

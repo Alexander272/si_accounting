@@ -23,6 +23,7 @@ type NotificationService struct {
 	// errBot          ErrorBot
 }
 
+// DEPRECATED
 func NewNotificationService(si SI, bot Most) *NotificationService {
 	cron, err := gocron.NewScheduler()
 	if err != nil {

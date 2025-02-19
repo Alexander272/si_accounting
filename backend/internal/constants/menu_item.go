@@ -11,6 +11,7 @@ const (
 	Documents    = "documents"
 	Roles        = "roles"
 	Users        = "users"
+	Realms       = "realms"
 )
 
 const (
