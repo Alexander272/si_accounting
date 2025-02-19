@@ -69,6 +69,9 @@ export const apiSlice = createApi({
 		'Channels',
 		'Responsible',
 		'Users',
+		'Roles',
+		'Realms',
+		'Accesses',
 	],
 	endpoints: () => ({}),
 })

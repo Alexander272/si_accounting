@@ -19,6 +19,7 @@ export type DialogVariants =
 	| 'Period'
 	| 'Documents'
 	| 'Receive'
+	| 'Access'
 
 interface IDialogOptions {
 	isOpen: boolean

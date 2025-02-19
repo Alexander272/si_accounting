@@ -11,7 +11,6 @@ import { DepartmentForm } from '@/features/departments/components/DepartmentForm
 // страница для управления работниками и департаментами
 export default function Employees() {
 	const [department, setDepartment] = useState('new')
-	//TODO как-то тут все странно работает. при перезагрузке страницы или при обновлении подразделения department становится undefined
 
 	const departmentHandler = (department: string) => {
 		setDepartment(department)

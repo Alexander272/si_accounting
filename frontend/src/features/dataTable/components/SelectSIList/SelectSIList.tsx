@@ -4,7 +4,7 @@ import { IconButton, Menu, MenuItem, useTheme } from '@mui/material'
 import type { SIStatus } from '../../types/data'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { LeftArrowIcon } from '@/components/Icons/LeftArrowIcon'
-import { getSIStatus, setStatus } from '../../dataTableSlice'
+import { getSIStatus, setPage, setStatus } from '../../dataTableSlice'
 
 export const SelectSIList = () => {
 	const status = useAppSelector(getSIStatus)
@@ -19,6 +19,7 @@ export const SelectSIList = () => {
 
 	const changeListHandler = (status: SIStatus) => () => {
 		dispatch(setStatus(status))
+		dispatch(setPage(1))
 		toggleHandler()
 	}
 

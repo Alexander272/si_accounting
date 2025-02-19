@@ -54,7 +54,6 @@ export const DepartmentForm: FC<Props> = ({ department, setDepartment }) => {
 		try {
 			if (department == 'new') {
 				const payload = await create(newData).unwrap()
-				console.log(payload)
 				setDepartment(payload.id)
 				toast.success('Подразделение создано')
 			} else {

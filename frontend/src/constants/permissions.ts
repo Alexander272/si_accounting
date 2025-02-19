@@ -1,29 +1,33 @@
 export const PermRules = Object.freeze({
 	SI: {
-		Read: 'si:read',
-		Write: 'si:write',
+		Read: 'si:read' as const,
+		Write: 'si:write' as const,
 	},
 	Location: {
-		Read: 'location:read',
-		Write: 'location:write',
+		Read: 'location:read' as const,
+		Write: 'location:write' as const,
 	},
 	Verification: {
-		Read: 'verification:read',
-		Write: 'verification:write',
+		Read: 'verification:read' as const,
+		Write: 'verification:write' as const,
 	},
 	Documents: {
-		Write: 'documents:write',
+		Write: 'documents:write' as const,
 	},
 	Employee: {
-		Read: 'employee:read',
-		Write: 'employee:write',
+		Read: 'employee:read' as const,
+		Write: 'employee:write' as const,
 	},
 	Department: {
-		Read: 'department:read',
-		Write: 'department:write',
+		Read: 'department:read' as const,
+		Write: 'department:write' as const,
 	},
 	Reserve: {
-		// Read: 'reserve:read',
-		Write: 'reserve:write',
+		// Read: 'reserve:read' as const,
+		Write: 'reserve:write' as const,
+	},
+	Realms: {
+		Read: 'realms:read' as const,
+		Write: 'realms:write' as const,
 	},
 })

@@ -2,11 +2,12 @@ import type { RouteObject } from 'react-router-dom'
 import { createBrowserRouter } from 'react-router-dom'
 
 import { AppRoutes } from '@/constants/routes'
-import { Layout } from '@/components/Layout/LayoutLazy'
+import { Layout } from '@/components/Layout/Layout'
 import { NotFound } from '@/pages/notFound/NotFoundLazy'
 import { Home } from '@/pages/home/HomeLazy'
 import { Auth } from '@/pages/auth/AuthLazy'
-import { Employees } from '@/pages/admin/employee/EmployeesLazy'
+import { Employees } from '@/pages/employee/EmployeesLazy'
+import { Realms } from '@/pages/admin/realms/RealmsLazy'
 import PrivateRoute from './PrivateRoute'
 
 const config: RouteObject[] = [
@@ -20,19 +21,21 @@ const config: RouteObject[] = [
 			},
 			{
 				path: AppRoutes.HOME,
-				element: (
-					<PrivateRoute>
-						<Home />
-					</PrivateRoute>
-				),
-			},
-			{
-				path: AppRoutes.EMPLOYEES,
-				element: (
-					<PrivateRoute>
-						<Employees />
-					</PrivateRoute>
-				),
+				element: <PrivateRoute />,
+				children: [
+					{
+						index: true,
+						element: <Home />,
+					},
+					{
+						path: AppRoutes.EMPLOYEES,
+						element: <Employees />,
+					},
+					{
+						path: AppRoutes.REALMS,
+						element: <Realms />,
+					},
+				],
 			},
 		],
 	},
