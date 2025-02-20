@@ -1,7 +1,7 @@
 import { toast } from 'react-toastify'
 
 import type { IBaseFetchError } from '@/app/types/error'
-import type { IAccesses } from './types/accesses'
+import type { IAccesses, IAccessesDTO } from './types/accesses'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
 
@@ -26,15 +26,18 @@ export const accessesApiSlice = apiSlice.injectEndpoints({
 			},
 		}),
 
-		createAccess: builder.mutation<null, IAccesses>({
+		createAccess: builder.mutation<null, IAccessesDTO>({
 			query: data => ({
 				url: API.accesses,
 				method: 'POST',
 				body: data,
 			}),
-			invalidatesTags: [{ type: 'Accesses', id: 'ALL' }],
+			invalidatesTags: (_res, _err, arg) => [
+				{ type: 'Accesses', id: 'ALL' },
+				{ type: 'Users', id: arg.realmId },
+			],
 		}),
-		updateAccess: builder.mutation<null, IAccesses>({
+		updateAccess: builder.mutation<null, IAccessesDTO>({
 			query: data => ({
 				url: `${API.accesses}/${data.id}`,
 				method: 'PUT',
@@ -47,7 +50,10 @@ export const accessesApiSlice = apiSlice.injectEndpoints({
 				url: `${API.accesses}/${id}`,
 				method: 'DELETE',
 			}),
-			invalidatesTags: [{ type: 'Accesses', id: 'ALL' }],
+			invalidatesTags: (_res, _err, arg) => [
+				{ type: 'Accesses', id: 'ALL' },
+				{ type: 'Users', id: arg },
+			],
 		}),
 	}),
 })

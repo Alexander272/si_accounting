@@ -6,7 +6,7 @@ export interface IRealm {
 	reserveChannel: string
 	expirationNotice: boolean
 	locationType: string
-	created: Date
+	created: string
 }
 
 export interface IRealmDTO {

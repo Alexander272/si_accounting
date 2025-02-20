@@ -1,5 +1,16 @@
 import { FC } from 'react'
-import { Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material'
+import {
+	Autocomplete,
+	Button,
+	CircularProgress,
+	FormControl,
+	InputLabel,
+	MenuItem,
+	Select,
+	Stack,
+	TextField,
+	Typography,
+} from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
@@ -10,6 +21,10 @@ import { changeDialogIsOpen, getDialogState } from '@/features/dialog/dialogSlic
 import { Dialog } from '@/features/dialog/components/Dialog'
 import { useGetRolesQuery } from '@/features/user/roleApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
+import { useGetUsersByRealmQuery, useSyncUsersMutation } from '@/features/user/usersApiSlice'
+import { IUserData } from '@/features/user/types/user'
+import { useCreateAccessMutation, useUpdateAccessMutation } from '../accessesApiSlice'
+import { SyncIcon } from '@/components/Icons/SyncIcon'
 
 type Context = { item?: IAccesses; realm?: string }
 
@@ -33,21 +48,34 @@ export const AccessDialog = () => {
 	)
 }
 
-const defaultValues: IAccessesDTO = {
-	userId: '',
+type Form = {
+	id?: string
+	user: IUserData | null
+	roleId: string
+}
+
+const defaultValues: Form = {
+	user: null,
 	roleId: '',
-	realmId: '',
 }
 
 export const Form: FC<Context> = ({ item, realm }) => {
+	// const
 	const dispatch = useAppDispatch()
 
+	const { data: users, isFetching: usersIsFetching } = useGetUsersByRealmQuery(
+		{ realm: realm || '' },
+		{ skip: !realm }
+	)
 	const { data: roles, isFetching: rolesIsFetching } = useGetRolesQuery(null)
 
-	const { control, handleSubmit } = useForm<IAccessesDTO>({
-		values: item
-			? { id: item.id, userId: item.user.id, roleId: item.role.id, realmId: realm || '' }
-			: { ...defaultValues, realmId: realm || '' },
+	const [create, { isLoading: creating }] = useCreateAccessMutation()
+	const [update, { isLoading: updating }] = useUpdateAccessMutation()
+
+	const [sync, { isLoading: isSync }] = useSyncUsersMutation()
+
+	const { control, handleSubmit } = useForm<Form>({
+		values: item ? { id: item.id, user: item.user, roleId: item.role.id } : defaultValues,
 	})
 
 	const closeHandler = () => {
@@ -57,15 +85,16 @@ export const Form: FC<Context> = ({ item, realm }) => {
 	const saveHandler = handleSubmit(async form => {
 		console.log('save', form)
 
-		const dto = {
-			...form,
+		const dto: IAccessesDTO = {
 			id: item?.id || '',
+			realmId: realm || '',
+			userId: form.user?.id || '',
+			roleId: form.roleId,
 		}
-		console.log(dto)
 
 		try {
-			// if (item?.id) await update(dto).unwrap()
-			// else await create(dto).unwrap()
+			if (item?.id) await update(dto).unwrap()
+			else await create(dto).unwrap()
 			closeHandler()
 		} catch (error) {
 			const fetchError = error as IFetchError
@@ -73,11 +102,53 @@ export const Form: FC<Context> = ({ item, realm }) => {
 		}
 	})
 
-	return (
-		<Stack component={'form'} paddingX={2} position={'relative'} spacing={2} onSubmit={saveHandler}>
-			{rolesIsFetching ? <Fallback position={'absolute'} zIndex={5} background={'#f5f5f557'} /> : null}
+	const syncHandler = async () => {
+		try {
+			await sync(null).unwrap()
+			toast.success('Пользователи синхронизированы')
+		} catch (error) {
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
+		}
+	}
 
-			{/* Users следует сделать autocomplete */}
+	return (
+		<Stack component={'form'} position={'relative'} spacing={2} onSubmit={saveHandler} mt={-2}>
+			{rolesIsFetching || usersIsFetching || creating || updating ? (
+				<Fallback position={'absolute'} zIndex={5} background={'#f5f5f557'} />
+			) : null}
+
+			<Button onClick={syncHandler} color='inherit' sx={{ textTransform: 'inherit' }}>
+				Синхронизировать пользователей
+				{isSync ? <CircularProgress size={18} sx={{ ml: 2 }} /> : <SyncIcon fontSize={18} ml={2} />}
+			</Button>
+
+			<Controller
+				name='user'
+				control={control}
+				render={({ field: { onChange, ...props } }) => (
+					<Autocomplete
+						options={users?.data || []}
+						getOptionLabel={option => `${option.lastName} ${option.firstName}`}
+						renderOption={(props, option) => {
+							return (
+								<li {...props} key={option.id}>
+									<Stack>
+										<Typography>{`${option.lastName} ${option.firstName}`}</Typography>
+										<Typography variant='body2' color='text.secondary'>
+											{option.email}
+										</Typography>
+									</Stack>
+								</li>
+							)
+						}}
+						isOptionEqualToValue={(option, value) => option.id === value.id}
+						renderInput={params => <TextField {...params} label='Пользователь' variant='outlined' />}
+						onChange={(_e, data) => onChange(data)}
+						{...props}
+					/>
+				)}
+			/>
 
 			<FormControl>
 				<InputLabel id={'role'}>Роль</InputLabel>

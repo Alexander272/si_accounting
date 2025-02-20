@@ -23,7 +23,10 @@ export const Responsible: FC<Props> = ({ department }) => {
 	const defaultValue = { id: '', departmentId: department?.id || '', ssoId: '' }
 
 	const { data, isFetching } = useGetResponsibleQuery({ department: department?.id || '' }, { skip: !department })
+	//TODO нужно получать не всех пользователей, а пользователей с ролью user и доступом к этой области
 	const { data: users, isFetching: usersIsFetching } = useGetAllUsersQuery(null)
+	// const { data: users, isFetching: usersIsFetching } = useGetUsersByRealmQuery({realm:'', include: true})
+
 	const [change] = useChangeResponsibleMutation()
 
 	const [sync, { isLoading }] = useSyncUsersMutation()

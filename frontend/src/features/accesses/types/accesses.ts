@@ -6,6 +6,7 @@ export interface IAccesses {
 	realmId: string
 	user: IUserData
 	role: IRole
+	created: string
 }
 
 export interface IAccessesDTO {

@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react'
-import { Button, FormControlLabel, Stack, Switch, TextField, useTheme } from '@mui/material'
+import { Button, FormControlLabel, Stack, Switch, TextField, Typography, useTheme } from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
@@ -86,12 +86,12 @@ export const RealmForm: FC<Props> = ({ realm, setRealm }) => {
 	}
 
 	return (
-		<Stack component={'form'} onSubmit={saveHandler} alignItems={'center'} position={'relative'}>
+		<Stack component={'form'} onSubmit={saveHandler} position={'relative'}>
 			{isFetching || isDeleting || isUpdating || isCreating ? (
 				<Fallback position={'absolute'} zIndex={5} background={'#f5f5f557'} />
 			) : null}
 
-			<Stack direction={'row'} flexGrow={1} spacing={2} width={860} mb={2}>
+			<Stack direction={'row'} flexGrow={1} spacing={2} mb={2}>
 				<Controller
 					control={control}
 					name={'name'}
@@ -105,7 +105,7 @@ export const RealmForm: FC<Props> = ({ realm, setRealm }) => {
 				/>
 			</Stack>
 
-			<Stack direction={'row'} flexGrow={1} spacing={2} width={860} mb={2}>
+			<Stack direction={'row'} flexGrow={1} spacing={2} mb={2}>
 				{/* //TODO может тут должен быть select */}
 				<Controller
 					control={control}
@@ -116,7 +116,7 @@ export const RealmForm: FC<Props> = ({ realm, setRealm }) => {
 				{/* locationType */}
 			</Stack>
 
-			<Stack direction={'row'} flexGrow={1} spacing={2} width={860} mb={2} justifyContent={'space-between'}>
+			<Stack direction={'row'} flexGrow={1} spacing={2} mb={2} justifyContent={'space-between'}>
 				<Controller
 					control={control}
 					name={'isActive'}
@@ -142,7 +142,7 @@ export const RealmForm: FC<Props> = ({ realm, setRealm }) => {
 					/>
 				</Button>
 			</Stack>
-			<Stack direction={'row'} flexGrow={1} spacing={2} width={860} mb={2} justifyContent={'space-between'}>
+			<Stack direction={'row'} flexGrow={1} spacing={2} mb={1} justifyContent={'space-between'}>
 				<Controller
 					control={control}
 					name={'expirationNotice'}
@@ -173,6 +173,10 @@ export const RealmForm: FC<Props> = ({ realm, setRealm }) => {
 					width='56'
 				/>
 			</Stack>
+
+			{realm != 'new' && data?.data ? (
+				<Typography>Дата создания области: {new Date(data.data.created).toLocaleString('ru-RU')}</Typography>
+			) : null}
 		</Stack>
 	)
 }

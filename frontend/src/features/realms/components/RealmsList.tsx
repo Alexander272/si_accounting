@@ -19,7 +19,7 @@ export const RealmsList: FC<Props> = ({ realm, setRealm }) => {
 	}
 
 	return (
-		<Stack position={'relative'} minWidth={260} height={'100%'}>
+		<Stack position={'relative'} minWidth={280} height={'100%'}>
 			{isFetching && <Fallback position={'absolute'} zIndex={5} background={'#f5f5f557'} />}
 			<Tabs
 				orientation='vertical'
