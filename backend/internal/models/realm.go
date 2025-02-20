@@ -17,6 +17,10 @@ type GetRealmsDTO struct {
 	All bool `json:"all"`
 }
 
+type GetRealmByIdDTO struct {
+	Id string `json:"id" db:"id" binding:"required"`
+}
+
 type RealmDTO struct {
 	Id               string `json:"id" db:"id"`
 	Name             string `json:"name" db:"name" binding:"required"`

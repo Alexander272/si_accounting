@@ -107,6 +107,9 @@ func (s *SessionService) DecodeAccessToken(ctx context.Context, token string) (*
 		return nil, fmt.Errorf("failed to decode access token. error: %w", err)
 	}
 
+	//TODO можно хранить текущие роли пользователя в redis используя sid в качестве ключа, а еще используя время жизни токена
+	// либо же хранить роли в cookie
+
 	user := &models.User{}
 	var role, username, userId string
 	c := *claims

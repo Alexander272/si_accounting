@@ -14,6 +14,7 @@ type ChangeFilterDTO struct {
 
 type FilterDTO struct {
 	Id          string `json:"id" db:"id"`
+	RealmId     string `json:"realmId" db:"realm_id"`
 	SSOId       string `json:"ssoId" db:"sso_id"`
 	FilterName  string `json:"field" db:"filter_name"`
 	CompareType string `json:"compareType" db:"compare_type"`

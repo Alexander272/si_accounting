@@ -29,7 +29,7 @@ func Register(api *gin.RouterGroup, service services.Accesses, middleware *middl
 	accesses := api.Group("/accesses")
 	{
 		accesses.GET("", middleware.CheckPermissions(constants.Realms, constants.Read), handler.get)
-		write := api.Group("", middleware.CheckPermissions(constants.Realms, constants.Write))
+		write := accesses.Group("", middleware.CheckPermissions(constants.Realms, constants.Write))
 		{
 			write.POST("", handler.create)
 			write.PUT("/:id", handler.update)

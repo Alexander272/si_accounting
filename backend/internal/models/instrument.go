@@ -16,6 +16,7 @@ type Instrument struct {
 }
 
 type CreateInstrumentDTO struct {
+	RealmId                   string `json:"realmId" db:"realm_id" binding:"required"`
 	Name                      string `json:"name" db:"name" binding:"required"`
 	Type                      string `json:"type" db:"type"`
 	FactoryNumber             string `json:"factoryNumber" db:"factory_number"`

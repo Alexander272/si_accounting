@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
@@ -20,6 +21,7 @@ func NewRealmService(repo repository.Realm) *RealmService {
 
 type Realm interface {
 	Get(ctx context.Context, req *models.GetRealmsDTO) ([]*models.Realm, error)
+	GetById(ctx context.Context, req *models.GetRealmByIdDTO) (*models.Realm, error)
 	Create(ctx context.Context, dto *models.RealmDTO) error
 	Update(ctx context.Context, dto *models.RealmDTO) error
 	Delete(ctx context.Context, dto *models.DeleteRealmDTO) error
@@ -28,6 +30,17 @@ type Realm interface {
 func (s *RealmService) Get(ctx context.Context, req *models.GetRealmsDTO) ([]*models.Realm, error) {
 	data, err := s.repo.Get(ctx, req)
 	if err != nil {
+		return nil, fmt.Errorf("failed to get realm. error: %w", err)
+	}
+	return data, nil
+}
+
+func (s *RealmService) GetById(ctx context.Context, req *models.GetRealmByIdDTO) (*models.Realm, error) {
+	data, err := s.repo.GetById(ctx, req)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRows) {
+			return nil, err
+		}
 		return nil, fmt.Errorf("failed to get realm. error: %w", err)
 	}
 	return data, nil

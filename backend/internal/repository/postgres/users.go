@@ -25,6 +25,7 @@ func NewUserRepo(db *sqlx.DB) *UserRepo {
 
 type User interface {
 	GetAll(ctx context.Context) ([]*models.UserData, error)
+	GetByRealm(ctx context.Context, req *models.GetByRealmDTO) ([]*models.UserData, error)
 	GetById(ctx context.Context, id string) (*models.UserData, error)
 	GetBySSOId(ctx context.Context, id string) (*models.UserData, error)
 	Create(ctx context.Context, dto *models.UserData) error
@@ -40,6 +41,26 @@ func (r *UserRepo) GetAll(ctx context.Context) ([]*models.UserData, error) {
 	data := []*models.UserData{}
 
 	if err := r.db.SelectContext(ctx, &data, query); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return data, nil
+}
+
+func (r *UserRepo) GetByRealm(ctx context.Context, req *models.GetByRealmDTO) ([]*models.UserData, error) {
+	include := ""
+	if req.Include {
+		include = " NOT"
+	}
+
+	query := fmt.Sprintf(`SELECT id, sso_id, username, first_name, last_name, email
+		FROM %s AS u
+		LEFT JOIN LATERAL (SELECT user_id FROM %s WHERE realm_id=$1 AND user_id=u.id) AS a ON true
+		WHERE user_id IS%s NULL ORDER BY last_name, first_name`,
+		UserTable, AccessTable, include,
+	)
+	data := []*models.UserData{}
+
+	if err := r.db.SelectContext(ctx, &data, query, req.RealmId); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return data, nil

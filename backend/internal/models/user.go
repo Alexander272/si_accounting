@@ -20,6 +20,11 @@ type UserData struct {
 	Email     string `json:"email" db:"email"`
 }
 
+type GetByRealmDTO struct {
+	RealmId string `json:"realmId" binding:"required"`
+	Include bool   `json:"include"`
+}
+
 // type KeycloakUser struct {
 // 	Id        string `json:"id"`
 // 	Username  string `json:"username"`

@@ -1,6 +1,7 @@
 package realm
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
@@ -28,7 +29,12 @@ func Register(api *gin.RouterGroup, service services.Realm, middleware *middlewa
 
 	realm := api.Group("/realms")
 	{
-		realm.GET("", middleware.CheckPermissions(constants.Realms, constants.Read), handlers.get)
+		read := realm.Group("", middleware.CheckPermissions(constants.Realms, constants.Read))
+		{
+			read.GET("", handlers.get)
+			read.GET("/:id", handlers.getById)
+		}
+
 		write := realm.Group("", middleware.CheckPermissions(constants.Realms, constants.Write))
 		{
 			write.POST("", handlers.create)
@@ -51,6 +57,28 @@ func (h *Handlers) get(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DataResponse{Data: data, Total: len(data)})
 }
 
+func (h *Handlers) getById(c *gin.Context) {
+	id := c.Param("id")
+	err := uuid.Validate(id)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "invalid id param")
+		return
+	}
+
+	dto := &models.GetRealmByIdDTO{Id: id}
+	data, err := h.service.GetById(c, dto)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRows) {
+			response.NewErrorResponse(c, http.StatusNotFound, err.Error(), err.Error())
+			return
+		}
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: data})
+}
+
 func (h *Handlers) create(c *gin.Context) {
 	dto := &models.RealmDTO{}
 	if err := c.BindJSON(dto); err != nil {
@@ -63,7 +91,7 @@ func (h *Handlers) create(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
-	c.JSON(http.StatusCreated, response.IdResponse{Message: "Область создана"})
+	c.JSON(http.StatusCreated, response.IdResponse{Id: dto.Id, Message: "Область создана"})
 }
 
 func (h *Handlers) update(c *gin.Context) {

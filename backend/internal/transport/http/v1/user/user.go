@@ -11,6 +11,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
 	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -28,15 +29,22 @@ func Register(api *gin.RouterGroup, service services.User, middleware *middlewar
 
 	users := api.Group("/users")
 	{
-		users.GET("", middleware.CheckPermissions(constants.Users, constants.Read), handler.getAll)
-		users.GET("/:id", middleware.CheckPermissions(constants.Users, constants.Read), handler.getById)
-		users.GET("/sso/:id", middleware.CheckPermissions(constants.Users, constants.Read), handler.getBySSOId)
-		users.POST("/sync", middleware.CheckPermissions(constants.Users, constants.Write), handler.sync)
-		users.POST("", middleware.CheckPermissions(constants.Users, constants.Write), handler.create)
-		users.POST("/several", middleware.CheckPermissions(constants.Users, constants.Read), handler.createSeveral)
-		users.PUT("/:id", middleware.CheckPermissions(constants.Users, constants.Write), handler.update)
-		users.PUT("/several", middleware.CheckPermissions(constants.Users, constants.Write), handler.updateSeveral)
-		users.DELETE("/:id", middleware.CheckPermissions(constants.Users, constants.Write), handler.delete)
+		read := users.Group("", middleware.CheckPermissions(constants.Users, constants.Read))
+		{
+			read.GET("", handler.getAll)
+			read.GET("/realm/:id", handler.getByRealm)
+			read.GET("/:id", handler.getById)
+			read.GET("/sso/:id", handler.getBySSOId)
+		}
+		write := users.Group("", middleware.CheckPermissions(constants.Users, constants.Write))
+		{
+			write.POST("/sync", handler.sync)
+			write.POST("", handler.create)
+			write.POST("/several", handler.createSeveral)
+			write.PUT("/:id", handler.update)
+			write.PUT("/several", handler.updateSeveral)
+			write.DELETE("/:id", handler.delete)
+		}
 	}
 }
 
@@ -50,9 +58,29 @@ func (h *Handler) getAll(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DataResponse{Data: data})
 }
 
+func (h *Handler) getByRealm(c *gin.Context) {
+	realm := c.Param("id")
+	err := uuid.Validate(realm)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "invalid id param")
+		return
+	}
+	include := c.Query("include")
+
+	dto := &models.GetByRealmDTO{RealmId: realm, Include: include == "true"}
+	data, err := h.service.GetByRealm(c, dto)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: data})
+}
+
 func (h *Handler) getById(c *gin.Context) {
 	id := c.Param("id")
-	if id == "" {
+	err := uuid.Validate(id)
+	if err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id пользователя не задан")
 		return
 	}
@@ -72,7 +100,8 @@ func (h *Handler) getById(c *gin.Context) {
 
 func (h *Handler) getBySSOId(c *gin.Context) {
 	id := c.Param("id")
-	if id == "" {
+	err := uuid.Validate(id)
+	if err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id пользователя не задан")
 		return
 	}

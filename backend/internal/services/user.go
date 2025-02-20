@@ -25,6 +25,7 @@ func NewUserService(repo repository.User, keycloak *auth.KeycloakClient) *UserSe
 
 type User interface {
 	GetAll(ctx context.Context) ([]*models.UserData, error)
+	GetByRealm(ctx context.Context, req *models.GetByRealmDTO) ([]*models.UserData, error)
 	GetById(ctx context.Context, id string) (*models.UserData, error)
 	GetBySSOId(ctx context.Context, id string) (*models.UserData, error)
 	Sync(ctx context.Context) error
@@ -40,6 +41,14 @@ func (s *UserService) GetAll(ctx context.Context) ([]*models.UserData, error) {
 	data, err := s.repo.GetAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all users. error: %w", err)
+	}
+	return data, nil
+}
+
+func (s *UserService) GetByRealm(ctx context.Context, req *models.GetByRealmDTO) ([]*models.UserData, error) {
+	data, err := s.repo.GetByRealm(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users by realm. error: %w", err)
 	}
 	return data, nil
 }
@@ -60,6 +69,12 @@ func (s *UserService) GetBySSOId(ctx context.Context, id string) (*models.UserDa
 	return data, nil
 }
 
+/*
+	TODO
+	Можно записывать пользователей из keycloak в таблицу пользователей, а ответственных брать из таблицы с доступами выбирая по ролям
+	и нужному realm
+*/
+
 func (s *UserService) Sync(ctx context.Context) error {
 	logger.Info("Sync users")
 
@@ -69,22 +84,25 @@ func (s *UserService) Sync(ctx context.Context) error {
 	}
 
 	// получение Id группы
-	// groups, err := s.keycloak.Client.GetGroups(ctx, token.AccessToken, s.keycloak.Realm, gocloak.GetGroupsParams{})
-	// if err != nil {
-	// 	return fmt.Errorf("failed to get groups. error: %w", err)
-	// }
-	// for _, g := range groups {
-	// 	logger.Debug("get all groups", logger.StringAttr("group", *g.Name), logger.StringAttr("id", *g.ID))
-	// 	if g.SubGroups != nil {
-	// 		for _, sg := range *g.SubGroups {
-	// 			logger.Debug("get all groups", logger.StringAttr("group", *sg.Name), logger.StringAttr("id", *sg.ID))
-	// 		}
-	// 	}
-	// }
+	groupID := ""
+	groups, err := s.keycloak.Client.GetGroups(ctx, token.AccessToken, s.keycloak.Realm, gocloak.GetGroupsParams{})
+	if err != nil {
+		return fmt.Errorf("failed to get groups. error: %w", err)
+	}
+	for _, g := range groups {
+		if g.Name != nil && *g.Name == "sia" {
+			groupID = *g.ID
+			break
+		}
+		// logger.Debug("get all groups", logger.StringAttr("group", *g.Name), logger.StringAttr("id", *g.ID))
+		// if g.SubGroups != nil {
+		// 	for _, sg := range *g.SubGroups {
+		// 		logger.Debug("get all groups", logger.StringAttr("group", *sg.Name), logger.StringAttr("id", *sg.ID))
+		// 	}
+		// }
+	}
 
 	data := []*models.UserData{}
-	groupID := "0451fe7d-85de-4823-b03d-c01dc1fd20c9"
-
 	keycloakUsers, err := s.keycloak.Client.GetGroupMembers(ctx, token.AccessToken, s.keycloak.Realm, groupID, gocloak.GetGroupsParams{})
 	if err != nil {
 		return fmt.Errorf("failed to get group users. error: %w", err)

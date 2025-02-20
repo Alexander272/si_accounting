@@ -28,11 +28,11 @@ type Accesses interface {
 }
 
 func (r *AccessesRepo) Get(ctx context.Context, req *models.GetAccessesDTO) ([]*models.Accesses, error) {
-	query := fmt.Sprintf(`SELECT a.id, realm_id, user_id, sso_id, username, first_name, last_name, email, role_id, name 
+	query := fmt.Sprintf(`SELECT a.id, realm_id, user_id, sso_id, username, first_name, last_name, email, role_id, name, a.created_at 
 		FROM %s AS a 
 		INNER JOIN %s AS u ON a.user_id=u.id 
 		INNER JOIN %s AS r ON r.id=a.role_id 
-		WHERE realm_id=$1`,
+		WHERE realm_id=$1 ORDER BY name, last_name, first_name`,
 		AccessTable, UserTable, RoleTable,
 	)
 	tmp := []*pq_models.Accesses{}
@@ -46,6 +46,7 @@ func (r *AccessesRepo) Get(ctx context.Context, req *models.GetAccessesDTO) ([]*
 		data = append(data, &models.Accesses{
 			Id:      v.Id,
 			RealmId: v.RealmId,
+			Created: v.Created,
 			User: &models.UserData{
 				Id:        v.UserId,
 				SSOId:     v.SSOId,
