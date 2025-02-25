@@ -59,7 +59,21 @@ func Register(api *gin.RouterGroup, service services.SI, middleware *middleware.
 // }
 
 func (h *SIHandlers) GetAll(c *gin.Context) {
+	// realm := c.GetHeader("realm")
+	// err := uuid.Validate(realm)
+	// if err != nil {
+	// 	response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "invalid id param")
+	// 	return
+	// }
+
+	identity, exists := c.Get(constants.CtxIdentity)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty identity", "Сессия не найдена")
+		return
+	}
+
 	params := &models.SIParams{
+		RealmId: identity.(models.Identity).Realm,
 		Page:    &models.SIPage{},
 		Sort:    []*models.SISort{},
 		Filters: []*models.SIFilter{},

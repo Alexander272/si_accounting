@@ -7,6 +7,11 @@ type DefaultFilter struct {
 	Value       string `json:"value" db:"value"`
 }
 
+type GetFilterDTO struct {
+	SSOId   string `json:"ssoId" db:"sso_id"`
+	RealmId string `json:"realmId" db:"realm_id"`
+}
+
 type ChangeFilterDTO struct {
 	SSOId   string `json:"ssoId" db:"sso_id"`
 	Filters []*FilterDTO

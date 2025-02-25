@@ -21,7 +21,7 @@ func NewDefaultFilterRepo(db *sqlx.DB) *DefaultFilterRepo {
 }
 
 type DefaultFilter interface {
-	Get(context.Context, string) ([]*models.SIFilter, error)
+	Get(context.Context, *models.GetFilterDTO) ([]*models.SIFilter, error)
 	Create(context.Context, *models.FilterDTO) error
 	CreateSeveral(context.Context, []*models.FilterDTO) error
 	Update(context.Context, *models.FilterDTO) error
@@ -29,11 +29,11 @@ type DefaultFilter interface {
 	DeleteBySSOId(context.Context, string) error
 }
 
-func (r *DefaultFilterRepo) Get(ctx context.Context, ssoId string) (filters []*models.SIFilter, err error) {
+func (r *DefaultFilterRepo) Get(ctx context.Context, req *models.GetFilterDTO) (filters []*models.SIFilter, err error) {
 	var data []*models.DefaultFilter
-	query := fmt.Sprintf(`SELECT id, filter_name, compare_type, value FROM %s WHERE sso_id=$1`, DefaultFilterTable)
+	query := fmt.Sprintf(`SELECT id, filter_name, compare_type, value FROM %s WHERE sso_id=$1 AND realm_id=$2`, DefaultFilterTable)
 
-	if err := r.db.Select(&data, query, ssoId); err != nil {
+	if err := r.db.SelectContext(ctx, &data, query, req.SSOId, req.RealmId); err != nil {
 		return nil, fmt.Errorf("failed execute query. error: %w", err)
 	}
 
@@ -58,7 +58,8 @@ func (r *DefaultFilterRepo) Get(ctx context.Context, ssoId string) (filters []*m
 }
 
 func (r *DefaultFilterRepo) Create(ctx context.Context, dto *models.FilterDTO) error {
-	query := fmt.Sprintf(`INSERT INTO %s (id, sso_id, filter_name, compare_type, value) VALUES (:id, :sso_id, :filter_name, :compare_type, :value)`,
+	query := fmt.Sprintf(`INSERT INTO %s (id, sso_id, realm_id, filter_name, compare_type, value) 
+		VALUES (:id, :sso_id, :realm_id, :filter_name, :compare_type, :value)`,
 		DefaultFilterTable,
 	)
 	dto.Id = uuid.NewString()
@@ -72,13 +73,15 @@ func (r *DefaultFilterRepo) Create(ctx context.Context, dto *models.FilterDTO) e
 func (r *DefaultFilterRepo) CreateSeveral(ctx context.Context, dto []*models.FilterDTO) error {
 	values := []string{}
 	args := []interface{}{}
-	c := 5
+	c := 6
 	for i, v := range dto {
 		id := uuid.New()
-		args = append(args, id, v.SSOId, v.FilterName, v.CompareType, v.Value)
-		values = append(values, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d)", c*i+1, c*i+2, c*i+3, c*i+4, c*i+5))
+		args = append(args, id, v.SSOId, v.RealmId, v.FilterName, v.CompareType, v.Value)
+		values = append(values, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d)", c*i+1, c*i+2, c*i+3, c*i+4, c*i+5, c*i+6))
 	}
-	query := fmt.Sprintf(`INSERT INTO %s (id, sso_id, filter_name, compare_type, value) VALUES %s`, DefaultFilterTable, strings.Join(values, ","))
+	query := fmt.Sprintf(`INSERT INTO %s (id, sso_id, realm_id, filter_name, compare_type, value) VALUES %s`,
+		DefaultFilterTable, strings.Join(values, ","),
+	)
 
 	if _, err := r.db.ExecContext(ctx, query, args...); err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)

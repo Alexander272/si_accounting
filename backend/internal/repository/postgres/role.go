@@ -2,9 +2,11 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
+	"github.com/Alexander272/si_accounting/backend/internal/repository/postgres/pq_models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -24,6 +26,7 @@ type Role interface {
 	GetAll(context.Context, *models.GetRolesDTO) ([]*models.RoleFull, error)
 	GetAllWithNames(context.Context, *models.GetRolesDTO) ([]*models.RoleFull, error)
 	Get(context.Context, string) (*models.Role, error)
+	GetByRealm(ctx context.Context, req *models.GetRoleByRealmDTO) (*models.RoleFull, error)
 	Create(context.Context, *models.RoleDTO) error
 	Update(context.Context, *models.RoleDTO) error
 	Delete(context.Context, string) error
@@ -82,18 +85,14 @@ func (r *RoleRepo) GetAllWithNames(ctx context.Context, req *models.GetRolesDTO)
 
 func (r *RoleRepo) Get(ctx context.Context, roleName string) (*models.Role, error) {
 	var data []models.RoleWithMenuDTO
-	// query := fmt.Sprintf(`SELECT r.id, r.name, COALESCE(extends, '{}') AS extends, i.name AS menu
-	// 	FROM %s AS r
-	// 	LEFT JOIN %s AS m ON r.id=role_id
-	// 	LEFT JOIN %s AS i ON menu_item_id=i.id
-	// 	WHERE i.is_show=true ORDER BY level`,
-	// 	RoleTable, MenuTable, MenuItemTable,
-	// )
-	query := fmt.Sprintf(`SELECT r.id, name, COALESCE(extends, '{}') AS extends,
-		ARRAY(SELECT DISTINCT(i.name || ':' || i.method) FROM %s AS m INNER JOIN %s AS i ON m.menu_item_id=i.id WHERE role_id=r.id) AS menu
+	query := fmt.Sprintf(`SELECT r.id, r.name, COALESCE(extends, '{}') AS extends,
+		COALESCE(ARRAY_AGG(DISTINCT(i.name || ':' || i.method)) FILTER (WHERE i.is_show=true), '{}') AS menu
 		FROM %s AS r
-		ORDER BY level, name`,
-		MenuTable, MenuItemTable, RoleTable,
+		LEFT JOIN %s AS m ON r.id = m.role_id
+		LEFT JOIN %s AS i ON m.menu_item_id = i.id
+		GROUP BY r.id, r.name
+		ORDER BY r.level, r.name`,
+		RoleTable, MenuTable, MenuItemTable,
 	)
 
 	if err := r.db.SelectContext(ctx, &data, query); err != nil {
@@ -101,53 +100,78 @@ func (r *RoleRepo) Get(ctx context.Context, roleName string) (*models.Role, erro
 	}
 
 	role := &models.Role{}
-	menu := make(map[string][]string, 0)
-	extends := make(map[string]struct{})
+	menuMap := make(map[string][]string, len(data))
+	extendsSet := make(map[string]struct{}, len(data))
 
-	//EDIT Возможно можно это как-то покрасивее написать
 	for _, r := range data {
-		m, exist := menu[r.Id]
-		if !exist {
-			menu[r.Id] = r.Menu
-
-			if r.Name == roleName {
-				role.Id = r.Id
-				role.Name = r.Name
-				extends[r.Id] = struct{}{}
-				for _, v := range r.Extends {
-					extends[v] = struct{}{}
-				}
+		menuMap[r.Id] = append(menuMap[r.Id], r.Menu...)
+		if r.Name == roleName {
+			role.Id = r.Id
+			role.Name = r.Name
+			extendsSet[r.Id] = struct{}{}
+			for _, v := range r.Extends {
+				extendsSet[v] = struct{}{}
 			}
-		} else {
-			m = append(m, r.Menu...)
-			menu[r.Id] = m
 		}
 	}
 
-	for i := 1; i < len(extends); i++ {
+	for i := 0; i < len(extendsSet); i++ {
 		for _, r := range data {
-			_, exist := extends[r.Id]
-			if exist {
+			if _, exist := extendsSet[r.Id]; exist {
 				for _, v := range r.Extends {
-					extends[v] = struct{}{}
+					extendsSet[v] = struct{}{}
 				}
-				break
 			}
 		}
 	}
 
-	roleMenu := map[string]struct{}{}
-	for k := range extends {
-		for _, v := range menu[k] {
-			roleMenu[v] = struct{}{}
+	roleMenuSet := make(map[string]struct{}, len(menuMap))
+	for k := range extendsSet {
+		for _, v := range menuMap[k] {
+			roleMenuSet[v] = struct{}{}
 		}
-		// role.Menu = append(role.Menu, menu[k]...)
 	}
-	for k := range roleMenu {
+
+	role.Menu = make([]string, 0, len(roleMenuSet))
+	for k := range roleMenuSet {
 		role.Menu = append(role.Menu, k)
 	}
-
 	return role, nil
+}
+
+func (r *RoleRepo) GetByRealm(ctx context.Context, req *models.GetRoleByRealmDTO) (*models.RoleFull, error) {
+	cond := ""
+	params := []interface{}{req.UserId}
+	if req.RealmId != "" {
+		cond = " AND realm_id=$2"
+		params = append(params, req.RealmId)
+	}
+
+	query := fmt.Sprintf(`SELECT r.id, name, description, level, COALESCE(extends, '{}') AS extends, realm_id
+		FROM %s AS r
+		INNER JOIN %s AS a ON a.role_id=r.id
+		LEFT JOIN LATERAL (SELECT sso_id from %s WHERE id=a.user_id) AS u ON true
+		WHERE sso_id=$1%s ORDER BY level DESC, realm_id LIMIT 1`,
+		RoleTable, AccessTable, UserTable, cond,
+	)
+	tmp := &pq_models.RoleFull{}
+
+	if err := r.db.GetContext(ctx, tmp, query, params...); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, models.ErrNoRows
+		}
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	req.RealmId = tmp.RealmId
+	data := &models.RoleFull{
+		Id:          tmp.Id,
+		Name:        tmp.Name,
+		Level:       tmp.Level,
+		Extends:     tmp.Extends,
+		Description: tmp.Description,
+	}
+
+	return data, nil
 }
 
 func (r *RoleRepo) Create(ctx context.Context, role *models.RoleDTO) error {

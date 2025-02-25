@@ -11,6 +11,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -41,10 +42,17 @@ func (h *Handler) get(c *gin.Context) {
 	}
 	user := u.(models.User)
 
-	data, err := h.service.Get(c, user.Id)
+	identity, exists := c.Get(constants.CtxIdentity)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty identity", "Сессия не найдена")
+		return
+	}
+
+	req := &models.GetFilterDTO{SSOId: user.Id, RealmId: identity.(models.Identity).Realm}
+	data, err := h.service.Get(c, req)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		error_bot.Send(c, err.Error(), user)
+		error_bot.Send(c, err.Error(), req)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: data})
@@ -54,6 +62,12 @@ func (h *Handler) change(c *gin.Context) {
 	dto := []*models.SIFilter{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+	realm := c.GetHeader("realm")
+	err := uuid.Validate(realm)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "invalid id param")
 		return
 	}
 
@@ -69,6 +83,7 @@ func (h *Handler) change(c *gin.Context) {
 		for _, v := range f.Values {
 			filters = append(filters, &models.FilterDTO{
 				SSOId:       user.Id,
+				RealmId:     realm,
 				FilterName:  f.Field,
 				CompareType: v.CompareType,
 				Value:       v.Value,

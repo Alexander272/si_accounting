@@ -10,18 +10,24 @@ import (
 )
 
 type RealmService struct {
-	repo repository.Realm
+	repo   repository.Realm
+	role   Role
+	filter DefaultFilter
 }
 
-func NewRealmService(repo repository.Realm) *RealmService {
+func NewRealmService(repo repository.Realm, role Role, filter DefaultFilter) *RealmService {
 	return &RealmService{
-		repo: repo,
+		repo:   repo,
+		role:   role,
+		filter: filter,
 	}
 }
 
 type Realm interface {
 	Get(ctx context.Context, req *models.GetRealmsDTO) ([]*models.Realm, error)
 	GetById(ctx context.Context, req *models.GetRealmByIdDTO) (*models.Realm, error)
+	GetByUser(ctx context.Context, req *models.GetRealmByUserDTO) ([]*models.Realm, error)
+	Choose(ctx context.Context, dto *models.ChooseRealmDTO) (*models.User, error)
 	Create(ctx context.Context, dto *models.RealmDTO) error
 	Update(ctx context.Context, dto *models.RealmDTO) error
 	Delete(ctx context.Context, dto *models.DeleteRealmDTO) error
@@ -44,6 +50,41 @@ func (s *RealmService) GetById(ctx context.Context, req *models.GetRealmByIdDTO)
 		return nil, fmt.Errorf("failed to get realm. error: %w", err)
 	}
 	return data, nil
+}
+
+func (s *RealmService) GetByUser(ctx context.Context, req *models.GetRealmByUserDTO) ([]*models.Realm, error) {
+	data, err := s.repo.GetByUser(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get realms by user. error: %w", err)
+	}
+	return data, nil
+}
+
+func (s *RealmService) Choose(ctx context.Context, dto *models.ChooseRealmDTO) (*models.User, error) {
+	req := &models.GetRoleByRealmDTO{UserId: dto.UserId, RealmId: dto.RealmId}
+	role, err := s.role.GetByRealm(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	// get menu
+	menu, err := s.role.Get(ctx, role.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	// get default filters
+	filters, err := s.filter.Get(ctx, &models.GetFilterDTO{SSOId: dto.UserId, RealmId: dto.RealmId})
+	if err != nil {
+		return nil, err
+	}
+
+	user := &models.User{
+		Role:    role.Name,
+		Menu:    menu.Menu,
+		Filters: filters,
+	}
+	return user, nil
 }
 
 func (s *RealmService) Create(ctx context.Context, dto *models.RealmDTO) error {

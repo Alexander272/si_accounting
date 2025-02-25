@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/Alexander272/si_accounting/backend/internal/config"
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
@@ -16,23 +17,28 @@ import (
 
 type Handlers struct {
 	service services.Realm
+	auth    config.AuthConfig
 }
 
-func NewHandlers(service services.Realm) *Handlers {
+func NewHandlers(service services.Realm, auth config.AuthConfig) *Handlers {
 	return &Handlers{
 		service: service,
+		auth:    auth,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Realm, middleware *middleware.Middleware) {
-	handlers := NewHandlers(service)
+func Register(api *gin.RouterGroup, service services.Realm, auth config.AuthConfig, middleware *middleware.Middleware) {
+	handlers := NewHandlers(service, auth)
 
 	realm := api.Group("/realms")
 	{
 		read := realm.Group("", middleware.CheckPermissions(constants.Realms, constants.Read))
 		{
 			read.GET("", handlers.get)
+			read.GET("/user", handlers.getByUser)
 			read.GET("/:id", handlers.getById)
+			read.POST("/choose", handlers.choose)
+			// TODO выбрать другую область и поменять роль в соответствии с ней
 		}
 
 		write := realm.Group("", middleware.CheckPermissions(constants.Realms, constants.Write))
@@ -77,6 +83,60 @@ func (h *Handlers) getById(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: data})
+}
+
+func (h *Handlers) getByUser(c *gin.Context) {
+	u, exists := c.Get(constants.CtxUser)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "Сессия не найдена")
+		return
+	}
+	user := u.(models.User)
+
+	dto := &models.GetRealmByUserDTO{UserId: user.Id}
+	data, err := h.service.GetByUser(c, dto)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: data})
+}
+
+func (h *Handlers) choose(c *gin.Context) {
+	dto := &models.ChooseRealmDTO{}
+	if err := c.BindJSON(dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+	u, exists := c.Get(constants.CtxUser)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "Сессия не найдена")
+		return
+	}
+	dto.UserId = u.(models.User).Id
+
+	user, err := h.service.Choose(c, dto)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+
+	cookie := &models.Identity{
+		Role:   user.Role,
+		Realm:  dto.RealmId,
+		UserId: dto.UserId,
+	}
+	identity, err := cookie.String()
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), cookie)
+		return
+	}
+
+	c.SetCookie(constants.IdentityCookie, identity, int(h.auth.RefreshTokenTTL.Seconds()), "/", c.Request.Host, h.auth.Secure, true)
+	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }
 
 func (h *Handlers) create(c *gin.Context) {

@@ -9,25 +9,29 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/internal/services"
+	"github.com/Alexander272/si_accounting/backend/internal/transport/http/middleware"
 	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type AuthHandler struct {
-	service services.Session
-	auth    config.AuthConfig
+	service    services.Session
+	middleware *middleware.Middleware
+	auth       config.AuthConfig
 }
 
 type Deps struct {
-	Service services.Session
-	Auth    config.AuthConfig
+	Service    services.Session
+	Middleware *middleware.Middleware
+	Auth       config.AuthConfig
 }
 
 func NewAuthHandlers(deps Deps) *AuthHandler {
 	return &AuthHandler{
-		service: deps.Service,
-		auth:    deps.Auth,
+		service:    deps.Service,
+		middleware: deps.Middleware,
+		auth:       deps.Auth,
 	}
 }
 
@@ -43,8 +47,8 @@ func Register(api *gin.RouterGroup, deps Deps) {
 }
 
 func (h *AuthHandler) SignIn(c *gin.Context) {
-	var dto models.SignIn
-	if err := c.BindJSON(&dto); err != nil {
+	dto := &models.SignIn{}
+	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
@@ -72,6 +76,18 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 		domain = c.Request.Host
 	}
 
+	roleCookie := &models.Identity{
+		Role:   user.Role,
+		Realm:  dto.Realm,
+		UserId: user.Id,
+	}
+	role, err := roleCookie.String()
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), roleCookie)
+		return
+	}
+
 	logger.Info("Пользователь успешно авторизовался",
 		logger.StringAttr("section", "auth"),
 		logger.StringAttr("ip", c.ClientIP()),
@@ -81,6 +97,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(constants.AuthCookie, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
+	c.SetCookie(constants.IdentityCookie, role, int(h.auth.RefreshTokenTTL.Seconds()), "/", c.Request.Host, h.auth.Secure, true)
 	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }
 
@@ -109,6 +126,7 @@ func (h *AuthHandler) SignOut(c *gin.Context) {
 
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(constants.AuthCookie, "", -1, "/", domain, h.auth.Secure, true)
+	c.SetCookie(constants.IdentityCookie, "", -1, "/", c.Request.Host, h.auth.Secure, true)
 	c.JSON(http.StatusNoContent, response.IdResponse{})
 }
 
@@ -119,14 +137,31 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.Refresh(c, refreshToken)
+	identity, err := c.Cookie(constants.IdentityCookie)
+	if err != nil || identity == "" {
+		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
+		return
+	}
+	id := &models.Identity{}
+	err = id.Parse(identity)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
+		return
+	}
+
+	req := &models.RefreshDTO{
+		Token: refreshToken,
+		Realm: id.Realm,
+	}
+
+	user, err := h.service.Refresh(c, req)
 	if err != nil {
 		if strings.Contains(err.Error(), "invalid_grant") {
 			response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "Сессия не найдена")
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		error_bot.Send(c, err.Error(), refreshToken)
+		error_bot.Send(c, err.Error(), req)
 		return
 	}
 
@@ -142,7 +177,20 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	// 	logger.StringAttr("user_id", user.Id),
 	// )
 
+	cookie := &models.Identity{
+		Role:   user.Role,
+		Realm:  id.Realm,
+		UserId: user.Id,
+	}
+	identity, err = cookie.String()
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), cookie)
+		return
+	}
+
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(constants.AuthCookie, user.RefreshToken, int(h.auth.RefreshTokenTTL.Seconds()), "/", domain, h.auth.Secure, true)
+	c.SetCookie(constants.IdentityCookie, identity, int(h.auth.RefreshTokenTTL.Seconds()), "/", c.Request.Host, h.auth.Secure, true)
 	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }

@@ -24,6 +24,7 @@ func NewRealmRepo(db *sqlx.DB) *RealmRepo {
 type Realm interface {
 	Get(ctx context.Context, req *models.GetRealmsDTO) ([]*models.Realm, error)
 	GetById(ctx context.Context, req *models.GetRealmByIdDTO) (*models.Realm, error)
+	GetByUser(ctx context.Context, req *models.GetRealmByUserDTO) ([]*models.Realm, error)
 	Create(ctx context.Context, dto *models.RealmDTO) error
 	Update(ctx context.Context, dto *models.RealmDTO) error
 	Delete(ctx context.Context, dto *models.DeleteRealmDTO) error
@@ -47,7 +48,20 @@ func (r *RealmRepo) Get(ctx context.Context, req *models.GetRealmsDTO) ([]*model
 	return data, nil
 }
 
-// func (r *RealmRepo) GetByUser(ctx *context.Context, )
+func (r *RealmRepo) GetByUser(ctx context.Context, req *models.GetRealmByUserDTO) ([]*models.Realm, error) {
+	query := fmt.Sprintf(`SELECT r.id, name, realm, reserve_channel, expiration_notice, location_type, is_active
+		FROM %s AS r 
+		LEFT JOIN LATERAL (SELECT a.id FROM %s AS a INNER JOIN %s AS u ON a.user_id=u.id WHERE sso_id=$1 AND realm_id=r.id) AS a ON true
+		WHERE a.id IS NOT NULL ORDER BY r.id`,
+		RealmTable, AccessTable, UserTable,
+	)
+	data := []*models.Realm{}
+
+	if err := r.db.SelectContext(ctx, &data, query, req.UserId); err != nil {
+		return nil, fmt.Errorf("failed to execute query")
+	}
+	return data, nil
+}
 
 func (r *RealmRepo) GetById(ctx context.Context, req *models.GetRealmByIdDTO) (*models.Realm, error) {
 	query := fmt.Sprintf(`SELECT id, name, realm, is_active, reserve_channel, expiration_notice, location_type, created_at 

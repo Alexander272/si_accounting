@@ -78,7 +78,7 @@ func NewServices(deps Deps) *Services {
 	menuItem := NewMenuItemService(deps.Repos.MenuItem)
 	menu := NewMenuService(deps.Repos.Menu, menuItem)
 
-	realm := NewRealmService(deps.Repos.Realm)
+	realm := NewRealmService(deps.Repos.Realm, role, filter)
 	accesses := NewAccessesService(deps.Repos.Accesses)
 
 	// TODO можно включить для keycloak настройку что он за прокси и запустить сервер на 80 (или на другом) порту для вывода интерфейса

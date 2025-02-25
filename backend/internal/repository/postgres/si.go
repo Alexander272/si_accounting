@@ -53,8 +53,8 @@ type SI interface {
 func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SIList, error) {
 	list := &models.SIList{}
 
-	params := []interface{}{}
-	count := 1
+	params := []interface{}{req.RealmId, req.Status}
+	count := len(params) + 1
 
 	order := " ORDER BY "
 	for _, s := range req.Sort {
@@ -83,7 +83,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 		}
 	}
 
-	params = append(params, req.Status, req.Page.Limit, req.Page.Offset)
+	params = append(params, req.Page.Limit, req.Page.Offset)
 
 	query := fmt.Sprintf(`SELECT id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, year_of_issue, 
 		inter_verification_interval, notes, m.status, v.date, v.next_date, COALESCE(m.place,'') AS place, COALESCE(m.person,'') AS person, 
@@ -93,9 +93,9 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 		LEFT JOIN LATERAL (SELECT (CASE WHEN status='%s' THEN place WHEN status='%s' THEN 'Резерв' ELSE
 			(CASE WHEN last_place!='' THEN 'Перемещение из «'||last_place||'»' ELSE 'Перемещение' END) END) AS place, last_place, last_place_id, status,
 			person, department_id FROM %s WHERE instrument_id=i.id ORDER BY date_of_issue DESC, created_at DESC LIMIT 1) AS m ON TRUE
-		WHERE i.status=$%d%s%s LIMIT $%d OFFSET $%d`,
+		WHERE realm_id=$1 AND i.status=$2%s%s LIMIT $%d OFFSET $%d`,
 		InstrumentTable, VerificationTable, constants.LocationStatusUsed, constants.LocationStatusReserve, SIMovementTable,
-		count, filter, order, count+1, count+2,
+		filter, order, count, count+1,
 	)
 
 	// logger.Debug(query)

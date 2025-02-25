@@ -34,6 +34,11 @@ type RoleWithApi struct{}
 
 type GetRolesDTO struct{}
 
+type GetRoleByRealmDTO struct {
+	RealmId string `json:"realmId" binding:"required"`
+	UserId  string `json:"userId" binding:"required"`
+}
+
 type RoleDTO struct {
 	Id          string   `json:"id" db:"id"`
 	Name        string   `json:"name" db:"name" binding:"required"`

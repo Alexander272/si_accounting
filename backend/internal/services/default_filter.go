@@ -19,7 +19,7 @@ func NewDefaultFilterService(repo repository.DefaultFilter) *DefaultFilterServic
 }
 
 type DefaultFilter interface {
-	Get(context.Context, string) ([]*models.SIFilter, error)
+	Get(context.Context, *models.GetFilterDTO) ([]*models.SIFilter, error)
 	Change(context.Context, *models.ChangeFilterDTO) error
 	Create(context.Context, *models.FilterDTO) error
 	CreateSeveral(context.Context, []*models.FilterDTO) error
@@ -28,8 +28,8 @@ type DefaultFilter interface {
 	DeleteBySSOId(context.Context, string) error
 }
 
-func (s *DefaultFilterService) Get(ctx context.Context, ssoId string) ([]*models.SIFilter, error) {
-	filters, err := s.repo.Get(ctx, ssoId)
+func (s *DefaultFilterService) Get(ctx context.Context, req *models.GetFilterDTO) ([]*models.SIFilter, error) {
+	filters, err := s.repo.Get(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get default filters. error: %w", err)
 	}
@@ -48,19 +48,6 @@ func (s *DefaultFilterService) Change(ctx context.Context, dto *models.ChangeFil
 	if err := s.CreateSeveral(ctx, dto.Filters); err != nil {
 		return err
 	}
-	// if len(dto) == 0 {
-	// 	//TODO удалить все фильтры
-	// 	return nil
-	// }
-
-	// filters, err := s.Get(ctx, dto[0].SSOId)
-	// if err != nil {
-	// 	return err
-	// }
-
-	//TODO сравнить то что уже есть с тем что пришло
-	// новое добавить, то что есть обновить, лишнее удалить
-
 	return nil
 }
 

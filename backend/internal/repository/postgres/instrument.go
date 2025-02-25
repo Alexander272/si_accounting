@@ -39,7 +39,7 @@ func (r *InstrumentRepo) Get(ctx context.Context, req *models.GetInstrumentsDTO)
 	)
 	instruments := make([]*models.Instrument, 0)
 
-	if err := r.db.Select(&instruments, query, pq.Array(req.IDs)); err != nil {
+	if err := r.db.SelectContext(ctx, &instruments, query, pq.Array(req.IDs)); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return instruments, nil
@@ -63,13 +63,13 @@ func (r *InstrumentRepo) GetById(ctx context.Context, id string) (*models.Instru
 }
 
 func (r *InstrumentRepo) Create(ctx context.Context, in *models.CreateInstrumentDTO) (string, error) {
-	query := fmt.Sprintf(`INSERT INTO %s(id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, 
-		year_of_issue, inter_verification_interval, notes, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+	query := fmt.Sprintf(`INSERT INTO %s(id, realm_id, name, type, factory_number, measurement_limits, accuracy, state_register, manufacturer, 
+		year_of_issue, inter_verification_interval, notes, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
 		InstrumentTable,
 	)
 	id := uuid.New()
 
-	_, err := r.db.Exec(query, id, in.Name, in.Type, in.FactoryNumber, in.MeasurementLimits, in.Accuracy, in.StateRegister, in.Manufacturer,
+	_, err := r.db.Exec(query, id, in.Name, in.RealmId, in.Type, in.FactoryNumber, in.MeasurementLimits, in.Accuracy, in.StateRegister, in.Manufacturer,
 		in.YearOfIssue, in.InterVerificationInterval, in.Notes, constants.InstrumentDraft,
 	)
 	if err != nil {

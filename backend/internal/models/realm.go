@@ -21,6 +21,15 @@ type GetRealmByIdDTO struct {
 	Id string `json:"id" db:"id" binding:"required"`
 }
 
+type GetRealmByUserDTO struct {
+	UserId string `json:"userId" db:"user_id"`
+}
+
+type ChooseRealmDTO struct {
+	RealmId string `json:"realmId" db:"realm_id" binding:"required"`
+	UserId  string `json:"userId"`
+}
+
 type RealmDTO struct {
 	Id               string `json:"id" db:"id"`
 	Name             string `json:"name" db:"name" binding:"required"`

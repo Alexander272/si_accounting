@@ -1,6 +1,7 @@
 package models
 
 type SIParams struct {
+	RealmId string
 	Page    *SIPage
 	Sort    []*SISort
 	Filters []*SIFilter

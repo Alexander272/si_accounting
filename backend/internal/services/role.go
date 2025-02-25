@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models"
@@ -22,6 +23,7 @@ type Role interface {
 	GetAll(context.Context, *models.GetRolesDTO) ([]*models.RoleFull, error)
 	GetAllWithNames(context.Context, *models.GetRolesDTO) ([]*models.RoleFull, error)
 	Get(context.Context, string) (*models.Role, error)
+	GetByRealm(ctx context.Context, req *models.GetRoleByRealmDTO) (*models.RoleFull, error)
 	Create(context.Context, *models.RoleDTO) error
 	Update(context.Context, *models.RoleDTO) error
 	Delete(context.Context, string) error
@@ -49,6 +51,17 @@ func (s *RoleService) Get(ctx context.Context, roleName string) (*models.Role, e
 		return nil, fmt.Errorf("failed to get role. error: %w", err)
 	}
 	return role, nil
+}
+
+func (s *RoleService) GetByRealm(ctx context.Context, req *models.GetRoleByRealmDTO) (*models.RoleFull, error) {
+	data, err := s.repo.GetByRealm(ctx, req)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRows) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("failed to get role by realm. error: %w", err)
+	}
+	return data, nil
 }
 
 func (s *RoleService) Create(ctx context.Context, role *models.RoleDTO) error {

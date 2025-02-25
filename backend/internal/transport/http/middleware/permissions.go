@@ -25,6 +25,9 @@ func (m *Middleware) CheckPermissions(menuItem, method string) gin.HandlerFunc {
 
 		user := u.(models.User)
 
+		//TODO надо проверять к какому realm относится роль
+		// точнее надо определять на какой realm идет запрос и на основе этого передавать нужную роль в enforce
+
 		access, err := m.services.Permission.Enforce(user.Role, menuItem, method)
 		if err != nil {
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
