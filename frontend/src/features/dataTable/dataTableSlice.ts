@@ -57,6 +57,9 @@ const dataTableSlice = createSlice({
 			}
 		},
 
+		setDefFilters: (state, action: PayloadAction<ISIFilter[]>) => {
+			state.filter = action.payload
+		},
 		setFilters: (state, action: PayloadAction<ISIFilter | undefined>) => {
 			// state.filter = action.payload
 
@@ -145,6 +148,7 @@ export const {
 	setPage,
 	setSize,
 	setSort,
+	setDefFilters,
 	setFilters,
 	setSelected,
 	setActive,

@@ -34,6 +34,13 @@ const userSlice = createSlice({
 			state.token = action.payload.token
 		},
 
+		setRole: (state, action: PayloadAction<string>) => {
+			state.role = action.payload
+		},
+		setMenu: (state, action: PayloadAction<string[]>) => {
+			state.menu = action.payload
+		},
+
 		resetUser: () => initialState,
 	},
 })
@@ -44,4 +51,4 @@ export const getMenu = (state: RootState) => state.user.menu
 export const userPath = userSlice.name
 export const userReducer = userSlice.reducer
 
-export const { setUser, resetUser } = userSlice.actions
+export const { setUser, setRole, setMenu, resetUser } = userSlice.actions

@@ -4,13 +4,14 @@ import type { IBaseFetchError } from '@/app/types/error'
 import type { IRealm, IRealmDTO } from './types/realm'
 import { API } from '@/app/api'
 import { apiSlice } from '@/app/apiSlice'
+import { IUser } from '../user/types/user'
 
 export const realmsApiSlice = apiSlice.injectEndpoints({
 	overrideExisting: false,
 	endpoints: builder => ({
 		getRealms: builder.query<{ data: IRealm[] }, { all: boolean }>({
 			query: ({ all }) => ({
-				url: API.realms,
+				url: API.realms.base,
 				method: 'GET',
 				params: all ? { all } : undefined,
 			}),
@@ -25,9 +26,24 @@ export const realmsApiSlice = apiSlice.injectEndpoints({
 				}
 			},
 		}),
+		getRealmsByUser: builder.query<{ data: IRealm[] }, null>({
+			query: () => ({
+				url: API.realms.user,
+			}),
+			providesTags: [{ type: 'Realms', id: 'ALL' }],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					console.log(error)
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
 		getRealmById: builder.query<{ data: IRealm }, string>({
 			query: id => ({
-				url: `${API.realms}/${id}`,
+				url: `${API.realms.base}/${id}`,
 				method: 'GET',
 			}),
 			providesTags: (_res, _err, arg) => [{ type: 'Realms', id: arg }],
@@ -41,10 +57,18 @@ export const realmsApiSlice = apiSlice.injectEndpoints({
 				}
 			},
 		}),
+		chooseRealm: builder.mutation<{ data: IUser }, string>({
+			query: realmId => ({
+				url: API.realms.choose,
+				method: 'POST',
+				body: { realmId },
+			}),
+			invalidatesTags: [{ type: 'SI', id: 'ALL' }],
+		}),
 
 		createRealm: builder.mutation<{ id: string }, IRealmDTO>({
 			query: data => ({
-				url: API.realms,
+				url: API.realms.base,
 				method: 'POST',
 				body: data,
 			}),
@@ -53,7 +77,7 @@ export const realmsApiSlice = apiSlice.injectEndpoints({
 
 		updateRealm: builder.mutation<null, IRealmDTO>({
 			query: data => ({
-				url: `${API.realms}/${data.id}`,
+				url: `${API.realms.base}/${data.id}`,
 				method: 'PUT',
 				body: data,
 			}),
@@ -65,7 +89,7 @@ export const realmsApiSlice = apiSlice.injectEndpoints({
 
 		deleteRealm: builder.mutation<null, string>({
 			query: id => ({
-				url: `${API.realms}/${id}`,
+				url: `${API.realms.base}/${id}`,
 				method: 'DELETE',
 			}),
 			invalidatesTags: [{ type: 'Realms', id: 'ALL' }],
@@ -75,7 +99,9 @@ export const realmsApiSlice = apiSlice.injectEndpoints({
 
 export const {
 	useGetRealmsQuery,
+	useGetRealmsByUserQuery,
 	useGetRealmByIdQuery,
+	useChooseRealmMutation,
 	useCreateRealmMutation,
 	useUpdateRealmMutation,
 	useDeleteRealmMutation,

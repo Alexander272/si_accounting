@@ -36,6 +36,10 @@ export const API = {
 		realm: '/users/realm' as const,
 	},
 	roles: '/roles' as const,
-	realms: '/realms' as const,
+	realms: {
+		base: '/realms' as const,
+		user: '/realms/user' as const,
+		choose: '/realms/choose' as const,
+	},
 	accesses: '/accesses' as const,
 }

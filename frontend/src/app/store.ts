@@ -6,6 +6,7 @@ import { modalPath, modalReducer } from '@/features/modal/modalSlice'
 import { dialogPath, dialogReducer } from '@/features/dialog/dialogSlice'
 import { employeesPath, employeesReducer } from '@/features/employees/employeeSlice'
 import { userPath, userReducer } from '@/features/user/userSlice'
+import { realmPath, realmReducer } from '@/features/realms/realmSlice'
 import { resetStoreListener } from './middlewares/resetStore'
 import { apiSlice } from './apiSlice'
 
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
 	[dialogPath]: dialogReducer,
 	[employeesPath]: employeesReducer,
 	[userPath]: userReducer,
+	[realmPath]: realmReducer,
 })
 
 export const store = configureStore({

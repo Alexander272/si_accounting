@@ -29,7 +29,7 @@ export const NavLink = styled(Link)(({ theme }) => ({
 	},
 }))
 
-export const NavButton = styled('p')(({ theme }) => ({
+export const NavButton = styled('div')(({ theme }) => ({
 	cursor: 'pointer',
 	fontSize: '1.2rem',
 	color: theme.palette.primary.main,
