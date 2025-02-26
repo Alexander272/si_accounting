@@ -63,7 +63,10 @@ export const realmsApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: { realmId },
 			}),
-			invalidatesTags: [{ type: 'SI', id: 'ALL' }],
+			invalidatesTags: [
+				{ type: 'SI', id: 'ALL' },
+				{ type: 'Departments', id: 'ALL' },
+			],
 		}),
 
 		createRealm: builder.mutation<{ id: string }, IRealmDTO>({

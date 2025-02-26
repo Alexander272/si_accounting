@@ -10,7 +10,7 @@ export const departmentApiSlice = apiSlice.injectEndpoints({
 	endpoints: builder => ({
 		getDepartments: builder.query<{ data: IDepartment[] }, null>({
 			query: () => `${API.departments}`,
-			providesTags: [{ type: 'Departments', id: 'all' }],
+			providesTags: [{ type: 'Departments', id: 'ALL' }],
 			onQueryStarted: async (_arg, api) => {
 				try {
 					await api.queryFulfilled
@@ -36,7 +36,7 @@ export const departmentApiSlice = apiSlice.injectEndpoints({
 
 		getDepartmentsByUser: builder.query<{ data: IDepartment[] }, null>({
 			query: () => `${API.departments}/sso`,
-			providesTags: [{ type: 'Departments', id: 'all' }],
+			providesTags: [{ type: 'Departments', id: 'ALL' }],
 			onQueryStarted: async (_arg, api) => {
 				try {
 					await api.queryFulfilled
@@ -53,7 +53,7 @@ export const departmentApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: data,
 			}),
-			invalidatesTags: [{ type: 'Departments', id: 'all' }],
+			invalidatesTags: [{ type: 'Departments', id: 'ALL' }],
 		}),
 
 		updateDepartment: builder.mutation<null, IDepartment>({
@@ -73,7 +73,7 @@ export const departmentApiSlice = apiSlice.injectEndpoints({
 				url: `${API.departments}/${id}`,
 				method: 'DELETE',
 			}),
-			invalidatesTags: [{ type: 'Departments', id: 'all' }],
+			invalidatesTags: [{ type: 'Departments', id: 'ALL' }],
 		}),
 	}),
 })

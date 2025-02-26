@@ -21,40 +21,36 @@ export const DataHeader = () => {
 	}
 
 	return (
-		<Stack position={'relative'}>
-			<Stack direction={'row'} spacing={2} paddingX={3} paddingY={2} justifyContent={'space-between'}>
-				<Stack direction={'row'}>
-					<Typography color={'primary'} variant='h5'>
-						Средства измерений
-					</Typography>
+		<Stack direction={'row'} spacing={2} paddingX={3} paddingBottom={2} justifyContent={'space-between'}>
+			<Stack direction={'row'}>
+				<Typography color={'primary'} variant='h5'>
+					Средства измерений
+				</Typography>
 
-					{useCheckPermission(PermRules.SI.Write) ? (
-						<>
-							<SelectSIList />
-							<Button
-								onClick={openHandler}
-								variant='outlined'
-								sx={{ borderWidth: 2, minWidth: 54, ml: 2, ':hover': { borderWidth: 2 } }}
-							>
-								<PlusIcon fontSize={14} fill={palette.primary.main} />
-							</Button>
-						</>
-					) : null}
-				</Stack>
-
-				{/* //TODO надо уменьшать размер бандла */}
-				<Stack direction={'row'} spacing={2}>
-					<Suspense fallback={<CircularProgress size={20} />}>
-						<Setting />
-					</Suspense>
-
-					<FastChoose />
-					<FastFilter />
-					<Tools />
-				</Stack>
+				{useCheckPermission(PermRules.SI.Write) ? (
+					<>
+						<SelectSIList />
+						<Button
+							onClick={openHandler}
+							variant='outlined'
+							sx={{ borderWidth: 2, minWidth: 54, ml: 2, ':hover': { borderWidth: 2 } }}
+						>
+							<PlusIcon fontSize={14} fill={palette.primary.main} />
+						</Button>
+					</>
+				) : null}
 			</Stack>
 
-			{/* <DataTableLoader /> */}
+			{/* //TODO надо уменьшать размер бандла */}
+			<Stack direction={'row'} spacing={2}>
+				<Suspense fallback={<CircularProgress size={20} />}>
+					<Setting />
+				</Suspense>
+
+				<FastChoose />
+				<FastFilter />
+				<Tools />
+			</Stack>
 		</Stack>
 	)
 }

@@ -1,4 +1,4 @@
-import { FC, SyntheticEvent } from 'react'
+import { FC, SyntheticEvent, useEffect } from 'react'
 import { Stack, Tab, Tabs, useTheme } from '@mui/material'
 
 import { Fallback } from '@/components/Fallback/Fallback'
@@ -14,12 +14,18 @@ export const DepartmentList: FC<Props> = ({ department, setDepartment }) => {
 
 	const { data, isFetching } = useGetDepartmentsQuery(null)
 
+	useEffect(() => {
+		if (!data || department == 'new') return
+		const found = data.data.find(e => e.id === department)
+		if (!found) setDepartment('new')
+	}, [data, department, setDepartment])
+
 	const tabHandler = (_event: SyntheticEvent, value: string) => {
 		setDepartment(value)
 	}
 
 	return (
-		<Stack position={'relative'}>
+		<Stack position={'relative'} minWidth={270}>
 			{isFetching && <Fallback position={'absolute'} zIndex={5} background={'#f5f5f557'} />}
 			<Tabs
 				orientation='vertical'

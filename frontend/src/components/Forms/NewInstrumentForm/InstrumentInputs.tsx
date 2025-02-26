@@ -105,7 +105,13 @@ export const InstrumentInputs: FC<Props> = ({ disabled }) => {
 					name={IntervalField.key}
 					rules={IntervalField.rules as RegisterOptions<IInstrumentForm, 'interVerificationInterval'>}
 					render={({ field, fieldState: { error } }) => (
-						<TextField {...field} label={IntervalField.label} disabled={disabled} error={Boolean(error)} />
+						<TextField
+							{...field}
+							label={IntervalField.label}
+							type='number'
+							disabled={disabled}
+							error={Boolean(error)}
+						/>
 					)}
 				/>
 			)}

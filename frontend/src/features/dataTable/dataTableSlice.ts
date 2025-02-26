@@ -61,8 +61,6 @@ const dataTableSlice = createSlice({
 			state.filter = action.payload
 		},
 		setFilters: (state, action: PayloadAction<ISIFilter | undefined>) => {
-			// state.filter = action.payload
-
 			if (!action.payload) {
 				state.filter = undefined
 				return
