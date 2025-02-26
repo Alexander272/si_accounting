@@ -29,6 +29,7 @@ type SI interface {
 	GetAll(context.Context, *models.SIParams) (*models.SIList, error)
 	GetMoved(context.Context, *models.SIParams) (*models.SIList, error)
 	GetForNotification(context.Context, *models.Period) ([]*models.Notification, error)
+	GetForVerification(context.Context, *models.Period) ([]*models.Notification, error)
 	Save(ctx context.Context, id string) error
 	Create(context.Context, *models.CreateSIDTO) error
 }
@@ -55,6 +56,14 @@ func (s *SIService) GetForNotification(ctx context.Context, req *models.Period) 
 		return nil, fmt.Errorf("failed to get si for notification. error: %w", err)
 	}
 	return list, nil
+}
+
+func (s *SIService) GetForVerification(ctx context.Context, req *models.Period) ([]*models.Notification, error) {
+	data, err := s.repo.GetForVerification(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get si for verification. error: %w", err)
+	}
+	return data, nil
 }
 
 func (s *SIService) Save(ctx context.Context, id string) error {

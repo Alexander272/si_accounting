@@ -24,6 +24,7 @@ type Role interface {
 	GetAllWithNames(context.Context, *models.GetRolesDTO) ([]*models.RoleFull, error)
 	Get(context.Context, string) (*models.Role, error)
 	GetByRealm(ctx context.Context, req *models.GetRoleByRealmDTO) (*models.RoleFull, error)
+	GetWithRealm(ctx context.Context, req *models.GetRoleByRealmDTO) ([]*models.RoleWithRealm, error)
 	Create(context.Context, *models.RoleDTO) error
 	Update(context.Context, *models.RoleDTO) error
 	Delete(context.Context, string) error
@@ -60,6 +61,14 @@ func (s *RoleService) GetByRealm(ctx context.Context, req *models.GetRoleByRealm
 			return nil, err
 		}
 		return nil, fmt.Errorf("failed to get role by realm. error: %w", err)
+	}
+	return data, nil
+}
+
+func (s *RoleService) GetWithRealm(ctx context.Context, req *models.GetRoleByRealmDTO) ([]*models.RoleWithRealm, error) {
+	data, err := s.repo.GetWithRealm(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get roles with realm. error: %w", err)
 	}
 	return data, nil
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
@@ -77,9 +78,8 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 	}
 
 	roleCookie := &models.Identity{
-		Role:   user.Role,
-		Realm:  dto.Realm,
 		UserId: user.Id,
+		Roles:  user.Roles,
 	}
 	role, err := roleCookie.String()
 	if err != nil {
@@ -137,21 +137,16 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 		return
 	}
 
-	identity, err := c.Cookie(constants.IdentityCookie)
-	if err != nil || identity == "" {
-		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
-		return
-	}
-	id := &models.Identity{}
-	err = id.Parse(identity)
+	realm := c.GetHeader("realm")
+	err = uuid.Validate(realm)
 	if err != nil {
-		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Сессия не найдена")
 		return
 	}
 
 	req := &models.RefreshDTO{
 		Token: refreshToken,
-		Realm: id.Realm,
+		Realm: realm,
 	}
 
 	user, err := h.service.Refresh(c, req)
@@ -178,11 +173,10 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	// )
 
 	cookie := &models.Identity{
-		Role:   user.Role,
-		Realm:  id.Realm,
 		UserId: user.Id,
+		Roles:  user.Roles,
 	}
-	identity, err = cookie.String()
+	identity, err := cookie.String()
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), cookie)

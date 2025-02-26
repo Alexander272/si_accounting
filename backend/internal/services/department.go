@@ -22,16 +22,16 @@ func NewDepartmentService(repo repository.Department, location Location) *Depart
 }
 
 type Department interface {
-	GetAll(context.Context) ([]*models.Department, error)
-	GetById(context.Context, string) (*models.Department, error)
+	GetAll(ctx context.Context, req *models.GetDepartmentsDTO) ([]*models.Department, error)
+	GetById(ctx context.Context, req *models.GetDepartmentByIdDTO) (*models.Department, error)
 	GetBySSOId(context.Context, string) ([]*models.Department, error)
-	Create(context.Context, *models.Department) (string, error)
-	Update(context.Context, *models.Department) error
+	Create(context.Context, *models.DepartmentDTO) (string, error)
+	Update(context.Context, *models.DepartmentDTO) error
 	Delete(context.Context, string) error
 }
 
-func (s *DepartmentService) GetAll(ctx context.Context) ([]*models.Department, error) {
-	departments, err := s.repo.GetAll(ctx)
+func (s *DepartmentService) GetAll(ctx context.Context, req *models.GetDepartmentsDTO) ([]*models.Department, error) {
+	departments, err := s.repo.GetAll(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all departments. error: %w", err)
 	}
@@ -41,8 +41,8 @@ func (s *DepartmentService) GetAll(ctx context.Context) ([]*models.Department, e
 	return departments, nil
 }
 
-func (s *DepartmentService) GetById(ctx context.Context, id string) (*models.Department, error) {
-	department, err := s.repo.GetById(ctx, id)
+func (s *DepartmentService) GetById(ctx context.Context, req *models.GetDepartmentByIdDTO) (*models.Department, error) {
+	department, err := s.repo.GetById(ctx, req)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRows) {
 			return nil, err
@@ -60,7 +60,7 @@ func (s *DepartmentService) GetBySSOId(ctx context.Context, id string) ([]*model
 	return departments, nil
 }
 
-func (s *DepartmentService) Create(ctx context.Context, department *models.Department) (string, error) {
+func (s *DepartmentService) Create(ctx context.Context, department *models.DepartmentDTO) (string, error) {
 	id, err := s.repo.Create(ctx, department)
 	if err != nil {
 		return id, fmt.Errorf("failed to create department. error: %w", err)
@@ -68,7 +68,7 @@ func (s *DepartmentService) Create(ctx context.Context, department *models.Depar
 	return id, nil
 }
 
-func (s *DepartmentService) Update(ctx context.Context, department *models.Department) error {
+func (s *DepartmentService) Update(ctx context.Context, department *models.DepartmentDTO) error {
 	if err := s.repo.Update(ctx, department); err != nil {
 		return fmt.Errorf("failed to update department. error: %w", err)
 	}

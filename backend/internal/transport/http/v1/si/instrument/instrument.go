@@ -13,6 +13,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type InstrumentHandlers struct {
@@ -82,20 +83,14 @@ func (h *InstrumentHandlers) Create(c *gin.Context) {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
-	// realm := c.GetHeader("realm")
-	// err := uuid.Validate(realm)
-	// if err != nil {
-	// 	response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "invalid id param")
-	// 	return
-	// }
-	// dto.RealmId = realm
 
-	identity, exists := c.Get(constants.CtxIdentity)
-	if !exists {
-		response.NewErrorResponse(c, http.StatusUnauthorized, "empty identity", "Сессия не найдена")
+	realm := c.GetHeader("realm")
+	err := uuid.Validate(realm)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Сессия не найдена")
 		return
 	}
-	dto.RealmId = identity.(models.Identity).Realm
+	dto.RealmId = realm
 
 	id, err := h.service.Create(c, dto)
 	if err != nil {

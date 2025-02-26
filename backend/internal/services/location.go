@@ -84,7 +84,7 @@ func (s *LocationService) FilterByDepartments(ctx context.Context, filter *model
 
 func (s *LocationService) Create(ctx context.Context, location *models.CreateLocationDTO) error {
 	if location.Status == constants.LocationStatusMoved && location.DepartmentId != "" {
-		department, err := s.department.GetById(ctx, location.DepartmentId)
+		department, err := s.department.GetById(ctx, &models.GetDepartmentByIdDTO{Id: location.DepartmentId})
 		if err != nil {
 			return err
 		}

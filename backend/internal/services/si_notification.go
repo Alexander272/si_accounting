@@ -7,8 +7,7 @@ import (
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
 	"github.com/Alexander272/si_accounting/backend/internal/models"
-	"github.com/Alexander272/si_accounting/backend/internal/models/bot"
-	"github.com/Alexander272/si_accounting/backend/internal/services/error_bot"
+	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/goodsign/monday"
 )
@@ -34,6 +33,7 @@ func NewSINotificationService(si SI, bot Most, times []*models.NotificationTime)
 type SINotification interface {
 	CheckSentSI()
 	CheckUsedSI()
+	CheckVerification()
 }
 
 func (s *SINotificationService) CheckSentSI() {
@@ -42,7 +42,7 @@ func (s *SINotificationService) CheckSentSI() {
 	nots, err := s.si.GetForNotification(context.Background(), &models.Period{})
 	if err != nil {
 		logger.Error("notification error:", logger.ErrAttr(err))
-		error_bot.Send(context.Background(), bot.Data{Error: err.Error(), Request: nil, Url: "Failed to get si list (checkSend)"})
+		error_bot.Send(nil, err.Error(), nil)
 		return
 	}
 
@@ -62,8 +62,7 @@ func (s *SINotificationService) CheckSentSI() {
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
 			logger.Error("notification error:", logger.ErrAttr(err))
-			error_bot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "Failed to send to bot (checkSend)"})
-
+			error_bot.Send(nil, err.Error(), n)
 		}
 	}
 }
@@ -129,7 +128,7 @@ func (s *SINotificationService) CheckUsedSI() {
 	si, err := s.si.GetForNotification(context.Background(), period)
 	if err != nil {
 		logger.Error("notification error:", logger.ErrAttr(err))
-		error_bot.Send(context.Background(), bot.Data{Error: err.Error(), Request: period, Url: "Failed to get si for notification"})
+		error_bot.Send(nil, err.Error(), period)
 		return
 	}
 
@@ -147,7 +146,7 @@ func (s *SINotificationService) CheckUsedSI() {
 
 		if err := s.bot.Send(context.Background(), n); err != nil {
 			logger.Error("notification error:", logger.ErrAttr(err))
-			error_bot.Send(context.Background(), bot.Data{Error: err.Error(), Request: n, Url: "Failed to send to bot"})
+			error_bot.Send(nil, err.Error(), n)
 		}
 	}
 
@@ -155,4 +154,35 @@ func (s *SINotificationService) CheckUsedSI() {
 		s.iterationNumber = index
 	}
 	s.iterationNumber = (index + 1)
+}
+
+func (s *SINotificationService) CheckVerification() {
+	now := time.Now()
+	if time.Now().Day() != 1 {
+		return
+	}
+	logger.Info("Check verification")
+
+	dto := &models.Period{
+		StartAt:  time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()).Unix(),
+		FinishAt: time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, now.Location()).Unix(),
+	}
+	nots, err := s.si.GetForVerification(context.Background(), dto)
+	if err != nil {
+		logger.Error("notification error:", logger.ErrAttr(err))
+		error_bot.Send(nil, err.Error(), dto)
+		return
+	}
+
+	for _, n := range nots {
+		if n.ChannelId == "" {
+			continue
+		}
+		n.Message = "В текущем месяце подходит срок поверки у следующих инструментов"
+
+		if err := s.bot.Send(context.Background(), n); err != nil {
+			logger.Error("notification error:", logger.ErrAttr(err))
+			error_bot.Send(nil, err.Error(), n)
+		}
+	}
 }

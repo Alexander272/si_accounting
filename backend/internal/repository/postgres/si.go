@@ -48,6 +48,7 @@ type SI interface {
 	GetAll(context.Context, *models.SIParams) (*models.SIList, error)
 	GetMoved(context.Context, *models.SIParams) (*models.SIList, error)
 	GetForNotification(context.Context, *models.Period) ([]*models.Notification, error)
+	GetForVerification(context.Context, *models.Period) ([]*models.Notification, error)
 }
 
 func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SIList, error) {
@@ -100,7 +101,7 @@ func (r *SIRepo) GetAll(ctx context.Context, req *models.SIParams) (*models.SILi
 
 	// logger.Debug(query)
 
-	if err := r.db.Select(&list.SI, query, params...); err != nil {
+	if err := r.db.SelectContext(ctx, &list.SI, query, params...); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
@@ -167,7 +168,7 @@ func (r *SIRepo) GetMoved(ctx context.Context, req *models.SIParams) (*models.SI
 	)
 	data := []*models.SI{}
 
-	if err := r.db.Select(&data, query, params...); err != nil {
+	if err := r.db.SelectContext(ctx, &data, query, params...); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
@@ -233,7 +234,7 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 	// 	params = append(params, startAt.Unix(), finishAt.Unix())
 	// }
 
-	if err := r.db.Select(&data, query, params...); err != nil {
+	if err := r.db.SelectContext(ctx, &data, query, params...); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
@@ -260,6 +261,43 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 				ChannelId: sn.ChannelId,
 				Type:      notType,
 				Status:    notStatus,
+				SI:        []*models.SelectedSI{si},
+			})
+		} else {
+			nots[len(nots)-1].SI = append(nots[len(nots)-1].SI, si)
+		}
+	}
+
+	return nots, nil
+}
+
+func (r *SIRepo) GetForVerification(ctx context.Context, req *models.Period) ([]*models.Notification, error) {
+	query := fmt.Sprintf(`SELECT i.id, i.name, type, factory_number, date, next_date, reserve_channel AS channel_id
+		FROM %s AS i
+		LEFT JOIN %s AS r ON r.id=realm_id
+		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id 
+			ORDER BY date DESC, created_at DESC LIMIT 1) AS v ON TRUE
+		WHERE is_active=true AND expiration_notice=true AND reserve_channel!='' AND next_date>=$1 AND next_date<=$2`,
+		InstrumentTable, RealmTable, VerificationTable,
+	)
+	data := []*models.SIFromNotification{}
+
+	if err := r.db.SelectContext(ctx, &data, query, req.StartAt, req.FinishAt); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+
+	nots := []*models.Notification{}
+	for i, sn := range data {
+		si := &models.SelectedSI{
+			Id:            sn.Id,
+			Name:          sn.Name,
+			FactoryNumber: sn.FactoryNumber,
+		}
+		if i == 0 || nots[len(nots)-1].ChannelId != sn.ChannelId {
+			nots = append(nots, &models.Notification{
+				ChannelId: sn.ChannelId,
+				Type:      "notification",
+				Status:    "notification",
 				SI:        []*models.SelectedSI{si},
 			})
 		} else {

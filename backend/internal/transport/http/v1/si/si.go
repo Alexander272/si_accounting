@@ -13,6 +13,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/pkg/error_bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type SIHandlers struct {
@@ -59,21 +60,21 @@ func Register(api *gin.RouterGroup, service services.SI, middleware *middleware.
 // }
 
 func (h *SIHandlers) GetAll(c *gin.Context) {
-	// realm := c.GetHeader("realm")
-	// err := uuid.Validate(realm)
-	// if err != nil {
-	// 	response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "invalid id param")
-	// 	return
-	// }
-
-	identity, exists := c.Get(constants.CtxIdentity)
-	if !exists {
-		response.NewErrorResponse(c, http.StatusUnauthorized, "empty identity", "Сессия не найдена")
+	realm := c.GetHeader("realm")
+	err := uuid.Validate(realm)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Сессия не найдена")
 		return
 	}
 
+	// identity, exists := c.Get(constants.CtxIdentity)
+	// if !exists {
+	// 	response.NewErrorResponse(c, http.StatusUnauthorized, "empty identity", "Сессия не найдена")
+	// 	return
+	// }
+
 	params := &models.SIParams{
-		RealmId: identity.(models.Identity).Realm,
+		RealmId: realm,
 		Page:    &models.SIPage{},
 		Sort:    []*models.SISort{},
 		Filters: []*models.SIFilter{},
@@ -313,6 +314,14 @@ func (h *SIHandlers) Create(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
+
+	realm := c.GetHeader("realm")
+	err := uuid.Validate(realm)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Сессия не найдена")
+		return
+	}
+	dto.Instrument.RealmId = realm
 
 	if err := h.service.Create(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())

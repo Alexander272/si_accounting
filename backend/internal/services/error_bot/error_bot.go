@@ -3,13 +3,13 @@ package error_bot
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/Alexander272/si_accounting/backend/internal/models/bot"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
-	"github.com/goccy/go-json"
 )
 
 // DEPRECATED

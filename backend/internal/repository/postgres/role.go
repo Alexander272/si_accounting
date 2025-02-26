@@ -27,6 +27,7 @@ type Role interface {
 	GetAllWithNames(context.Context, *models.GetRolesDTO) ([]*models.RoleFull, error)
 	Get(context.Context, string) (*models.Role, error)
 	GetByRealm(ctx context.Context, req *models.GetRoleByRealmDTO) (*models.RoleFull, error)
+	GetWithRealm(ctx context.Context, req *models.GetRoleByRealmDTO) ([]*models.RoleWithRealm, error)
 	Create(context.Context, *models.RoleDTO) error
 	Update(context.Context, *models.RoleDTO) error
 	Delete(context.Context, string) error
@@ -171,6 +172,22 @@ func (r *RoleRepo) GetByRealm(ctx context.Context, req *models.GetRoleByRealmDTO
 		Description: tmp.Description,
 	}
 
+	return data, nil
+}
+
+func (r *RoleRepo) GetWithRealm(ctx context.Context, req *models.GetRoleByRealmDTO) ([]*models.RoleWithRealm, error) {
+	query := fmt.Sprintf(`SELECT r.id, name, description, level, realm_id
+		FROM %s AS r
+		INNER JOIN %s AS a ON a.role_id=r.id
+		LEFT JOIN LATERAL (SELECT sso_id from %s WHERE id=a.user_id) AS u ON true
+		WHERE sso_id=$1 ORDER BY level DESC, realm_id`,
+		RoleTable, AccessTable, UserTable,
+	)
+	data := []*models.RoleWithRealm{}
+
+	if err := r.db.SelectContext(ctx, &data, query, req.UserId); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
 	return data, nil
 }
 

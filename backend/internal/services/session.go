@@ -41,30 +41,23 @@ func (s *SessionService) SignIn(ctx context.Context, u *models.SignIn) (*models.
 		return nil, err
 	}
 
-	// получить роли сгруппированные по областям
-	/*
-		SELECT r.id, name, description, level, realm_id
-			FROM public.roles AS r
-			INNER JOIN accesses AS a ON a.role_id=r.id
-			LEFT JOIN LATERAL (SELECT sso_id from users WHERE id=a.user_id) AS u ON true
-			WHERE sso_id='ed6bf9fa-9168-414d-a413-281439cbbacb';
-	*/
-	// еще надо получить доступные разделы для каждой роли
-
-	// если область не будет задана надо будет получить область по умолчанию или как-то еще определять область
-
-	//? или получать только роль для нужной области, а при переключении запрашивать новую роль?
-
-	// можно попробовать закинуть роль и id области в куки по ключу sia_identity
-	// в куки засунуть сразу несколько полей проблемно (надо превращать в json, а потом обратно)
-
-	req := &models.GetRoleByRealmDTO{UserId: user.Id, RealmId: u.Realm}
-	role, err := s.role.GetByRealm(ctx, req)
+	roles, err := s.role.GetWithRealm(ctx, &models.GetRoleByRealmDTO{UserId: user.Id})
 	if err != nil {
 		return nil, err
 	}
-	user.Role = role.Name
-	u.Realm = req.RealmId
+	user.Roles = roles
+	if u.Realm == "" {
+		user.Role = roles[0].Name
+		u.Realm = roles[0].RealmId
+	} else {
+		for _, r := range roles {
+			if r.RealmId == u.Realm {
+				user.Role = r.Name
+				u.Realm = r.RealmId
+				break
+			}
+		}
+	}
 
 	// get menu
 	menu, err := s.role.Get(ctx, user.Role)
@@ -73,7 +66,7 @@ func (s *SessionService) SignIn(ctx context.Context, u *models.SignIn) (*models.
 	}
 
 	// get default filters
-	filters, err := s.filter.Get(ctx, &models.GetFilterDTO{SSOId: user.Id, RealmId: req.RealmId})
+	filters, err := s.filter.Get(ctx, &models.GetFilterDTO{SSOId: user.Id, RealmId: u.Realm})
 	if err != nil {
 		return nil, err
 	}
@@ -105,11 +98,17 @@ func (s *SessionService) Refresh(ctx context.Context, req *models.RefreshDTO) (*
 		return nil, err
 	}
 
-	role, err := s.role.GetByRealm(ctx, &models.GetRoleByRealmDTO{UserId: user.Id, RealmId: req.Realm})
+	roles, err := s.role.GetWithRealm(ctx, &models.GetRoleByRealmDTO{UserId: user.Id})
 	if err != nil {
 		return nil, err
 	}
-	user.Role = role.Name
+	user.Roles = roles
+	for _, r := range roles {
+		if r.RealmId == req.Realm {
+			user.Role = r.Name
+			break
+		}
+	}
 
 	// get menu
 	menu, err := s.role.Get(ctx, user.Role)

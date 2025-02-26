@@ -42,13 +42,14 @@ func (h *Handler) get(c *gin.Context) {
 	}
 	user := u.(models.User)
 
-	identity, exists := c.Get(constants.CtxIdentity)
-	if !exists {
-		response.NewErrorResponse(c, http.StatusUnauthorized, "empty identity", "Сессия не найдена")
+	realm := c.GetHeader("realm")
+	err := uuid.Validate(realm)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Сессия не найдена")
 		return
 	}
 
-	req := &models.GetFilterDTO{SSOId: user.Id, RealmId: identity.(models.Identity).Realm}
+	req := &models.GetFilterDTO{SSOId: user.Id, RealmId: realm}
 	data, err := h.service.Get(c, req)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())

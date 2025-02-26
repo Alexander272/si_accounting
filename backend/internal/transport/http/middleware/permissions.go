@@ -8,6 +8,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Permission struct {
@@ -17,18 +18,33 @@ type Permission struct {
 
 func (m *Middleware) CheckPermissions(menuItem, method string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		u, exists := c.Get(constants.CtxUser)
-		if !exists {
-			response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "сессия не найдена")
+		realm := c.GetHeader("realm")
+		err := uuid.Validate(realm)
+		if err != nil {
+			response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "invalid id param")
 			return
 		}
 
-		user := u.(models.User)
+		identity, err := c.Cookie(constants.IdentityCookie)
+		if err != nil || identity == "" {
+			response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
+			return
+		}
+		id := &models.Identity{}
+		err = id.Parse(identity)
+		if err != nil {
+			response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
+			return
+		}
 
-		//TODO надо проверять к какому realm относится роль
-		// точнее надо определять на какой realm идет запрос и на основе этого передавать нужную роль в enforce
+		role := ""
+		for _, item := range id.Roles {
+			if item.RealmId == realm {
+				role = item.Name
+			}
+		}
 
-		access, err := m.services.Permission.Enforce(user.Role, menuItem, method)
+		access, err := m.services.Permission.Enforce(role, menuItem, method)
 		if err != nil {
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 			return

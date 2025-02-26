@@ -40,10 +40,18 @@ func Register(api *gin.RouterGroup, service services.Department, middleware *mid
 }
 
 func (h *DepartmentHandlers) GetAll(c *gin.Context) {
-	departments, err := h.service.GetAll(c)
+	realm := c.GetHeader("realm")
+	err := uuid.Validate(realm)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Сессия не найдена")
+		return
+	}
+	dto := &models.GetDepartmentsDTO{RealmId: realm}
+
+	departments, err := h.service.GetAll(c, dto)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		error_bot.Send(c, err.Error(), nil)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -56,15 +64,16 @@ func (h *DepartmentHandlers) GetById(c *gin.Context) {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id подразделения не задан")
 		return
 	}
+	dto := &models.GetDepartmentByIdDTO{Id: id}
 
-	department, err := h.service.GetById(c, id)
+	department, err := h.service.GetById(c, dto)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRows) {
 			response.NewErrorResponse(c, http.StatusNotFound, err.Error(), "Подразделение не найдено")
 			return
 		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		error_bot.Send(c, err.Error(), id)
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 
@@ -89,7 +98,7 @@ func (h *DepartmentHandlers) GetBySSOId(c *gin.Context) {
 }
 
 func (h *DepartmentHandlers) Create(c *gin.Context) {
-	dto := &models.Department{}
+	dto := &models.DepartmentDTO{}
 	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
@@ -118,7 +127,7 @@ func (h *DepartmentHandlers) Create(c *gin.Context) {
 }
 
 func (h *DepartmentHandlers) Update(c *gin.Context) {
-	dto := &models.Department{}
+	dto := &models.DepartmentDTO{}
 	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return

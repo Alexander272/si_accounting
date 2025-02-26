@@ -116,6 +116,24 @@ func (h *Handlers) choose(c *gin.Context) {
 	}
 	dto.UserId = u.(models.User).Id
 
+	identity, err := c.Cookie(constants.IdentityCookie)
+	if err != nil || identity == "" {
+		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
+		return
+	}
+	id := &models.Identity{}
+	err = id.Parse(identity)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
+		return
+	}
+
+	for _, item := range id.Roles {
+		if item.RealmId == dto.RealmId {
+			dto.Role = item.Name
+		}
+	}
+
 	user, err := h.service.Choose(c, dto)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
@@ -123,19 +141,6 @@ func (h *Handlers) choose(c *gin.Context) {
 		return
 	}
 
-	cookie := &models.Identity{
-		Role:   user.Role,
-		Realm:  dto.RealmId,
-		UserId: dto.UserId,
-	}
-	identity, err := cookie.String()
-	if err != nil {
-		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		error_bot.Send(c, err.Error(), cookie)
-		return
-	}
-
-	c.SetCookie(constants.IdentityCookie, identity, int(h.auth.RefreshTokenTTL.Seconds()), "/", c.Request.Host, h.auth.Secure, true)
 	c.JSON(http.StatusOK, response.DataResponse{Data: user})
 }
 

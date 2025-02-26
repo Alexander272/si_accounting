@@ -52,7 +52,7 @@ func (r *InstrumentRepo) GetById(ctx context.Context, id string) (*models.Instru
 	)
 	instrument := &models.Instrument{}
 
-	if err := r.db.Get(instrument, query, id, constants.InstrumentDraft); err != nil {
+	if err := r.db.GetContext(ctx, instrument, query, id, constants.InstrumentDraft); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRows
 		}
@@ -69,8 +69,8 @@ func (r *InstrumentRepo) Create(ctx context.Context, in *models.CreateInstrument
 	)
 	id := uuid.New()
 
-	_, err := r.db.Exec(query, id, in.Name, in.RealmId, in.Type, in.FactoryNumber, in.MeasurementLimits, in.Accuracy, in.StateRegister, in.Manufacturer,
-		in.YearOfIssue, in.InterVerificationInterval, in.Notes, constants.InstrumentDraft,
+	_, err := r.db.ExecContext(ctx, query, id, in.RealmId, in.Name, in.Type, in.FactoryNumber, in.MeasurementLimits, in.Accuracy, in.StateRegister,
+		in.Manufacturer, in.YearOfIssue, in.InterVerificationInterval, in.Notes, constants.InstrumentDraft,
 	)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute query. error: %w", err)
@@ -84,7 +84,7 @@ func (r *InstrumentRepo) Update(ctx context.Context, in *models.UpdateInstrument
 		InstrumentTable,
 	)
 
-	_, err := r.db.Exec(query, in.Name, in.Type, in.FactoryNumber, in.MeasurementLimits, in.Accuracy, in.StateRegister, in.Manufacturer,
+	_, err := r.db.ExecContext(ctx, query, in.Name, in.Type, in.FactoryNumber, in.MeasurementLimits, in.Accuracy, in.StateRegister, in.Manufacturer,
 		in.YearOfIssue, in.InterVerificationInterval, in.Notes, in.Id,
 	)
 	if err != nil {
@@ -96,7 +96,7 @@ func (r *InstrumentRepo) Update(ctx context.Context, in *models.UpdateInstrument
 func (r *InstrumentRepo) ChangeStatus(ctx context.Context, status *models.UpdateStatus) error {
 	query := fmt.Sprintf(`UPDATE %s SET status=$1 WHERE id=$2`, InstrumentTable)
 
-	_, err := r.db.Exec(query, status.Status, status.Id)
+	_, err := r.db.ExecContext(ctx, query, status.Status, status.Id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
@@ -107,7 +107,7 @@ func (r *InstrumentRepo) Delete(ctx context.Context, id string) error {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id=$1`, InstrumentTable)
 	// query := fmt.Sprintf(`UPDATE %s SET status='deleted' WHERE id=$1`, InstrumentTable)
 
-	_, err := r.db.Exec(query, id)
+	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

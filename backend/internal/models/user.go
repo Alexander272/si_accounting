@@ -7,6 +7,8 @@ type User struct {
 	Menu    []string    `json:"menu"`
 	Filters []*SIFilter `json:"filters"`
 
+	Roles []*RoleWithRealm `json:"-"`
+
 	AccessToken  string `json:"token"`
 	RefreshToken string `json:"-"`
 }

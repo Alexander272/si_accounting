@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/Alexander272/si_accounting/backend/internal/constants"
-	"github.com/Alexander272/si_accounting/backend/internal/models"
 	"github.com/Alexander272/si_accounting/backend/internal/models/response"
 	"github.com/gin-gonic/gin"
 )
@@ -38,24 +37,6 @@ func (m *Middleware) VerifyToken(c *gin.Context) {
 		return
 	}
 
-	identity, err := c.Cookie(constants.IdentityCookie)
-	if err != nil || identity == "" {
-		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
-		return
-	}
-	id := &models.Identity{}
-	err = id.Parse(identity)
-	if err != nil {
-		response.NewErrorResponse(c, http.StatusUnauthorized, err.Error(), "сессия не найдена")
-		return
-	}
-	if id.UserId != user.Id {
-		response.NewErrorResponse(c, http.StatusUnauthorized, "invalid session", "сессия не найдена")
-		return
-	}
-
 	c.Set(constants.CtxUser, *user)
-	c.Set(constants.CtxIdentity, *id)
-
 	c.Next()
 }

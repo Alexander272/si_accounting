@@ -61,14 +61,8 @@ func (s *RealmService) GetByUser(ctx context.Context, req *models.GetRealmByUser
 }
 
 func (s *RealmService) Choose(ctx context.Context, dto *models.ChooseRealmDTO) (*models.User, error) {
-	req := &models.GetRoleByRealmDTO{UserId: dto.UserId, RealmId: dto.RealmId}
-	role, err := s.role.GetByRealm(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
 	// get menu
-	menu, err := s.role.Get(ctx, role.Name)
+	menu, err := s.role.Get(ctx, dto.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +74,7 @@ func (s *RealmService) Choose(ctx context.Context, dto *models.ChooseRealmDTO) (
 	}
 
 	user := &models.User{
-		Role:    role.Name,
+		Role:    dto.Role,
 		Menu:    menu.Menu,
 		Filters: filters,
 	}

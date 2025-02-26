@@ -30,13 +30,21 @@ type RoleFullDTO struct {
 	Description string         `json:"description" db:"description"`
 }
 
+type RoleWithRealm struct {
+	Id          string `json:"id" db:"id"`
+	Name        string `json:"name" db:"name"`
+	Level       int    `json:"level" db:"level"`
+	Description string `json:"description" db:"description"`
+	RealmId     string `json:"realmId" db:"realm_id"`
+}
+
 type RoleWithApi struct{}
 
 type GetRolesDTO struct{}
 
 type GetRoleByRealmDTO struct {
 	RealmId string `json:"realmId" binding:"required"`
-	UserId  string `json:"userId" binding:"required"`
+	UserId  string `json:"userId"`
 }
 
 type RoleDTO struct {
