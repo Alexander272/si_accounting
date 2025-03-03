@@ -27,6 +27,11 @@ type GetByRealmDTO struct {
 	Include bool   `json:"include"`
 }
 
+type GetByAccessDTO struct {
+	RealmId string `json:"realmId" binding:"required"`
+	Role    string `json:"role"`
+}
+
 // type KeycloakUser struct {
 // 	Id        string `json:"id"`
 // 	Username  string `json:"username"`

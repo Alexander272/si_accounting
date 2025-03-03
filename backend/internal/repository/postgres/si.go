@@ -272,7 +272,7 @@ func (r *SIRepo) GetForNotification(ctx context.Context, req *models.Period) (no
 }
 
 func (r *SIRepo) GetForVerification(ctx context.Context, req *models.Period) ([]*models.Notification, error) {
-	query := fmt.Sprintf(`SELECT i.id, i.name, type, factory_number, date, next_date, reserve_channel AS channel_id
+	query := fmt.Sprintf(`SELECT i.id, i.name, factory_number, date, next_date, reserve_channel AS channel_id
 		FROM %s AS i
 		LEFT JOIN %s AS r ON r.id=realm_id
 		LEFT JOIN LATERAL (SELECT date, next_date FROM %s WHERE instrument_id=i.id 

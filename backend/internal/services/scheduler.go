@@ -89,6 +89,7 @@ func (s *SchedulerService) job() {
 
 	s.notification.CheckUsedSI()
 	s.notification.CheckSentSI()
+	s.notification.CheckVerification()
 
 	// Синхронизация пользователей с keycloak
 	if err := s.user.Sync(context.Background()); err != nil {

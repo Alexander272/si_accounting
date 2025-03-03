@@ -25,6 +25,7 @@ func NewUserService(repo repository.User, keycloak *auth.KeycloakClient) *UserSe
 
 type User interface {
 	GetAll(ctx context.Context) ([]*models.UserData, error)
+	GetByAccess(ctx context.Context, req *models.GetByAccessDTO) ([]*models.UserData, error)
 	GetByRealm(ctx context.Context, req *models.GetByRealmDTO) ([]*models.UserData, error)
 	GetById(ctx context.Context, id string) (*models.UserData, error)
 	GetBySSOId(ctx context.Context, id string) (*models.UserData, error)
@@ -41,6 +42,14 @@ func (s *UserService) GetAll(ctx context.Context) ([]*models.UserData, error) {
 	data, err := s.repo.GetAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all users. error: %w", err)
+	}
+	return data, nil
+}
+
+func (s *UserService) GetByAccess(ctx context.Context, req *models.GetByAccessDTO) ([]*models.UserData, error) {
+	data, err := s.repo.GetByAccess(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users by access. error: %w", err)
 	}
 	return data, nil
 }
@@ -68,12 +77,6 @@ func (s *UserService) GetBySSOId(ctx context.Context, id string) (*models.UserDa
 	}
 	return data, nil
 }
-
-/*
-	TODO
-	Можно записывать пользователей из keycloak в таблицу пользователей, а ответственных брать из таблицы с доступами выбирая по ролям
-	и нужному realm
-*/
 
 func (s *UserService) Sync(ctx context.Context) error {
 	logger.Info("Sync users")

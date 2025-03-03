@@ -158,9 +158,9 @@ func (s *SINotificationService) CheckUsedSI() {
 
 func (s *SINotificationService) CheckVerification() {
 	now := time.Now()
-	if time.Now().Day() != 1 {
-		return
-	}
+	// if time.Now().Day() != 1 {
+	// 	return
+	// }
 	logger.Info("Check verification")
 
 	dto := &models.Period{

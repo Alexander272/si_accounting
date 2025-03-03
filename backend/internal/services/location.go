@@ -316,7 +316,7 @@ func (s *LocationService) Receiving(ctx context.Context, dto *models.DialogRespo
 }
 
 func (s *LocationService) ForcedReceiptMany(ctx context.Context) error {
-	logger.Info("Forced receipt si")
+	logger.Info("Forced receipt SI")
 	if err := s.repo.ForcedReceiptMany(ctx); err != nil {
 		return fmt.Errorf("failed to forced receipt many si. error: %w", err)
 	}

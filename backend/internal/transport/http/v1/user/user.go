@@ -32,6 +32,7 @@ func Register(api *gin.RouterGroup, service services.User, middleware *middlewar
 		read := users.Group("", middleware.CheckPermissions(constants.Users, constants.Read))
 		{
 			read.GET("", handler.getAll)
+			read.GET("/access", handler.getByAccess)
 			read.GET("/realm/:id", handler.getByRealm)
 			read.GET("/:id", handler.getById)
 			read.GET("/sso/:id", handler.getBySSOId)
@@ -53,6 +54,30 @@ func (h *Handler) getAll(c *gin.Context) {
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), nil)
+		return
+	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: data})
+}
+
+func (h *Handler) getByAccess(c *gin.Context) {
+	role := c.Query("role")
+	if role == "" {
+		role = "user"
+	}
+	dto := &models.GetByAccessDTO{Role: role}
+
+	realm := c.GetHeader("realm")
+	err := uuid.Validate(realm)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Область не найдена")
+		return
+	}
+	dto.RealmId = realm
+
+	data, err := h.service.GetByAccess(c, dto)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: data})

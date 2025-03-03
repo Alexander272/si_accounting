@@ -25,6 +25,7 @@ func NewUserRepo(db *sqlx.DB) *UserRepo {
 
 type User interface {
 	GetAll(ctx context.Context) ([]*models.UserData, error)
+	GetByAccess(ctx context.Context, req *models.GetByAccessDTO) ([]*models.UserData, error)
 	GetByRealm(ctx context.Context, req *models.GetByRealmDTO) ([]*models.UserData, error)
 	GetById(ctx context.Context, id string) (*models.UserData, error)
 	GetBySSOId(ctx context.Context, id string) (*models.UserData, error)
@@ -41,6 +42,22 @@ func (r *UserRepo) GetAll(ctx context.Context) ([]*models.UserData, error) {
 	data := []*models.UserData{}
 
 	if err := r.db.SelectContext(ctx, &data, query); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return data, nil
+}
+
+func (r *UserRepo) GetByAccess(ctx context.Context, req *models.GetByAccessDTO) ([]*models.UserData, error) {
+	query := fmt.Sprintf(`SELECT u.id, sso_id, username, first_name, last_name, email
+		FROM %s AS u
+		INNER JOIN %s AS a ON user_id=u.id
+		INNER JOIN %s AS r ON role_id=r.id
+		WHERE realm_id=$1 AND name=$2 ORDER BY last_name, first_name`,
+		UserTable, AccessTable, RoleTable,
+	)
+	data := []*models.UserData{}
+
+	if err := r.db.SelectContext(ctx, &data, query, req.RealmId, req.Role); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return data, nil

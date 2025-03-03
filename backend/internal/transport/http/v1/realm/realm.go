@@ -32,13 +32,12 @@ func Register(api *gin.RouterGroup, service services.Realm, auth config.AuthConf
 
 	realm := api.Group("/realms")
 	{
+		realm.GET("/user", handlers.getByUser)
 		read := realm.Group("", middleware.CheckPermissions(constants.Realms, constants.Read))
 		{
 			read.GET("", handlers.get)
-			read.GET("/user", handlers.getByUser)
 			read.GET("/:id", handlers.getById)
 			read.POST("/choose", handlers.choose)
-			// TODO выбрать другую область и поменять роль в соответствии с ней
 		}
 
 		write := realm.Group("", middleware.CheckPermissions(constants.Realms, constants.Write))

@@ -10,6 +10,9 @@ type Realm struct {
 	ReserveChannel   string    `json:"reserveChannel" db:"reserve_channel"`
 	ExpirationNotice bool      `json:"expirationNotice" db:"expiration_notice"`
 	LocationType     string    `json:"locationType" db:"location_type"`
+	HasResponsible   bool      `json:"hasResponsible" db:"has_responsible"`
+	NeedResponsible  bool      `json:"needResponsible" db:"need_responsible"`
+	NeedConfirmed    bool      `json:"needConfirmed" db:"need_confirmed"`
 	Created          time.Time `json:"created" db:"created_at"`
 }
 
@@ -39,6 +42,9 @@ type RealmDTO struct {
 	ReserveChannel   string `json:"reserveChannel" db:"reserve_channel"`
 	ExpirationNotice bool   `json:"expirationNotice" db:"expiration_notice"`
 	LocationType     string `json:"locationType" db:"location_type"`
+	HasResponsible   bool   `json:"hasResponsible" db:"has_responsible"`
+	NeedResponsible  bool   `json:"needResponsible" db:"need_responsible"`
+	NeedConfirmed    bool   `json:"needConfirmed" db:"need_confirmed"`
 }
 
 type DeleteRealmDTO struct {

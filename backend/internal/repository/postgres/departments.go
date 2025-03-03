@@ -69,7 +69,7 @@ func (r *DepartmentRepo) GetBySSOId(ctx context.Context, id string) ([]*models.D
 }
 
 func (r *DepartmentRepo) Create(ctx context.Context, dto *models.DepartmentDTO) (string, error) {
-	query := fmt.Sprintf(`INSERT INTO %s(id, name, leader_id, channel_id) VALUES ($1, $2, $3, $4)`, DepartmentTable)
+	query := fmt.Sprintf(`INSERT INTO %s(id, name, leader_id, channel_id, realm_id) VALUES ($1, $2, $3, $4, $5)`, DepartmentTable)
 	dto.Id = uuid.NewString()
 
 	var leaderId *string = &dto.LeaderId
@@ -81,7 +81,7 @@ func (r *DepartmentRepo) Create(ctx context.Context, dto *models.DepartmentDTO) 
 		channelId = nil
 	}
 
-	_, err := r.db.ExecContext(ctx, query, dto.Id, dto.Name, leaderId, channelId)
+	_, err := r.db.ExecContext(ctx, query, dto.Id, dto.Name, leaderId, channelId, dto.RealmId)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute query. error: %w", err)
 	}

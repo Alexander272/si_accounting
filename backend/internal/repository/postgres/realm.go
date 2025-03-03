@@ -37,7 +37,7 @@ func (r *RealmRepo) Get(ctx context.Context, req *models.GetRealmsDTO) ([]*model
 	}
 
 	query := fmt.Sprintf(`SELECT id, name, realm, is_active, reserve_channel, expiration_notice, location_type, created_at 
-		FROM %s %s`,
+		FROM %s %s ORDER BY created_at`,
 		RealmTable, condition,
 	)
 	data := []*models.Realm{}
@@ -49,16 +49,17 @@ func (r *RealmRepo) Get(ctx context.Context, req *models.GetRealmsDTO) ([]*model
 }
 
 func (r *RealmRepo) GetByUser(ctx context.Context, req *models.GetRealmByUserDTO) ([]*models.Realm, error) {
-	query := fmt.Sprintf(`SELECT r.id, name, realm, reserve_channel, expiration_notice, location_type, is_active
+	query := fmt.Sprintf(`SELECT r.id, name, realm, reserve_channel, expiration_notice, location_type, is_active, has_responsible,
+		need_responsible, need_confirmed
 		FROM %s AS r 
 		LEFT JOIN LATERAL (SELECT a.id FROM %s AS a INNER JOIN %s AS u ON a.user_id=u.id WHERE sso_id=$1 AND realm_id=r.id) AS a ON true
-		WHERE a.id IS NOT NULL ORDER BY r.id`,
+		WHERE a.id IS NOT NULL ORDER BY created_at`,
 		RealmTable, AccessTable, UserTable,
 	)
 	data := []*models.Realm{}
 
 	if err := r.db.SelectContext(ctx, &data, query, req.UserId); err != nil {
-		return nil, fmt.Errorf("failed to execute query")
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return data, nil
 }
@@ -80,8 +81,10 @@ func (r *RealmRepo) GetById(ctx context.Context, req *models.GetRealmByIdDTO) (*
 }
 
 func (r *RealmRepo) Create(ctx context.Context, dto *models.RealmDTO) error {
-	query := fmt.Sprintf(`INSERT INTO %s (id, name, realm, is_active, reserve_channel, expiration_notice, location_type) 
-		VALUES (:id, :name, :realm, :is_active, :reserve_channel, :expiration_notice, :location_type)`,
+	query := fmt.Sprintf(`INSERT INTO %s (id, name, realm, is_active, reserve_channel, expiration_notice, location_type, 
+		has_responsible, need_responsible, need_confirmed) 
+		VALUES (:id, :name, :realm, :is_active, :reserve_channel, :expiration_notice, :location_type, :has_responsible, 
+		:need_responsible, :need_confirmed)`,
 		RealmTable,
 	)
 	dto.Id = uuid.NewString()
@@ -94,7 +97,8 @@ func (r *RealmRepo) Create(ctx context.Context, dto *models.RealmDTO) error {
 
 func (r *RealmRepo) Update(ctx context.Context, dto *models.RealmDTO) error {
 	query := fmt.Sprintf(`UPDATE %s SET name=:name, is_active=:is_active, reserve_channel=:reserve_channel, 
-		expiration_notice=:expiration_notice, location_type=:location_type WHERE id=:id`,
+		expiration_notice=:expiration_notice, location_type=:location_type, has_responsible=:has_responsible,
+		need_responsible=:need_responsible, need_confirmed=:need_confirmed WHERE id=:id`,
 		RealmTable,
 	)
 
