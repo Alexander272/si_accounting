@@ -26,9 +26,10 @@ import { useDeleteEmployeeMutation, useGetEmployeesQuery } from '../employeesApi
 
 type Props = {
 	department: string
+	hasResponsible?: boolean
 }
 
-export const EmployeeTable: FC<Props> = ({ department }) => {
+export const EmployeeTable: FC<Props> = ({ department, hasResponsible }) => {
 	const { palette } = useTheme()
 	const dispatch = useAppDispatch()
 
@@ -64,7 +65,7 @@ export const EmployeeTable: FC<Props> = ({ department }) => {
 
 	return (
 		<Stack width={'100%'} alignItems={'center'}>
-			<Responsible department={dep?.data} />
+			{hasResponsible ? <Responsible department={dep?.data} /> : null}
 
 			<TableContainer sx={{ position: 'relative', minHeight: 140, mt: 3, mb: 4 }}>
 				{(isFetching || depIsFetching) && (

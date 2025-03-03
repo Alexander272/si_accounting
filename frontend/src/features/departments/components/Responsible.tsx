@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 import type { IFetchError } from '@/app/types/error'
 import type { IDepartment } from '../types/departments'
 import type { IResponsible } from '../types/responsible'
-import { useGetAllUsersQuery, useSyncUsersMutation } from '@/features/user/usersApiSlice'
+import { useGetUserByAccessQuery, useSyncUsersMutation } from '@/features/user/usersApiSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { PlusIcon } from '@/components/Icons/PlusIcon'
 import { FileDeleteIcon } from '@/components/Icons/FileDeleteIcon'
@@ -23,9 +23,7 @@ export const Responsible: FC<Props> = ({ department }) => {
 	const defaultValue = { id: '', departmentId: department?.id || '', ssoId: '' }
 
 	const { data, isFetching } = useGetResponsibleQuery({ department: department?.id || '' }, { skip: !department })
-	//TODO нужно получать не всех пользователей, а пользователей с ролью user и доступом к этой области
-	const { data: users, isFetching: usersIsFetching } = useGetAllUsersQuery(null)
-	// const { data: users, isFetching: usersIsFetching } = useGetUsersByRealmQuery({realm:'', include: true})
+	const { data: users, isFetching: usersIsFetching } = useGetUserByAccessQuery(null)
 
 	const [change] = useChangeResponsibleMutation()
 

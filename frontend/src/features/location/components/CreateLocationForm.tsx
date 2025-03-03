@@ -23,6 +23,7 @@ const defaultValues: ILocationForm = {
 type Props = {
 	status?: Status
 	hidden?: HiddenField
+	notRequired?: HiddenField
 	instrument: Instrument
 	loading?: boolean
 	submitLabel?: string
@@ -34,6 +35,7 @@ type Props = {
 export const CreateLocationForm: FC<Props> = ({
 	status,
 	hidden,
+	notRequired,
 	instrument,
 	loading,
 	submitLabel,
@@ -80,6 +82,7 @@ export const CreateLocationForm: FC<Props> = ({
 			<LocationForm
 				defaultValues={defaultValues}
 				hidden={hidden}
+				notRequired={notRequired}
 				disabled={isLoading || loading}
 				onSubmit={submitHandler}
 				submitLabel={submitLabel}

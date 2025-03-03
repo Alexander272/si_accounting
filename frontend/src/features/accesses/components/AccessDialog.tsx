@@ -129,7 +129,7 @@ export const Form: FC<Context> = ({ item, realm }) => {
 				render={({ field: { onChange, ...props } }) => (
 					<Autocomplete
 						options={users?.data || []}
-						getOptionLabel={option => `${option.lastName} ${option.firstName}`}
+						getOptionLabel={option => `${option.lastName} ${option.firstName} (${option.email})`}
 						renderOption={(props, option) => {
 							return (
 								<li {...props} key={option.id}>

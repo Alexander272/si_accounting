@@ -8,6 +8,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 type Props = {
 	defaultValues: ILocationForm
 	hidden?: HiddenField
+	notRequired?: HiddenField
 	disabled?: boolean
 	submitLabel?: string
 	cancelLabel?: string
@@ -18,6 +19,7 @@ type Props = {
 export const LocationForm: FC<Props> = ({
 	defaultValues,
 	hidden,
+	notRequired,
 	disabled,
 	submitLabel,
 	cancelLabel,
@@ -40,7 +42,7 @@ export const LocationForm: FC<Props> = ({
 	return (
 		<Stack component={'form'} onSubmit={submitHandler}>
 			<FormProvider {...methods}>
-				<LocationInputs hidden={hide} />
+				<LocationInputs hidden={hide} notRequired={notRequired} />
 			</FormProvider>
 
 			<Stack direction={'row'} spacing={3} mt={4}>

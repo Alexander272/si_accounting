@@ -6,6 +6,7 @@ import { useAppSelector } from '@/hooks/redux'
 import { useModal } from '@/features/modal/hooks/useModal'
 import { getActiveItem } from '@/features/dataTable/dataTableSlice'
 import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
+import { getRealm } from '@/features/realms/realmSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { Confirm } from '@/components/Confirm/Confirm'
 import { CreateLocationForm } from './CreateLocationForm'
@@ -13,15 +14,13 @@ import { useDeleteLocationMutation, useGetLastLocationQuery } from '../locationA
 
 export const CreateLocation = () => {
 	const active = useAppSelector(getActiveItem)
+	const realm = useAppSelector(getRealm)
 
 	const { closeModal } = useModal()
 
 	const { data: instrument, isLoading: isLoadingInstrument } = useGetInstrumentByIdQuery(active?.id || '', {
 		skip: !active?.id,
 	})
-
-	console.log('active', active)
-	//TODO если инструменты выделены и нажата кнопка в меню инструменты, это форма не работает
 
 	if (isLoadingInstrument) return <Fallback marginTop={5} marginBottom={3} height={250} />
 	if (!instrument) return <Typography>Не удалось загрузить данные</Typography>
@@ -54,7 +53,8 @@ export const CreateLocation = () => {
 			{active?.status == 'reserve' && (
 				<CreateLocationForm
 					instrument={instrument?.data}
-					hidden={{ isToReserve: true }}
+					hidden={{ isToReserve: true, needConfirmed: !realm?.needConfirmed, person: !realm?.hasResponsible }}
+					notRequired={{ person: !realm?.needResponsible }}
 					onSubmit={closeModal}
 					onCancel={closeModal}
 				/>

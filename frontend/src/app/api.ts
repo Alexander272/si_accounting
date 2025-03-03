@@ -33,6 +33,7 @@ export const API = {
 	users: {
 		base: '/users' as const,
 		sync: '/users/sync' as const,
+		access: '/users/access' as const,
 		realm: '/users/realm' as const,
 	},
 	roles: '/roles' as const,

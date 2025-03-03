@@ -20,6 +20,7 @@ export const DepartmentList: FC<Props> = ({ label, name, rules, disabled }) => {
 	useEffect(() => {
 		//TODO на проде почему-то не отрабатывает setValue
 		if (data?.data.length) setValue(name, data.data[0].id)
+		else setValue(name, '')
 	}, [name, data, setValue])
 
 	return (

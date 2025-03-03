@@ -13,13 +13,14 @@ import { useModal } from '@/features/modal/hooks/useModal'
 import { useCreateSIMutation } from '@/features/dataTable/siApiSlice'
 import { useGetInstrumentByIdQuery } from '@/features/instrument/instrumentApiSlice'
 import { getActiveItem, setActive } from '@/features/dataTable/dataTableSlice'
+import { getRealm } from '@/features/realms/realmSlice'
 import { InstrumentForm } from '@/components/Forms/NewInstrumentForm/InstrumentForm'
 import { VerificationForm } from '@/components/Forms/NewVerificationForm/VerificationForm'
 import { LocationForm } from '@/components/Forms/NewLocationForm/LocationForm'
 import { Stepper } from '@/components/Stepper/Stepper'
-import { FileDeleteIcon } from '@/components/Icons/FileDeleteIcon'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { FormLoader } from '@/components/Loader/FormLoader'
+import { FileDeleteIcon } from '@/components/Icons/FileDeleteIcon'
 
 const steps = [
 	{ id: 'instrument', number: 0, label: 'Информация о СИ', skip: false },
@@ -71,6 +72,7 @@ export const LocalCreateSi = () => {
 
 	const { palette } = useTheme()
 
+	const realm = useAppSelector(getRealm)
 	const active = useAppSelector(getActiveItem)
 	const { data, isLoading } = useGetInstrumentByIdQuery(active?.id || '', { skip: !active?.id })
 	const [create, { isLoading: creating }] = useCreateSIMutation()
@@ -219,7 +221,8 @@ export const LocalCreateSi = () => {
 					<LocationForm
 						defaultValues={location}
 						disabled={creating}
-						hidden={{ needConfirmed: true }}
+						hidden={{ needConfirmed: true, person: !realm?.hasResponsible }}
+						notRequired={{ person: !realm?.needResponsible }}
 						submitLabel='Сохранить'
 						cancelLabel='Назад'
 						onSubmit={submitHandler(localKeys.location)}

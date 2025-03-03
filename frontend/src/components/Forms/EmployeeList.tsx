@@ -20,6 +20,7 @@ export const EmployeeList: FC<Props> = ({ label, name, rules, disabled }) => {
 
 	useEffect(() => {
 		if (data?.data.length) setValue(name, data.data[0].id)
+		else setValue(name, '')
 	}, [name, data, setValue])
 
 	return (

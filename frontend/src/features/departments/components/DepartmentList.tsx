@@ -25,7 +25,7 @@ export const DepartmentList: FC<Props> = ({ department, setDepartment }) => {
 	}
 
 	return (
-		<Stack position={'relative'} minWidth={270}>
+		<Stack position={'relative'} minWidth={270} height={'100%'}>
 			{isFetching && <Fallback position={'absolute'} zIndex={5} background={'#f5f5f557'} />}
 			<Tabs
 				orientation='vertical'
@@ -36,6 +36,7 @@ export const DepartmentList: FC<Props> = ({ department, setDepartment }) => {
 					borderRight: 1,
 					borderColor: 'divider',
 					maxHeight: 760,
+					height: '100%',
 					'.MuiTabs-scrollButtons': { transition: 'all .2s ease-in-out' },
 					'.MuiTabs-scrollButtons.Mui-disabled': {
 						height: 0,

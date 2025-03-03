@@ -7,10 +7,13 @@ import { Breadcrumb } from '@/components/Breadcrumb/Breadcrumb'
 import { DepartmentList } from '@/features/departments/components/DepartmentList'
 import { EmployeeTable } from '@/features/employees/components/EmployeeTable'
 import { DepartmentForm } from '@/features/departments/components/DepartmentForm'
+import { getRealm } from '@/features/realms/realmSlice'
+import { useAppSelector } from '@/hooks/redux'
 
 // страница для управления работниками и департаментами
-export default function Employees() {
+export default function Places() {
 	const [department, setDepartment] = useState('new')
+	const realm = useAppSelector(getRealm)
 
 	const departmentHandler = (department: string) => {
 		setDepartment(department)
@@ -32,7 +35,7 @@ export default function Employees() {
 				<Breadcrumbs aria-label='breadcrumb' sx={{ mb: 2 }}>
 					<Breadcrumb to={AppRoutes.HOME}>Главная</Breadcrumb>
 					<Breadcrumb to={AppRoutes.EMPLOYEES} active>
-						Подразделения
+						Места нахождения
 					</Breadcrumb>
 				</Breadcrumbs>
 
@@ -40,7 +43,9 @@ export default function Employees() {
 					<DepartmentList department={department} setDepartment={departmentHandler} />
 					<Stack width={'100%'} spacing={3} sx={{ maxHeight: 760, overflowY: 'auto', pt: 1 }}>
 						<DepartmentForm department={department} setDepartment={departmentHandler} />
-						{department != 'new' && <EmployeeTable department={department} hasResponsible />}
+						{department != 'new' && realm?.hasResponsible ? (
+							<EmployeeTable department={department} />
+						) : null}
 					</Stack>
 				</Stack>
 			</Box>

@@ -4,11 +4,13 @@ import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 
 import type { ModalSelectors } from '@/features/modal/modalSlice'
-import { useAppSelector } from '@/hooks/redux'
+import { AppRoutes } from '@/constants/routes'
 import { PermRules } from '@/constants/permissions'
+import { useAppSelector } from '@/hooks/redux'
 import { useModal } from '@/features/modal/hooks/useModal'
 import { useCheckPermission } from '@/features/auth/hooks/check'
 import { getSIStatus, getSelected, getTableFilter, getTableSort } from '@/features/dataTable/dataTableSlice'
+import { getRealm } from '@/features/realms/realmSlice'
 import { useLazyExportQuery } from '@/features/files/filesApiSlice'
 import { VerifyIcon } from '@/components/Icons/VerifyIcon'
 import { ExchangeIcon } from '@/components/Icons/ExchangeIcon'
@@ -24,6 +26,7 @@ export const Tools = () => {
 
 	const navigate = useNavigate()
 
+	const realm = useAppSelector(getRealm)
 	const selected = useAppSelector(getSelected)
 
 	const status = useAppSelector(getSIStatus)
@@ -74,11 +77,14 @@ export const Tools = () => {
 			</ListItemIcon>
 			Добавить поверку
 		</MenuItem>,
-		<MenuItem key='departments' onClick={linkHandler('/employees')}>
+		<MenuItem
+			key='departments'
+			onClick={linkHandler(realm?.locationType == 'department' ? AppRoutes.EMPLOYEES : AppRoutes.PLACES)}
+		>
 			<ListItemIcon>
 				<EditEmployeeIcon fontSize={18} fill={'#757575'} />
 			</ListItemIcon>
-			Редактировать подразделения
+			Редактировать {realm?.locationType == 'department' ? 'подразделения' : 'места'}
 		</MenuItem>,
 		<MenuItem key='export' onClick={exportHandler}>
 			<ListItemIcon>
@@ -166,8 +172,6 @@ export const Tools = () => {
 				{useCheckPermission(PermRules.Location.Write) ? LocMenuItems : null}
 				{useCheckPermission(PermRules.SI.Write) ? SIMenuItems : null}
 				{useCheckPermission(PermRules.Reserve.Write) ? ResMenuItems : null}
-
-				{/* //TODO возможно надо будет выгружать в excel таблицу которая выводится на экран */}
 			</Menu>
 		</>
 	)

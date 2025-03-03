@@ -19,7 +19,9 @@ export const ActiveRealm = () => {
 	const [choose] = useChooseRealmMutation()
 
 	useEffect(() => {
-		if (realm || !data) return
+		if (!data) return
+		const founded = data.data.find(e => e.id === realm?.id)
+		if (founded) return
 		dispatch(setRealm(data.data[0]))
 	}, [data, dispatch, realm])
 

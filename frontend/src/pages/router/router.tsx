@@ -7,6 +7,7 @@ import { NotFound } from '@/pages/notFound/NotFoundLazy'
 import { Home } from '@/pages/home/HomeLazy'
 import { Auth } from '@/pages/auth/AuthLazy'
 import { Employees } from '@/pages/employee/EmployeesLazy'
+import { Places } from '@/pages/places/PlacesLazy'
 import { Realms } from '@/pages/admin/realms/RealmsLazy'
 import PrivateRoute from './PrivateRoute'
 
@@ -30,6 +31,10 @@ const config: RouteObject[] = [
 					{
 						path: AppRoutes.EMPLOYEES,
 						element: <Employees />,
+					},
+					{
+						path: AppRoutes.PLACES,
+						element: <Places />,
 					},
 					{
 						path: AppRoutes.REALMS,

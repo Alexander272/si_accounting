@@ -21,7 +21,7 @@ type Props = {
 	setRealm: (realm: string) => void
 }
 
-type Form = Pick<IRealm, 'name' | 'realm' | 'isActive' | 'reserveChannel' | 'expirationNotice' | 'locationType'>
+type Form = Omit<IRealm, 'id' | 'created'>
 
 const defaultValues: Form = {
 	name: '',
@@ -29,7 +29,10 @@ const defaultValues: Form = {
 	isActive: true,
 	reserveChannel: '',
 	expirationNotice: false,
-	locationType: '',
+	locationType: 'department',
+	hasResponsible: true,
+	needResponsible: true,
+	needConfirmed: true,
 }
 
 export const RealmForm: FC<Props> = ({ realm, setRealm }) => {
@@ -106,7 +109,6 @@ export const RealmForm: FC<Props> = ({ realm, setRealm }) => {
 			</Stack>
 
 			<Stack direction={'row'} flexGrow={1} spacing={2} mb={2}>
-				{/* //TODO может тут должен быть select */}
 				<Controller
 					control={control}
 					name={'reserveChannel'}

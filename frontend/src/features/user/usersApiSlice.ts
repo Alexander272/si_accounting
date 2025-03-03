@@ -23,6 +23,24 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 				}
 			},
 		}),
+		getUserByAccess: builder.query<{ data: IUserData[] }, null>({
+			query: () => ({
+				url: `${API.users.access}`,
+				method: 'GET',
+			}),
+			providesTags: [
+				{ type: 'Users', id: 'all' },
+				{ type: 'Users', id: 'access' },
+			],
+			onQueryStarted: async (_arg, api) => {
+				try {
+					await api.queryFulfilled
+				} catch (error) {
+					const fetchError = (error as IBaseFetchError).error
+					toast.error(fetchError.data.message, { autoClose: false })
+				}
+			},
+		}),
 		getUsersByRealm: builder.query<{ data: IUserData[] }, { realm: string; include?: boolean }>({
 			query: req => ({
 				url: `${API.users.realm}/${req.realm}`,
@@ -53,4 +71,5 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 	}),
 })
 
-export const { useGetAllUsersQuery, useGetUsersByRealmQuery, useSyncUsersMutation } = usersApiSlice
+export const { useGetAllUsersQuery, useGetUserByAccessQuery, useGetUsersByRealmQuery, useSyncUsersMutation } =
+	usersApiSlice

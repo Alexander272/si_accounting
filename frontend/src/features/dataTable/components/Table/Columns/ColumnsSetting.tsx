@@ -87,7 +87,7 @@ export default function ColumnsSetting() {
 					</Stack>
 				</Stack>
 
-				<Stack maxHeight={450} overflow={'auto'} ml={0.5}>
+				<Stack maxHeight={450} overflow={'auto'} ml={0.5} pr={1}>
 					<FormProvider {...methods}>
 						<ReactSortable list={fields} setList={() => {}} onEnd={dropHandler} handle='.drag'>
 							{fields.map((f, i) => (

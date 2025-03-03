@@ -20,9 +20,10 @@ import { Titles } from './titles'
 type Props = {
 	hidden?: HiddenField
 	disabled?: boolean
+	notRequired?: HiddenField
 }
 
-export const LocationInputs: FC<Props> = ({ hidden, disabled }) => {
+export const LocationInputs: FC<Props> = ({ hidden, disabled, notRequired }) => {
 	const { control } = useFormContext<ILocationForm>()
 
 	return (
@@ -62,7 +63,12 @@ export const LocationInputs: FC<Props> = ({ hidden, disabled }) => {
 				/>
 			) : null}
 			{!(hidden && hidden['person']) ? (
-				<EmployeeList label={Titles.Employee} name='person' rules={{ required: true }} disabled={disabled} />
+				<EmployeeList
+					label={Titles.Employee}
+					name='person'
+					rules={{ required: !notRequired?.person }}
+					disabled={disabled}
+				/>
 			) : null}
 			{!(hidden && hidden['dateOfIssue']) ? (
 				<Controller
