@@ -1,5 +1,17 @@
 import { FC, useEffect } from 'react'
-import { Button, FormControlLabel, Stack, Switch, TextField, Typography, useTheme } from '@mui/material'
+import {
+	Button,
+	FormControl,
+	FormControlLabel,
+	InputLabel,
+	MenuItem,
+	Select,
+	Stack,
+	Switch,
+	TextField,
+	Typography,
+	useTheme,
+} from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
@@ -115,65 +127,118 @@ export const RealmForm: FC<Props> = ({ realm, setRealm }) => {
 					render={({ field }) => <TextField {...field} label={'Канал'} fullWidth />}
 				/>
 
-				{/* locationType */}
-			</Stack>
-
-			<Stack direction={'row'} flexGrow={1} spacing={2} mb={2} justifyContent={'space-between'}>
-				<Controller
-					control={control}
-					name={'isActive'}
-					render={({ field }) => (
-						<FormControlLabel
-							control={<Switch checked={field.value} {...field} />}
-							label={field.value ? 'Активна' : 'Не активна'}
-						/>
-					)}
-				/>
-
-				<Button
-					variant='outlined'
-					type='submit'
-					disabled={!Object.keys(dirtyFields).length}
-					sx={{
-						minWidth: 56,
-					}}
-				>
-					<SaveIcon
-						fontSize={18}
-						fill={!Object.keys(dirtyFields).length ? palette.action.disabled : palette.primary.main}
+				<FormControl fullWidth>
+					<InputLabel id='locationType'>Тип местоположения</InputLabel>
+					<Controller
+						control={control}
+						name='locationType'
+						render={({ field }) => (
+							<Select labelId='locationType' {...field} label={'Тип местоположения'}>
+								<MenuItem value='department'>Подразделение</MenuItem>
+								<MenuItem value='place'>Место нахождения</MenuItem>
+							</Select>
+						)}
 					/>
-				</Button>
+				</FormControl>
 			</Stack>
-			<Stack direction={'row'} flexGrow={1} spacing={2} mb={1} justifyContent={'space-between'}>
+
+			<Stack direction={'row'} flexGrow={1} spacing={2} mb={2}>
 				<Controller
 					control={control}
-					name={'expirationNotice'}
+					name={'needConfirmed'}
 					render={({ field }) => (
 						<FormControlLabel
 							control={<Switch checked={field.value} {...field} />}
-							label={`Уведомления о поверках ${field.value ? 'включены' : 'выключены'}`}
+							label={
+								<>
+									Подтверждения инструментов
+									<br />
+									{field.value ? 'используются' : 'не используются'}
+								</>
+							}
 						/>
 					)}
 				/>
 
-				<Confirm
-					onClick={deleteHandler}
-					buttonComponent={
-						<Button
-							variant='outlined'
-							color='error'
-							disabled={realm == 'new'}
-							sx={{ minWidth: 56, height: '100%' }}
-						>
-							<FileDeleteIcon
-								fontSize={20}
-								fill={realm == 'new' ? palette.action.disabled : palette.error.main}
-							/>
-						</Button>
-					}
-					confirmText='Вы уверены, что хотите удалить область?'
-					width='56'
+				<Controller
+					control={control}
+					name='hasResponsible'
+					render={({ field }) => (
+						<FormControlLabel
+							control={<Switch checked={field.value} {...field} />}
+							label={field.value ? 'Есть сотрудники' : 'Нет сотрудников'}
+						/>
+					)}
 				/>
+
+				<Controller
+					control={control}
+					name='needResponsible'
+					render={({ field }) => (
+						<FormControlLabel
+							control={<Switch checked={field.value} {...field} />}
+							label={`${field.value ? 'Нужен' : 'Не нужен'} ответственный сотрудник`}
+						/>
+					)}
+				/>
+			</Stack>
+
+			<Stack direction={'row'} flexGrow={1} alignItems={'center'} justifyContent={'space-between'}>
+				<Stack direction={'row'} flexGrow={1} spacing={2} mb={2}>
+					<Controller
+						control={control}
+						name={'isActive'}
+						render={({ field }) => (
+							<FormControlLabel
+								control={<Switch checked={field.value} {...field} />}
+								label={field.value ? 'Активна' : 'Не активна'}
+							/>
+						)}
+					/>
+
+					<Controller
+						control={control}
+						name={'expirationNotice'}
+						render={({ field }) => (
+							<FormControlLabel
+								control={<Switch checked={field.value} {...field} />}
+								label={`Уведомления о поверках ${field.value ? 'включены' : 'выключены'}`}
+							/>
+						)}
+					/>
+				</Stack>
+				<Stack direction={'row'} flexGrow={1} spacing={2} mb={1} justifyContent={'flex-end'} height={38}>
+					<Button
+						variant='outlined'
+						type='submit'
+						disabled={!Object.keys(dirtyFields).length}
+						sx={{ minWidth: 56 }}
+					>
+						<SaveIcon
+							fontSize={18}
+							fill={!Object.keys(dirtyFields).length ? palette.action.disabled : palette.primary.main}
+						/>
+					</Button>
+
+					<Confirm
+						onClick={deleteHandler}
+						buttonComponent={
+							<Button
+								variant='outlined'
+								color='error'
+								disabled={realm == 'new'}
+								sx={{ minWidth: 56, height: '100%' }}
+							>
+								<FileDeleteIcon
+									fontSize={20}
+									fill={realm == 'new' ? palette.action.disabled : palette.error.main}
+								/>
+							</Button>
+						}
+						confirmText='Вы уверены, что хотите удалить область?'
+						width='56'
+					/>
+				</Stack>
 			</Stack>
 
 			{realm != 'new' && data?.data ? (
