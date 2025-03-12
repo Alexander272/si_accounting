@@ -36,7 +36,8 @@ func (r *RealmRepo) Get(ctx context.Context, req *models.GetRealmsDTO) ([]*model
 		condition = ""
 	}
 
-	query := fmt.Sprintf(`SELECT id, name, realm, is_active, reserve_channel, expiration_notice, location_type, created_at 
+	query := fmt.Sprintf(`SELECT id, name, realm, is_active, reserve_channel, expiration_notice, location_type, has_responsible, 
+		need_responsible, need_confirmed, created_at 
 		FROM %s %s ORDER BY created_at`,
 		RealmTable, condition,
 	)
@@ -50,7 +51,7 @@ func (r *RealmRepo) Get(ctx context.Context, req *models.GetRealmsDTO) ([]*model
 
 func (r *RealmRepo) GetByUser(ctx context.Context, req *models.GetRealmByUserDTO) ([]*models.Realm, error) {
 	query := fmt.Sprintf(`SELECT r.id, name, realm, reserve_channel, expiration_notice, location_type, is_active, has_responsible,
-		need_responsible, need_confirmed
+		need_responsible, need_confirmed, created_at
 		FROM %s AS r 
 		LEFT JOIN LATERAL (SELECT a.id FROM %s AS a INNER JOIN %s AS u ON a.user_id=u.id WHERE sso_id=$1 AND realm_id=r.id) AS a ON true
 		WHERE a.id IS NOT NULL ORDER BY created_at`,
@@ -65,7 +66,8 @@ func (r *RealmRepo) GetByUser(ctx context.Context, req *models.GetRealmByUserDTO
 }
 
 func (r *RealmRepo) GetById(ctx context.Context, req *models.GetRealmByIdDTO) (*models.Realm, error) {
-	query := fmt.Sprintf(`SELECT id, name, realm, is_active, reserve_channel, expiration_notice, location_type, created_at 
+	query := fmt.Sprintf(`SELECT id, name, realm, is_active, reserve_channel, expiration_notice, location_type, 
+		has_responsible, need_responsible, need_confirmed, created_at 
 		FROM %s WHERE id=$1`,
 		RealmTable,
 	)
