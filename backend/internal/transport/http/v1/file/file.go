@@ -15,6 +15,7 @@ import (
 	"github.com/Alexander272/si_accounting/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/goodsign/monday"
+	"github.com/google/uuid"
 )
 
 type FileHandlers struct {
@@ -38,7 +39,15 @@ func Register(api *gin.RouterGroup, service services.File, middleware *middlewar
 }
 
 func (h *FileHandlers) export(c *gin.Context) {
+	realm := c.GetHeader("realm")
+	err := uuid.Validate(realm)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Сессия не найдена")
+		return
+	}
+
 	params := &models.SIParams{
+		RealmId: realm,
 		Page: &models.SIPage{
 			Limit: 999999,
 		},
