@@ -303,6 +303,7 @@ func (r *LocationRepo) ReceivingFromBot(ctx context.Context) error {
 }
 
 func (r *LocationRepo) Delete(ctx context.Context, id string) error {
+	//? удалить перемещение, если оно не единственное
 	query := fmt.Sprintf(`DELETE FROM %s AS m WHERE id=$1 
 		AND (SELECT COUNT(id) FROM %s WHERE instrument_id=m.instrument_id)>1`,
 		SIMovementTable, SIMovementTable,

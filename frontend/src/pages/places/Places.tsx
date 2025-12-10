@@ -25,7 +25,7 @@ export default function Places() {
 				borderRadius={3}
 				padding={2}
 				margin={'0 auto'}
-				width={'66%'}
+				width={{ xl: '66%', lg: '86%', md: '100%' }}
 				border={'1px solid rgba(0, 0, 0, 0.12)'}
 				flexGrow={1}
 				display={'flex'}

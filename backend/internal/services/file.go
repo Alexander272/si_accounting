@@ -154,7 +154,7 @@ func (s *FileService) MakeVerificationSchedule(ctx context.Context, params *mode
 	}
 
 	columnNames := []string{
-		"№ п/п", "Наименование", "Заводской номер", "Диапазон измерений", "Периодичность поверки", "Дата последней поверки",
+		"№ п/п", "Наименование", "Тип СИ", "Заводской номер", "Диапазон измерений", "Периодичность поверки", "Дата последней поверки",
 		"Дата следующей поверки", "Примечание",
 	}
 	if err := file.SetSheetRow(sheetName, "A1", &columnNames); err != nil {
@@ -175,7 +175,7 @@ func (s *FileService) MakeVerificationSchedule(ctx context.Context, params *mode
 
 	for i, d := range data.SI {
 		values := []interface{}{
-			i + 1, d.Name, d.FactoryNumber, d.MeasurementLimits, d.InterVerificationInterval, d.Date, d.NextDate, d.Notes,
+			i + 1, d.Name, d.Type, d.FactoryNumber, d.MeasurementLimits, d.InterVerificationInterval, d.Date, d.NextDate, d.Notes,
 		}
 
 		if err := file.SetSheetRow(sheetName, fmt.Sprintf("A%d", i+2), &values); err != nil {

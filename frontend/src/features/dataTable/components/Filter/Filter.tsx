@@ -103,29 +103,30 @@ export const Filter: FC<Props> = ({ cell }) => {
 					},
 				}}
 			>
-				<Stack
-					direction={'row'}
-					// paddingY={1}
-					alignItems={'center'}
-					spacing={1}
-					minWidth={300}
-					width={'100%'}
-				>
-					<Typography ml={1} mr={1} fontWeight={'bold'} align='center' width={'100%'}>
-						{cell.label}
-					</Typography>
+				<>
+					<Stack
+						direction={'row'}
+						// paddingY={1}
+						alignItems={'center'}
+						spacing={1}
+						minWidth={300}
+						width={'100%'}
+					>
+						<Typography ml={1} mr={1} fontWeight={'bold'} align='center' width={'100%'}>
+							{cell.label}
+						</Typography>
 
-					<IconButton onClick={toggleHandler} sx={{ lineHeight: '16px' }}>
-						&times;
-					</IconButton>
-				</Stack>
+						<IconButton onClick={toggleHandler} sx={{ lineHeight: '16px' }}>
+							&times;
+						</IconButton>
+					</Stack>
 
-				<Divider sx={{ mb: 2, mt: 1 }} />
+					<Divider sx={{ mb: 2, mt: 1 }} />
 
-				{filterCell?.type == 'date' && (
-					<DateFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
-				)}
-				{/* {cell.type == 'list' && (
+					{filterCell?.type == 'date' && (
+						<DateFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
+					)}
+					{/* {cell.type == 'list' && (
 					<ListFilter
 						field={cell.id}
 						values={filter?.values[0].value.split(',')}
@@ -134,37 +135,46 @@ export const Filter: FC<Props> = ({ cell }) => {
 						onSubmit={submitHandler}
 					/>
 				)} */}
-				{filterCell?.type == 'number' && (
-					<NumberFilter field={cell.id} values={values} onCancel={clearHandler} onSubmit={submitHandler} />
-				)}
-				{/* {filterCell?.filterComponent &&
+					{filterCell?.type == 'number' && (
+						<NumberFilter
+							field={cell.id}
+							values={values}
+							onCancel={clearHandler}
+							onSubmit={submitHandler}
+						/>
+					)}
+					{/* {filterCell?.filterComponent &&
 					filterCell.filterComponent({
 						field: cell.id,
 						values: filter?.values[0].value.split(','),
 						onSubmit: submitHandler,
 						onCancel: clearHandler,
 					})} */}
-				<Suspense fallback={<Fallback />}>
-					{filterCell?.filterComponent && (
-						<filterCell.filterComponent
-							field={cell.id}
-							values={filter?.values[0].value.split(',')}
-							onSubmit={submitHandler}
-							onCancel={clearHandler}
-						/>
-					)}
-				</Suspense>
+					<Suspense fallback={<Fallback />}>
+						{filterCell?.filterComponent && (
+							<filterCell.filterComponent
+								field={cell.id}
+								values={filter?.values[0].value.split(',')}
+								onSubmit={submitHandler}
+								onCancel={clearHandler}
+							/>
+						)}
+					</Suspense>
 
-				{(!filterCell?.type && !filterCell?.filterComponent) || filterCell.type == 'string' ? (
-					<TextFilter
-						field={cell.id}
-						values={
-							filter && { compareType: filter.values[0].compareType, valueStart: filter.values[0].value }
-						}
-						onCancel={clearHandler}
-						onSubmit={submitHandler}
-					/>
-				) : null}
+					{(!filterCell?.type && !filterCell?.filterComponent) || filterCell.type == 'string' ? (
+						<TextFilter
+							field={cell.id}
+							values={
+								filter && {
+									compareType: filter.values[0].compareType,
+									valueStart: filter.values[0].value,
+								}
+							}
+							onCancel={clearHandler}
+							onSubmit={submitHandler}
+						/>
+					) : null}
+				</>
 			</Menu>
 		</>
 	)

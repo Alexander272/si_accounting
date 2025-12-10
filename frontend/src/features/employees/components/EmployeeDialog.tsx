@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { Button, Stack, TextField } from '@mui/material'
+import { Autocomplete, Button, Stack, TextField } from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
@@ -10,6 +10,7 @@ import { Dialog } from '@/features/dialog/components/Dialog'
 import { changeDialogIsOpen, getDialogState } from '@/features/dialog/dialogSlice'
 import { Fallback } from '@/components/Fallback/Fallback'
 import { useCreateEmployeeMutation, useGetEmployeeByIdQuery, useUpdateEmployeeMutation } from '../employeesApiSlice'
+import { useGetDepartmentsQuery } from '@/features/departments/departmentApiSlice'
 
 type Context = { id?: string; department?: string }
 
@@ -28,7 +29,7 @@ export const EmployeeDialog = () => {
 			body={<Form {...(modal?.content as Context)} />}
 			open={modal?.isOpen || false}
 			onClose={closeHandler}
-			maxWidth='md'
+			maxWidth='sm'
 			fullWidth
 		/>
 	)
@@ -41,12 +42,12 @@ const defaultValues = {
 	notes: '',
 }
 export const Form: FC<Context> = ({ id, department }) => {
-	const { data, isFetching } = useGetEmployeeByIdQuery(id || '', { skip: !id })
-
 	const dispatch = useAppDispatch()
 
-	const [create] = useCreateEmployeeMutation()
-	const [update] = useUpdateEmployeeMutation()
+	const { data, isFetching } = useGetEmployeeByIdQuery(id || '', { skip: !id })
+	const { data: departments, isFetching: departmentsIsFetching } = useGetDepartmentsQuery(null)
+	const [create, { isLoading: isCreating }] = useCreateEmployeeMutation()
+	const [update, { isLoading: isUpdating }] = useUpdateEmployeeMutation()
 
 	const { control, handleSubmit } = useForm<IEmployee>({
 		values: data?.data || { ...defaultValues, departmentId: department || '' },
@@ -79,7 +80,40 @@ export const Form: FC<Context> = ({ id, department }) => {
 
 	return (
 		<Stack component={'form'} paddingX={2} position={'relative'} spacing={2} onSubmit={saveHandler}>
-			{isFetching ? <Fallback position={'absolute'} zIndex={5} background={'#f5f5f557'} /> : null}
+			{isFetching || departmentsIsFetching || isCreating || isUpdating ? (
+				<Fallback position={'absolute'} zIndex={5} background={'#f5f5f557'} />
+			) : null}
+
+			<Controller
+				control={control}
+				name='departmentId'
+				rules={{ required: true }}
+				render={({ field: { onChange, value, ref }, fieldState: { error } }) => (
+					<Autocomplete
+						value={departments?.data.find(d => d.id == value) || ''}
+						onChange={(_e, value) => onChange(typeof value == 'string' ? value : value.id)}
+						freeSolo
+						disableClearable
+						autoComplete
+						options={departments?.data || []}
+						getOptionLabel={option => (typeof option === 'string' ? option : option.name)}
+						loading={departmentsIsFetching}
+						loadingText='Поиск похожих значений...'
+						noOptionsText='Ничего не найдено'
+						renderInput={params => (
+							<TextField
+								{...params}
+								label={'Подразделение'}
+								onChange={onChange}
+								error={Boolean(error)}
+								helperText={error?.message}
+								inputRef={ref}
+								multiline
+							/>
+						)}
+					/>
+				)}
+			/>
 
 			<Controller
 				control={control}

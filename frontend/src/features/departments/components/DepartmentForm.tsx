@@ -85,7 +85,7 @@ export const DepartmentForm: FC<Props> = ({ department, setDepartment }) => {
 				<Fallback position={'absolute'} zIndex={5} background={'#f5f5f557'} />
 			) : null}
 
-			<Stack direction={'row'} flexGrow={1} spacing={2} width={860} mb={2}>
+			<Stack direction={'row'} flexGrow={1} width={'100%'} spacing={2} mb={2}>
 				<Controller
 					control={control}
 					name={'name'}
@@ -107,7 +107,7 @@ export const DepartmentForm: FC<Props> = ({ department, setDepartment }) => {
 				</Button>
 			</Stack>
 
-			<Stack direction={'row'} flexGrow={1} spacing={2} width={860}>
+			<Stack direction={'row'} flexGrow={1} width={'100%'} spacing={2}>
 				<FormControl fullWidth>
 					<InputLabel id='channel'>Канал для уведомлений</InputLabel>
 					<Controller
